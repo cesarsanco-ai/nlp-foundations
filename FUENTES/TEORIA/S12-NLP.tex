@@ -1,0 +1,230 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, shapes, chains, scopes, shadows}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+
+% --- Colores y estilos para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Estilo de cabecera y pie ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Sesión 12: RAG y Bases de Datos Vectoriales}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sesión 12} \\ 
+    \Huge \textbf{RETRIEVAL-AUGMENTED GENERATION (RAG)} \\
+    \Large Y Bases de Datos Vectoriales
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\addcontentsline{toc}{chapter}{Índice general}
+
+% ------------------------------------------------------------------
+% CAPÍTULO 12: RAG Y BASES DE DATOS VECTORIALES
+% ------------------------------------------------------------------
+\chapter{Retrieval-Augmented Generation (RAG) y Bases de Datos Vectoriales}
+
+En la era de los Large Language Models (LLMs), uno de los mayores desafíos es el manejo de información privada o dinámica que no formó parte del entrenamiento original del modelo. Esta sesión explora la arquitectura RAG, una técnica que permite a los modelos "consultar" una base de conocimientos externa antes de generar una respuesta, reduciendo drásticamente las alucinaciones y permitiendo la actualización de conocimientos sin necesidad de reentrenamiento costoso.
+
+\section{Logro de la sesión}
+Al finalizar la sesión, el estudiante será capaz de diseñar e implementar sistemas que combinan la recuperación de información (Retrieval) con la generación de lenguaje (Generation), utilizando bases de datos vectoriales para realizar búsquedas semánticas eficientes.
+
+\section{Limitaciones de los LLMs}
+
+A pesar de su capacidad, los LLMs sufren de dos problemas críticos que RAG busca resolver:
+
+\begin{enumerate}
+    \item \textbf{Conocimiento Desactualizado (Knowledge Cutoff)}: Los modelos están limitados a los datos con los que fueron entrenados. Si un modelo terminó su entrenamiento en 2024, no sabrá eventos de 2025.
+    \item \textbf{Alucinaciones}: Cuando un modelo no tiene la información, tiende a generar respuestas que suenan coherentes pero son fácticamente falsas.
+    \item \textbf{Falta de Datos Privados}: Un modelo público (como GPT-4) no conoce los documentos internos de una empresa específica.
+\end{enumerate}
+
+\section{¿Qué es RAG (Retrieval-Augmented Generation)?}
+
+RAG es un framework que optimiza la salida de un LLM al consultar una base de conocimientos confiable fuera de sus datos de entrenamiento iniciales antes de generar una respuesta.
+
+\subsection{El Flujo de Trabajo RAG}
+El proceso se divide en tres etapas principales:
+\begin{itemize}
+    \item \textbf{Recuperación (Retrieval)}: El sistema busca documentos relevantes en una base de datos basándose en la consulta del usuario.
+    \item \textbf{Aumento (Augmentation)}: La consulta original y los documentos recuperados se combinan en un "Prompt" enriquecido.
+    \item \textbf{Generación (Generation)}: El LLM utiliza este contexto para redactar la respuesta final.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    block/.style={rectangle, draw, fill=blue!10, text width=2.5cm, textAlign=center, minimum height=1.2cm, rounded corners, font=\small, align=center, drop shadow},
+    arrow/.style={-Stealth, thick}
+]
+    % Nodos
+    \node[block] (user) {Usuario (Pregunta)};
+    \node[block, right=of user] (search) {Búsqueda Semántica};
+    \node[block, below=of search, fill=green!10] (db) {Base de Datos Vectorial};
+    \node[block, right=of search] (augment) {Prompt Enriquecido (Pregunta + Contexto)};
+    \node[block, right=of augment, fill=orange!10] (llm) {LLM (Generador)};
+    \node[block, below=of llm] (resp) {Respuesta Final};
+
+    % Flechas
+    \draw[arrow] (user) -- (search);
+    \draw[arrow] (search) -- (augment);
+    \draw[arrow] (db) -- (search);
+    \draw[arrow] (augment) -- (llm);
+    \draw[arrow] (llm) -- (resp);
+
+\end{tikzpicture}
+\captionof{figure}{Diagrama del flujo de un sistema RAG estándar.}
+\end{center}
+
+\section{Embeddings y Búsqueda Semántica}
+
+Para que el sistema "entienda" qué documentos son relevantes, no buscamos palabras clave (como en Google antiguo), sino **significado**. 
+
+\subsection{Embeddings}
+Son representaciones numéricas (vectores de alta dimensión) de fragmentos de texto. Textos con significados similares terminan en puntos cercanos dentro del espacio vectorial.
+
+\[ \text{Vector}(\text{"Rey"}) - \text{Vector}(\text{"Hombre"}) + \text{Vector}(\text{"Mujer"}) \approx \text{Vector}(\text{"Reina"}) \]
+
+\subsection{Similitud del Coseno}
+Es la métrica más usada para medir qué tan cerca están dos vectores $\mathbf{A}$ y $\mathbf{B}$:
+\[ \text{similarity} = \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} \]
+
+\section{Bases de Datos Vectoriales}
+
+A diferencia de las bases de datos SQL tradicionales, las vectoriales están optimizadas para almacenar y buscar entre millones de vectores de forma casi instantánea.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Herramienta} & \textbf{Tipo} & \textbf{Uso Principal} \\ \midrule
+\textbf{FAISS} & Librería (Meta) & Búsqueda local, alta velocidad en RAM. \\
+\textbf{Pinecone} & Managed Service & Escalabilidad en la nube, nivel empresarial. \\
+\textbf{Weaviate} & Open Source & Base de datos vectorial con búsqueda híbrida. \\
+\textbf{ChromaDB} & Open Source & Fácil integración con cuadernos de Python. \\ \bottomrule
+\end{tabular}
+\caption{Principales tecnologías de almacenamiento vectorial.}
+\end{table}
+
+\section{Evaluación de Sistemas RAG: El "RAG Triad"}
+
+Evaluar RAG es difícil porque hay dos partes que pueden fallar. Usamos principalmente dos métricas de fidelidad:
+
+\begin{itemize}
+    \item \textbf{Faithfulness (Fidelidad)}: ¿La respuesta se deriva estrictamente del contexto recuperado o el modelo inventó cosas (alucinó)?
+    \item \textbf{Relevance (Relevancia)}: ¿El contexto recuperado es realmente útil para responder la pregunta del usuario?
+\end{itemize}
+
+\section{Implementación Conceptual (Python)}
+
+\begin{lstlisting}[language=Python]
+# Ejemplo simplificado usando LangChain y OpenAI
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain.chains import RetrievalQA
+
+# 1. Preparar datos y embeddings
+embeddings = OpenAIEmbeddings()
+vector_db = FAISS.from_texts(["La Sesion 12 trata sobre RAG", "Carlos es el profesor"], embeddings)
+
+# 2. Configurar el LLM
+llm = ChatOpenAI(model_name="gpt-4", temperature=0)
+
+# 3. Crear la cadena RAG
+rag_chain = RetrievalQA.from_chain_type(
+    llm=llm, 
+    chain_type="stuff", 
+    retriever=vector_db.as_retriever()
+)
+
+# 4. Consulta
+query = "De que trata la Sesion 12?"
+response = rag_chain.invoke(query)
+print(response["result"])
+\end{lstlisting}
+
+\section{Preparación para Entrevistas y Aplicaciones}
+
+\subsection{Pregunta Clave: "¿Qué es RAG y cuándo lo usarías?"}
+\textbf{Respuesta}: RAG es una arquitectura que combina la recuperación de documentos con modelos generativos. Lo usaría cuando:
+\begin{itemize}
+    \item Se requiere trabajar con datos privados que no pueden subirse a la nube para entrenamiento.
+    \item La información cambia frecuentemente (noticias, precios, inventarios).
+    \item Es crítico reducir las alucinaciones citando fuentes específicas.
+\end{itemize}
+
+\subsection{Diferencia entre RAG y Fine-Tuning}
+\begin{center}
+\begin{tabular}{|l|p{5cm}|p{5cm}|}
+\hline
+\rowcolor{gray!20} \textbf{Característica} & \textbf{Fine-Tuning} & \textbf{RAG} \\ \hline
+\textbf{Conocimiento} & Estático (en los pesos). & Dinámico (en la base de datos). \\ \hline
+\textbf{Costo} & Alto (requiere GPUs y tiempo). & Bajo (solo costo de inferencia/DB). \\ \hline
+\textbf{Alucinaciones} & Posibles. & Muy reducidas. \\ \hline
+\textbf{Transparencia} & Caja negra. & Puede citar fuentes (links/docs). \\ \hline
+\end{tabular}
+\end{center}
+
+\section{Resumen}
+\begin{itemize}
+    \item \textbf{RAG} soluciona el problema de conocimiento desactualizado y alucinaciones.
+    \item Los \textbf{Embeddings} convierten texto en vectores para búsqueda por significado.
+    \item Las \textbf{Bases de Datos Vectoriales} (FAISS, Pinecone) son el motor que almacena el conocimiento externo.
+    \item \textbf{Faithfulness} y \textbf{Relevance} son claves para asegurar que el sistema no mienta.
+\end{itemize}
+
+\vspace{1cm}
+\begin{center}
+    \textit{"RAG no es solo una técnica, es el puente entre la inteligencia del modelo y la realidad de los datos actuales."}
+\end{center}
+
+\end{document}

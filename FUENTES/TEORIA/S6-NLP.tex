@@ -1,0 +1,448 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, shapes}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+
+% --- Colores y estilos para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Estilo de cabecera y pie ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Sesión 6: Redes Neuronales para NLP}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sesión 6} \\ 
+    \Huge \textbf{REDES NEURONALES PARA NLP Y EMBEDDINGS ENTRENABLES} \\
+    \Large De representaciones estáticas a aprendizaje end-to-end
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\addcontentsline{toc}{chapter}{Índice general}
+
+% ------------------------------------------------------------------
+% CAPÍTULO 6: SESIÓN 6 - REDES NEURONALES PARA NLP
+% ------------------------------------------------------------------
+\chapter{Redes Neuronales para NLP y Embeddings Entrenables}
+
+En las sesiones anteriores se han utilizado representaciones de texto (BOW, TF-IDF, word embeddings estáticos) junto con modelos clásicos de machine learning. Sin embargo, estos enfoques tienen una limitación fundamental: la representación de las palabras es fija y no se ajusta a la tarea específica. Esta sesión introduce las redes neuronales para NLP, comenzando por la capa de embedding entrenable y las arquitecturas feed-forward simples. Se sientan las bases para modelos más complejos como RNNs y Transformers, que se abordarán en sesiones posteriores.
+
+\section{Logro de la sesión}
+Construir redes neuronales simples para tareas de NLP usando PyTorch, comprendiendo el concepto de embeddings entrenables, el flujo de datos desde el texto hasta la predicción, y las técnicas de regularización específicas para NLP.
+
+\section{Introducción: de los embeddings estáticos a los entrenables}
+
+\subsection{Recordatorio: embeddings estáticos}
+Word2Vec y GloVe producen embeddings estáticos: una vez entrenados, el vector para una palabra es fijo, independientemente del contexto o de la tarea posterior. Estos embeddings se pueden usar como características de entrada para modelos clásicos (SVM, etc.) o para inicializar capas de embedding en redes neuronales.
+
+\subsection{Limitaciones de los embeddings estáticos}
+\begin{itemize}
+    \item No se ajustan a la tarea específica (ej. la palabra "banco" puede necesitar un significado diferente en un clasificador de textos financieros vs. uno de biología).
+    \item No capturan información contextual más allá de la ventana de entrenamiento original.
+    \item Son independientes del dominio; un embedding entrenado en Wikipedia puede no ser óptimo para tweets médicos.
+\end{itemize}
+
+\subsection{Ventaja de los embeddings entrenables}
+En una red neuronal, la capa de embedding puede ser \textbf{entrenable}: sus pesos se actualizan durante el backpropagation para minimizar la pérdida de la tarea final. Esto permite que el modelo aprenda representaciones específicas para el problema, mejorando el rendimiento.
+
+\section{Capa de Embedding en PyTorch}
+
+\subsection{Fundamento matemático}
+Una capa de embedding es esencialmente una tabla de búsqueda. Para un vocabulario de tamaño \(|V|\) y una dimensión de embedding \(d\), se define una matriz \(\mathbf{E} \in \mathbb{R}^{|V| \times d}\). Cada fila \(\mathbf{E}[i]\) corresponde al embedding de la palabra con índice \(i\).
+
+Dado un tensor de índices de palabras \(\mathbf{x} \in \mathbb{Z}^{n}\) (donde \(n\) es la longitud de la secuencia), la capa de embedding produce un tensor \(\mathbf{X} \in \mathbb{R}^{n \times d}\) tal que:
+\[
+\mathbf{X}[j] = \mathbf{E}[ \mathbf{x}[j] ]
+\]
+
+\subsection{Implementación en PyTorch}
+\begin{lstlisting}[language=Python]
+import torch
+import torch.nn as nn
+
+embedding_dim = 100
+vocab_size = 10000
+embedding_layer = nn.Embedding(vocab_size, embedding_dim)
+
+# Ejemplo: secuencia de 5 palabras con índices
+input_indices = torch.tensor([1, 5, 23, 7, 42])
+embedded = embedding_layer(input_indices)  # shape: (5, 100)
+\end{lstlisting}
+
+\subsection{Inicialización}
+Por defecto, los embeddings se inicializan aleatoriamente (distribución uniforme o normal). Se pueden inicializar con embeddings pre-entrenados (Word2Vec, GloVe) y luego decidir si se congelan o se ajustan durante el entrenamiento.
+
+\begin{lstlisting}[language=Python]
+# Cargar embeddings pre-entrenados (ej. GloVe) y asignarlos
+pretrained_weights = torch.tensor(glove_vectors)  # shape: (vocab_size, dim)
+embedding_layer = nn.Embedding.from_pretrained(pretrained_weights, freeze=False)
+# freeze=True para mantenerlos estáticos
+\end{lstlisting}
+
+\section{Redes Feed-Forward para Clasificación de Texto}
+
+\subsection{Arquitectura básica}
+Una arquitectura simple pero efectiva para clasificación de texto consta de:
+\begin{enumerate}
+    \item \textbf{Capa de embedding}: convierte índices de palabras a vectores densos.
+    \item \textbf{Función de pooling}: combina los embeddings de todas las palabras de la secuencia en un único vector (promedio, suma, max-pooling).
+    \item \textbf{MLP (Multilayer Perceptron)}: una o más capas fully-connected con activaciones no lineales.
+    \item \textbf{Capa de salida}: con activación softmax para obtener probabilidades por clase.
+\end{enumerate}
+
+\subsection{Promedio de embeddings (Average Pooling)}
+La forma más simple de combinar los embeddings de una oración es calcular su promedio:
+
+Dada una secuencia de \(T\) palabras con embeddings \(\mathbf{e}_1, \mathbf{e}_2, ..., \mathbf{e}_T \in \mathbb{R}^d\), el vector de la oración es:
+\[
+\mathbf{h} = \frac{1}{T} \sum_{t=1}^T \mathbf{e}_t
+\]
+
+\textbf{Ventaja}: invariante a la longitud de la oración.
+\textbf{Desventaja}: pierde el orden y el contexto local.
+
+\subsection{Arquitectura completa}
+\begin{lstlisting}[language=Python]
+class TextClassifier(nn.Module):
+    def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, dropout=0.5):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.fc1 = nn.Linear(embed_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, num_classes)
+        self.dropout = nn.Dropout(dropout)
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        # x: (batch_size, seq_len)
+        embedded = self.embedding(x)          # (batch_size, seq_len, embed_dim)
+        pooled = embedded.mean(dim=1)         # (batch_size, embed_dim)
+        h = self.dropout(self.relu(self.fc1(pooled)))  # (batch_size, hidden_dim)
+        out = self.fc2(h)                     # (batch_size, num_classes)
+        return out
+\end{lstlisting}
+
+\subsection{Consideraciones sobre longitudes de secuencia}
+Las oraciones tienen longitudes variables. En PyTorch, se pueden:
+\begin{itemize}
+    \item Agrupar por longitud y usar `pack_padded_sequence` (más eficiente).
+    \item Truncar o rellenar (padding) todas las secuencias a la misma longitud.
+    \item Usar máscaras para ignorar el padding en el promedio.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+# Ejemplo con padding y máscara
+def masked_mean(embeddings, mask):
+    # embeddings: (batch, seq_len, dim)
+    # mask: (batch, seq_len) con 1 para tokens reales, 0 para padding
+    mask = mask.unsqueeze(-1)  # (batch, seq_len, 1)
+    sum_embeddings = (embeddings * mask).sum(dim=1)
+    lengths = mask.sum(dim=1)  # (batch, 1)
+    return sum_embeddings / (lengths + 1e-8)
+\end{lstlisting}
+
+\section{Función de Pérdida: Cross-Entropy}
+
+\subsection{Definición matemática}
+Para un problema de clasificación con \(C\) clases, la entropía cruzada para una muestra se define como:
+
+\[
+\mathcal{L} = -\sum_{c=1}^C y_c \log(\hat{y}_c)
+\]
+donde \(y_c\) es 1 para la clase verdadera y 0 en otro caso (one-hot), y \(\hat{y}_c\) es la probabilidad predicha por el modelo (después de softmax).
+
+Para un lote (batch) de \(N\) muestras, la pérdida promedio es:
+
+\[
+\mathcal{L}_{\text{batch}} = -\frac{1}{N} \sum_{i=1}^N \sum_{c=1}^C y_{ic} \log(\hat{y}_{ic})
+\]
+
+\subsection{Implementación en PyTorch}
+PyTorch proporciona `nn.CrossEntropyLoss`, que combina log-softmax y entropía cruzada en una sola función numéricamente estable.
+
+\begin{lstlisting}[language=Python]
+criterion = nn.CrossEntropyLoss()
+logits = model(x)          # (batch_size, num_classes)
+loss = criterion(logits, y)  # y: (batch_size) con índices de clase
+\end{lstlisting}
+
+\subsection{Interpretación probabilística}
+Minimizar la entropía cruzada equivale a maximizar la log-verosimilitud de los datos bajo el modelo.
+
+\section{Regularización en NLP}
+
+Los modelos de NLP tienden a sobreajustar debido a la alta dimensionalidad del vocabulario. Las técnicas de regularización son esenciales.
+
+\subsection{Dropout}
+Durante el entrenamiento, se apagan aleatoriamente neuronas con probabilidad \(p\). Esto evita la co-adaptación y fuerza a la red a aprender representaciones más robustas.
+
+\begin{lstlisting}[language=Python]
+self.dropout = nn.Dropout(0.5)
+h = self.dropout(self.relu(self.fc1(pooled)))
+\end{lstlisting}
+
+\textbf{Efecto}: en inferencia, todas las neuronas se usan pero con pesos escalados por \(1-p\).
+
+\subsection{Weight Decay (Regularización L2)}
+Se añade un término a la función de pérdida que penaliza pesos grandes:
+
+\[
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{original}} + \lambda \sum_{w} \|w\|^2
+\]
+
+En PyTorch, se especifica en el optimizador:
+
+\begin{lstlisting}[language=Python]
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+\end{lstlisting}
+
+\subsection{Early Stopping}
+Se detiene el entrenamiento cuando la métrica en validación deja de mejorar durante un número de épocas (paciencia). Previene sobreajuste por exceso de entrenamiento.
+
+\subsection{Normalización de capas (Layer Normalization)}
+Útil en NLP para estabilizar el entrenamiento, especialmente en modelos recurrentes. Normaliza las activaciones a lo largo de la dimensión de características.
+
+\begin{lstlisting}[language=Python]
+self.layer_norm = nn.LayerNorm(embed_dim)
+\end{lstlisting}
+
+\subsection{Regularización específica para embeddings}
+\begin{itemize}
+    \item \textbf{Embedding dropout}: se apagan aleatoriamente palabras completas (útil para evitar que el modelo dependa de palabras específicas).
+    \item \textbf{Max-norm regularization}: limita la norma de los vectores embedding a un valor máximo.
+\end{itemize}
+
+\section{Ejemplo paso a paso: Clasificación de Sentimiento con PyTorch}
+
+\subsection{Datos}
+Utilizaremos un pequeño conjunto de reseñas de películas con etiquetas positivas (1) y negativas (0).
+
+\begin{lstlisting}[language=Python]
+texts = [
+    "I loved this movie, it was fantastic",
+    "Terrible film, I hated it",
+    "Amazing acting and great story",
+    "Boring and slow, waste of time"
+]
+labels = [1, 0, 1, 0]
+\end{lstlisting}
+
+\subsection{Paso 1: Construir vocabulario}
+\begin{lstlisting}[language=Python]
+from collections import Counter
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+def build_vocab(texts, max_size=10000):
+    word_counts = Counter()
+    for text in texts:
+        word_counts.update(text.lower().split())
+    vocab = {word: idx+2 for idx, (word, _) in enumerate(word_counts.most_common(max_size))}
+    vocab['<PAD>'] = 0
+    vocab['<UNK>'] = 1
+    return vocab
+
+vocab = build_vocab(texts)
+vocab_size = len(vocab)
+print(f"Tamaño del vocabulario: {vocab_size}")
+\end{lstlisting}
+
+\subsection{Paso 2: Tokenizar y convertir a índices}
+\begin{lstlisting}[language=Python]
+def encode(text, vocab, max_len=10):
+    tokens = text.lower().split()
+    indices = [vocab.get(token, vocab['<UNK>']) for token in tokens[:max_len]]
+    # padding
+    indices += [vocab['<PAD>']] * (max_len - len(indices))
+    return indices
+
+X = [encode(text, vocab) for text in texts]
+X = torch.tensor(X)  # (4, 10)
+y = torch.tensor(labels)
+\end{lstlisting}
+
+\subsection{Paso 3: Definir el modelo}
+\begin{lstlisting}[language=Python]
+class SentimentClassifier(nn.Module):
+    def __init__(self, vocab_size, embed_dim=50, hidden_dim=32, num_classes=2, dropout=0.5):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
+        self.fc1 = nn.Linear(embed_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, num_classes)
+        self.dropout = nn.Dropout(dropout)
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        # x: (batch, seq_len)
+        embedded = self.embedding(x)          # (batch, seq_len, embed_dim)
+        pooled = embedded.mean(dim=1)         # (batch, embed_dim)
+        h = self.dropout(self.relu(self.fc1(pooled)))  # (batch, hidden_dim)
+        out = self.fc2(h)                     # (batch, num_classes)
+        return out
+
+model = SentimentClassifier(vocab_size)
+\end{lstlisting}
+
+\subsection{Paso 4: Entrenamiento}
+\begin{lstlisting}[language=Python]
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-5)
+
+epochs = 100
+for epoch in range(epochs):
+    optimizer.zero_grad()
+    logits = model(X)
+    loss = criterion(logits, y)
+    loss.backward()
+    optimizer.step()
+    
+    if (epoch+1) % 20 == 0:
+        print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+\end{lstlisting}
+
+\subsection{Paso 5: Evaluación}
+\begin{lstlisting}[language=Python]
+with torch.no_grad():
+    logits = model(X)
+    predictions = torch.argmax(logits, dim=1)
+    accuracy = (predictions == y).float().mean()
+    print(f'Accuracy: {accuracy:.2%}')
+\end{lstlisting}
+
+\section{Métricas de Evaluación en NLP}
+
+\subsection{Accuracy}
+Porcentaje de predicciones correctas. Adecuado para clases balanceadas.
+
+\subsection{Precisión, Recall y F1-Score}
+Para problemas desbalanceados (ej. detección de spam), son más informativas.
+
+\begin{lstlisting}[language=Python]
+from sklearn.metrics import precision_recall_fscore_support
+
+precision, recall, f1, _ = precision_recall_fscore_support(y, predictions, average='binary')
+print(f'Precision: {precision:.2f}, Recall: {recall:.2f}, F1: {f1:.2f}')
+\end{lstlisting}
+
+\subsection{Matriz de confusión}
+Visualiza errores por clase.
+
+\subsection{Curva ROC y AUC}
+Para problemas binarios, mide la capacidad discriminativa.
+
+\subsection{Log-Loss (Cross-Entropy)}
+La pérdida en sí misma puede ser una métrica, especialmente cuando se necesitan probabilidades bien calibradas.
+
+\section{Aplicaciones de Negocio y Casos de Uso}
+
+\subsection{Análisis de sentimiento en redes sociales}
+Las empresas monitorean menciones en Twitter, Facebook, etc., para detectar crisis de reputación o medir aceptación de productos. Una red feed-forward con embeddings entrenables puede superar a modelos clásicos.
+
+\subsection{Clasificación de tickets de soporte}
+Automatizar la asignación de tickets a departamentos (ventas, soporte técnico, facturación) basado en el texto del cliente.
+
+\subsection{Detección de spam en correos electrónicos}
+Modelos neuronales pueden adaptarse a nuevos patrones de spam mejor que reglas fijas.
+
+\subsection{Moderación de contenido}
+Clasificar comentarios en foros como apropiados o inapropiados (tóxicos, ofensivos).
+
+\subsection{Análisis de intenciones en chatbots}
+Determinar si un usuario quiere comprar, reclamar, preguntar, etc.
+
+\section{Preparación para Entrevistas}
+
+\subsection{Preguntas típicas}
+\begin{itemize}
+    \item \textbf{"¿Cómo representarías una oración para ingresarla a una red neuronal?"}
+    Respuesta: convertir palabras a índices, usar una capa de embedding (entrenable o pre-entrenada), y luego combinar los embeddings mediante promedio, suma, max-pooling, o usar arquitecturas más complejas como RNNs o Transformers.
+    
+    \item \textbf{"¿Qué son los embeddings entrenables y por qué son mejores que los estáticos?"}
+    Los embeddings entrenables se ajustan durante el entrenamiento de la tarea específica, capturando matices del dominio y mejorando el rendimiento. Los estáticos son fijos y pueden no ser óptimos para la tarea.
+    
+    \item \textbf{"Explica la función de pérdida cross-entropy."}
+    Mide la diferencia entre la distribución de probabilidad predicha y la distribución real (one-hot). Penaliza más las predicciones seguras pero erróneas.
+    
+    \item \textbf{"¿Cómo evitarías el sobreajuste en un modelo de NLP?"}
+    Usar dropout, weight decay, early stopping, aumentar datos (data augmentation), y reducir la complejidad del modelo.
+    
+    \item \textbf{"¿Qué es el padding y cómo se maneja?"}
+    Para procesar oraciones de diferentes longitudes en lotes, se añaden tokens de padding (ej. <PAD>) para que todas tengan la misma longitud. Luego, se usa una máscara para que el modelo ignore esos tokens en operaciones como el promedio o en capas recurrentes.
+\end{itemize}
+
+\subsection{Preguntas avanzadas}
+\begin{itemize}
+    \item \textbf{"¿Cómo inicializarías una capa de embedding con Word2Vec y por qué?"}
+    Se cargan los pesos pre-entrenados y se asigna a la capa. Luego se puede decidir congelarlos (si se tiene poco data) o permitir que se ajusten (fine-tuning) si se dispone de suficiente data específica.
+    
+    \item \textbf{"¿Qué diferencias hay entre usar el promedio de embeddings y usar una LSTM?"}
+    El promedio es invariante al orden y pierde información secuencial; es adecuado para tareas donde el orden no importa (ej. clasificación de temas). LSTM captura dependencias temporales, mejor para tareas como análisis de sentimiento donde el orden es crucial.
+\end{itemize}
+
+\section{Conexión con el resto del curso}
+\begin{itemize}
+    \item \textbf{Sesión 4 (Word Embeddings)}: proporciona los embeddings estáticos que pueden usarse como inicialización.
+    \item \textbf{Sesión 5 (Modelos Clásicos)}: las redes neuronales superan a estos modelos en rendimiento, pero requieren más datos y cómputo.
+    \item \textbf{Sesión 7 (RNN/LSTM)}: extensión natural para capturar orden y contexto.
+    \item \textbf{Sesión 8 (Transformers)}: evolución que supera las limitaciones de las RNNs.
+\end{itemize}
+
+\section{Resumen}
+\begin{itemize}
+    \item Los \textbf{embeddings entrenables} se ajustan a la tarea, mejorando el rendimiento respecto a los estáticos.
+    \item La \textbf{capa de embedding} es una tabla de búsqueda diferenciable, implementada en PyTorch como `nn.Embedding`.
+    \item Una arquitectura simple de \textbf{red feed-forward} promedia los embeddings y los pasa por un MLP.
+    \item La función de pérdida estándar es \textbf{Cross-Entropy}, que mide la diferencia entre probabilidades predichas y reales.
+    \item La \textbf{regularización} (dropout, weight decay, early stopping) es crucial para evitar sobreajuste.
+    \item Este modelo es un baseline efectivo para muchas tareas de NLP y sirve como base para arquitecturas más complejas.
+\end{itemize}
+
+\end{document}

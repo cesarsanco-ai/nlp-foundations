@@ -1,0 +1,392 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, shapes}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+
+% --- Colores y estilos para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Estilo de cabecera y pie ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Sesión 3: BOW, TF-IDF y N-gramas}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sesión 3} \\ 
+    \Huge \textbf{REPRESENTACIÓN DEL TEXTO: BOW, TF-IDF Y N-GRAMAS} \\
+    \Large De texto a vectores numéricos
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\addcontentsline{toc}{chapter}{Índice general}
+
+% ------------------------------------------------------------------
+% CAPÍTULO 3: SESIÓN 3 - REPRESENTACIÓN DEL TEXTO
+% ------------------------------------------------------------------
+\chapter{Representación del Texto: BOW, TF-IDF y N-gramas}
+
+Una vez que el texto ha sido preprocesado (tokenizado, normalizado, etc.), el siguiente paso es convertirlo en una representación numérica que los algoritmos de machine learning puedan procesar. Esta sesión aborda las técnicas clásicas de representación: Bag of Words (BOW), n-gramas y TF-IDF. Se explican sus fundamentos matemáticos, se muestran ejemplos detallados y se analizan sus limitaciones, sentando las bases para comprender representaciones más avanzadas como word embeddings.
+
+\section{Logro de la sesión}
+Transformar texto en vectores numéricos utilizando técnicas clásicas de representación, comprendiendo sus fundamentos, ventajas, limitaciones y el contexto de aplicación de cada una.
+
+\section{Introducción: la necesidad de representar el texto numéricamente}
+Los modelos de machine learning operan con números, no con texto directamente. Por tanto, es necesario convertir cada documento (frase, párrafo, artículo) en un vector numérico. La elección de la representación afecta:
+\begin{itemize}
+    \item La capacidad de capturar significado semántico.
+    \item La dimensionalidad de los datos.
+    \item El rendimiento de los modelos posteriores.
+\end{itemize}
+Las técnicas que se presentan a continuación son representaciones dispersas (sparse) que han sido ampliamente utilizadas durante décadas y aún hoy son punto de partida en muchos problemas.
+
+\section{Bag of Words (BOW)}
+
+\subsection{Definición e intuición}
+Bag of Words representa cada documento como una bolsa (multiconjunto) de sus palabras, ignorando el orden pero manteniendo la frecuencia. La idea es que el contenido de un documento puede inferirse por las palabras que contiene, independientemente de cómo estén ordenadas.
+
+\subsection{Construcción paso a paso}
+\begin{enumerate}
+    \item \textbf{Crear el vocabulario}: conjunto de todas las palabras únicas que aparecen en el corpus.
+    \item \textbf{Asignar un índice} a cada palabra del vocabulario.
+    \item \textbf{Construir la matriz documento-término}: para cada documento, se crea un vector de tamaño \(|\text{vocabulario}|\) donde la componente \(i\) es el número de veces que la palabra \(i\) aparece en el documento.
+\end{enumerate}
+
+\subsection{Ejemplo numérico detallado}
+Consideremos un corpus con tres documentos:
+\begin{align*}
+d_1 &: \text{"el gato persigue al ratón"} \\
+d_2 &: \text{"el perro persigue al gato"} \\
+d_3 &: \text{"el ratón huye del gato"}
+\end{align*}
+
+\textbf{Paso 1: Vocabulario} (ordenado alfabéticamente):
+al, el, gato, huye, del, perro, persigue, ratón
+
+\textbf{Paso 2: Índices}:
+0: al, 1: el, 2: gato, 3: huye, 4: del, 5: perro, 6: persigue, 7: ratón
+
+\textbf{Paso 3: Matriz documento-término (frecuencias)}:
+\[
+\mathbf{X} = \begin{pmatrix}
+d_1: & [1, 1, 1, 0, 0, 0, 1, 1] \\
+d_2: & [1, 1, 1, 0, 0, 1, 1, 0] \\
+d_3: & [0, 1, 1, 1, 1, 0, 0, 1]
+\end{pmatrix}
+\]
+
+\textbf{Interpretación}: la fila \(d_1\) indica que la palabra "al" aparece 1 vez, "el" 1 vez, "gato" 1 vez, ..., "ratón" 1 vez.
+
+\subsection{Representación matemática}
+Dado un vocabulario \(V = \{w_1, w_2, \dots, w_m\}\), cada documento \(d_j\) se representa como:
+\[
+\mathbf{v}_j = (f_{j1}, f_{j2}, \dots, f_{jm})
+\]
+donde \(f_{ji}\) es la frecuencia del término \(w_i\) en el documento \(d_j\).
+
+\subsection{Limitaciones de BOW}
+\begin{itemize}
+    \item \textbf{Pérdida de orden}: "el gato persigue al ratón" y "el ratón persigue al gato" tienen el mismo vector, aunque su significado sea opuesto.
+    \item \textbf{Alta dimensionalidad}: el vocabulario puede ser enorme (decenas de miles de términos), generando vectores muy dispersos.
+    \item \textbf{Falta de semántica}: palabras como "gato" y "felino" son tratadas como completamente distintas, aunque sean similares.
+    \item \textbf{Palabras comunes dominan}: términos como "el", "de" aparecen en casi todos los documentos y pueden opacar a las palabras realmente significativas.
+\end{itemize}
+
+\section{N-gramas}
+
+\subsection{Definición}
+Un n-grama es una secuencia contigua de \(n\) ítems (palabras o caracteres) extraída de un texto. Los n-gramas capturan cierto contexto local, a diferencia de BOW que considera palabras aisladas.
+
+\subsection{Tipos}
+\begin{itemize}
+    \item \textbf{Unigramas} (\(n=1\)): palabras individuales (BOW).
+    \item \textbf{Bigramas} (\(n=2\)): pares de palabras consecutivas.
+    \item \textbf{Trigramas} (\(n=3\)): tripletes de palabras.
+    \item \textbf{N-gramas de caracteres}: útiles para lenguas sin espacios, corrección ortográfica.
+\end{itemize}
+
+\subsection{Ejemplo con bigramas}
+Para la frase "el gato persigue al ratón", los bigramas (con ventana deslizante de 2 palabras) son:
+\[
+\text{"el gato"}, \text{"gato persigue"}, \text{"persigue al"}, \text{"al ratón"}
+\]
+
+Si añadimos estos bigramas al vocabulario, la representación captura que "persigue" está asociado a "al" y "ratón", lo que podría ayudar a distinguir sujeto y objeto.
+
+\subsection{Compensación entre orden y dimensionalidad}
+\begin{itemize}
+    \item Los n-gramas aumentan drásticamente la dimensionalidad. Para un vocabulario de \(m\) palabras, el número de posibles bigramas es del orden de \(m^2\), aunque en la práctica muchos no aparecen.
+    \item Ofrecen un compromiso: capturan algo de orden sin llegar a modelar la estructura sintáctica completa.
+    \item Útiles en tareas donde el orden local es importante, como clasificación de idioma o detección de spam.
+\end{itemize}
+
+\subsection{Implementación práctica}
+En la práctica, se suele limitar \(n\) a 2 o 3 y filtrar los n-gramas poco frecuentes para controlar la dimensionalidad.
+
+\section{TF-IDF (Term Frequency-Inverse Document Frequency)}
+
+\subsection{Definición e intuición}
+TF-IDF es una ponderación que asigna mayor peso a los términos que son frecuentes en un documento pero raros en el resto del corpus. Así, penaliza palabras comunes (como artículos) y resalta términos distintivos.
+
+\subsection{Componentes}
+\subsubsection{Frecuencia de término (TF)}
+Mide cuán frecuente es un término en el documento. Variantes:
+\begin{itemize}
+    \item TF bruta: \( \text{tf}(t,d) = f_{t,d} \) (número de veces que aparece \(t\) en \(d\)).
+    \item TF normalizada: \( \text{tf}(t,d) = \frac{f_{t,d}}{\sum_{t'} f_{t',d}} \) (frecuencia relativa).
+    \item TF logarítmica: \( \text{tf}(t,d) = \log(1 + f_{t,d}) \).
+\end{itemize}
+La más común es la TF bruta o la logarítmica.
+
+\subsubsection{Frecuencia inversa de documento (IDF)}
+Mide cuán raro es un término en el corpus. Se define como:
+\[
+\text{idf}(t) = \log\left( \frac{N}{\text{df}(t)} \right)
+\]
+donde \(N\) es el número total de documentos y \(\text{df}(t)\) es el número de documentos que contienen el término \(t\) (document frequency). El logaritmo suaviza la escala.
+
+\textbf{Variante con suavizado}: para evitar división por cero (si un término no aparece en ningún documento, lo cual no ocurre en la práctica), se usa:
+\[
+\text{idf}(t) = \log\left( \frac{N + 1}{\text{df}(t) + 1} \right) + 1
+\]
+
+\subsubsection{Peso TF-IDF}
+El peso final es el producto:
+\[
+\text{tfidf}(t,d) = \text{tf}(t,d) \times \text{idf}(t)
+\]
+
+\subsection{Ejemplo numérico completo}
+Retomemos el corpus anterior con 3 documentos. Calcularemos TF-IDF para el término "gato".
+
+\textbf{Datos}:
+\begin{itemize}
+    \item \(N = 3\) documentos.
+    \item Frecuencia de "gato": aparece en \(d_1, d_2, d_3\) → \(\text{df}(\text{"gato"}) = 3\).
+    \item \(\text{idf}(\text{"gato"}) = \log(3/3) = \log(1) = 0\).
+\end{itemize}
+Por tanto, el peso TF-IDF de "gato" será 0 en todos los documentos, reflejando que es una palabra común en este corpus.
+
+Ahora el término "perro":
+\begin{itemize}
+    \item Aparece solo en \(d_2\) → \(\text{df}(\text{"perro"}) = 1\).
+    \item \(\text{idf}(\text{"perro"}) = \log(3/1) = \log(3) \approx 1.099\).
+    \item En \(d_2\), TF de "perro" es 1 (una aparición). Entonces \(\text{tfidf}(d_2, \text{"perro"}) = 1 \times 1.099 = 1.099\).
+\end{itemize}
+
+Para el término "huye":
+\begin{itemize}
+    \item Aparece solo en \(d_3\) → \(\text{df} = 1\) → \(\text{idf} \approx 1.099\).
+    \item TF en \(d_3\) = 1 → \(\text{tfidf} \approx 1.099\).
+\end{itemize}
+
+La matriz TF-IDF completa (usando TF bruta) sería:
+\[
+\mathbf{X}_{\text{tfidf}} = \begin{pmatrix}
+d_1: & [\text{al}: 0.0, \text{el}: 0.0, \text{gato}: 0.0, \text{huye}: 0.0, \text{del}: 0.0, \text{perro}: 0.0, \text{persigue}: 0.405, \text{ratón}: 0.405] \\
+d_2: & [0.0, 0.0, 0.0, 0.0, 0.0, 1.099, 0.405, 0.0] \\
+d_3: & [0.0, 0.0, 0.0, 1.099, 1.099, 0.0, 0.0, 0.405]
+\end{pmatrix}
+\]
+Observar que "persigue" aparece en \(d_1\) y \(d_2\) (2 documentos) → \(\text{idf} = \log(3/2) \approx 0.405\). "ratón" aparece en \(d_1\) y \(d_3\) → también 0.405.
+
+\subsection{Normalización de vectores TF-IDF}
+Es común normalizar cada vector documento a norma unitaria (por ejemplo, L2) para que la longitud del documento no influya en medidas de similitud como el coseno. La normalización L2 se define como:
+\[
+\mathbf{v}_{\text{norm}} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2}
+\]
+
+\subsection{Interpretación geométrica}
+Cada documento es un punto en un espacio de alta dimensionalidad. La similitud entre documentos se mide a menudo con el coseno del ángulo entre sus vectores:
+\[
+\text{sim}(d_i, d_j) = \frac{\mathbf{v}_i \cdot \mathbf{v}_j}{\|\mathbf{v}_i\| \|\mathbf{v}_j\|}
+\]
+que equivale al producto punto si los vectores están normalizados.
+
+\section{Comparación entre BOW, TF-IDF y embeddings (avance)}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Característica} & \textbf{BOW} & \textbf{TF-IDF} & \textbf{Word Embeddings} \\
+\hline
+Captura orden de palabras & No & No & No (en promedio) \\
+Captura semántica & No & No & Sí \\
+Peso de palabras comunes & Alta & Baja & Depende del modelo \\
+Dimensionalidad & Alta (dispersa) & Alta (dispersa) & Baja (densa) \\
+Interpretabilidad & Sí (términos) & Sí (términos) & Baja \\
+Requerimiento de datos & Bajo & Bajo & Alto \\
+Uso típico & Línea base, spam & Búsqueda, clasificación & NLP profundo \\
+\hline
+\end{tabular}
+\caption{Comparación de representaciones.}
+\end{table}
+
+\textbf{¿Cuándo usar cada una?}
+\begin{itemize}
+    \item \textbf{BOW}: modelos simples, línea base, cuando la interpretabilidad es crucial (ej. palabras clave).
+    \item \textbf{TF-IDF}: cuando se necesita ponderar la importancia de términos, en búsqueda de información, extracción de palabras clave.
+    \item \textbf{Embeddings}: cuando se dispone de suficientes datos y se requiere capturar semántica (sinónimos, analogías).
+\end{itemize}
+
+\section{Limitaciones de las representaciones dispersas}
+
+\subsection{Maldición de la dimensionalidad}
+A medida que crece el vocabulario, el espacio de características se vuelve enorme, y los datos se vuelven extremadamente dispersos. Esto afecta a modelos basados en distancias (kNN) y puede causar overfitting.
+
+\subsection{Problemas de memoria y computación}
+Almacenar matrices de miles de documentos × cientos de miles de términos requiere técnicas de almacenamiento sparse (como CSR). Aun así, puede ser inviable para corpus muy grandes.
+
+\subsection{Falta de generalización semántica}
+Palabras como "coche" y "automóvil" son tratadas como completamente independientes, lo que impide que el modelo generalice a sinónimos.
+
+\subsection{Necesidad de reducción de dimensionalidad}
+Técnicas como LSA (Latent Semantic Analysis) aplican SVD a la matriz TF-IDF para obtener representaciones densas de menor dimensión, que capturan relaciones semánticas latentes.
+
+\section{Aplicaciones prácticas}
+
+\subsection{Clasificación de textos}
+BOW y TF-IDF son la base de muchos clasificadores (Naive Bayes, SVM) en problemas como:
+\begin{itemize}
+    \item Detección de spam.
+    \item Clasificación de noticias por categorías.
+    \item Análisis de sentimiento (aunque embeddings dan mejores resultados).
+\end{itemize}
+
+\subsection{Búsqueda de documentos similares}
+En motores de búsqueda, se representa la consulta y los documentos con vectores TF-IDF y se calcula la similitud del coseno para recuperar los más relevantes.
+
+\subsection{Extracción de palabras clave}
+Las palabras con mayor peso TF-IDF en un documento suelen ser buenas candidatas para keywords, ya que son frecuentes en ese documento pero raras en el corpus.
+
+\section{Implementación en Python con scikit-learn}
+
+\subsection{CountVectorizer (BOW)}
+\begin{lstlisting}[language=Python]
+from sklearn.feature_extraction.text import CountVectorizer
+
+corpus = [
+    "el gato persigue al ratón",
+    "el perro persigue al gato",
+    "el ratón huye del gato"
+]
+
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(corpus)
+print(vectorizer.get_feature_names_out())
+print(X.toarray())
+\end{lstlisting}
+
+\subsection{TfidfVectorizer}
+\begin{lstlisting}[language=Python]
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorizer = TfidfVectorizer(norm='l2', use_idf=True, smooth_idf=True)
+X = vectorizer.fit_transform(corpus)
+print(vectorizer.get_feature_names_out())
+print(X.toarray())  # Valores TF-IDF normalizados L2
+\end{lstlisting}
+
+\subsection{Uso de n-gramas}
+\begin{lstlisting}[language=Python]
+# Bigramas
+vectorizer = CountVectorizer(ngram_range=(1,2))
+X = vectorizer.fit_transform(corpus)
+\end{lstlisting}
+
+\subsection{Ejemplo con dataset real (20 Newsgroups)}
+\begin{lstlisting}[language=Python]
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import make_pipeline
+
+categories = ['alt.atheism', 'soc.religion.christian']
+newsgroups = fetch_20newsgroups(categories=categories)
+pipeline = make_pipeline(TfidfVectorizer(), MultinomialNB())
+pipeline.fit(newsgroups.data, newsgroups.target)
+\end{lstlisting}
+
+\section{Preparación para entrevistas}
+
+\subsection{Preguntas típicas}
+\begin{itemize}
+    \item \textbf{"Compara Bag of Words, TF-IDF y word embeddings. ¿Cuándo usarías cada uno?"}
+    Responder con la tabla comparativa, destacando que BOW y TF-IDF son simples, interpretables y no requieren grandes datos, pero no capturan semántica. Embeddings los superan en tareas semánticas pero necesitan más datos.
+    \item \textbf{"¿Qué es IDF y por qué se usa?"}
+    IDF mide la rareza de un término. Se usa para penalizar palabras comunes que aparecen en muchos documentos, dando más peso a términos distintivos.
+    \item \textbf{"¿Cómo calcularías la similitud entre dos documentos representados con TF-IDF?"}
+    Usando la similitud del coseno (producto punto normalizado). Si los vectores están normalizados a norma L2, es simplemente el producto punto.
+    \item \textbf{"¿Qué problemas tiene la representación BOW?"}
+    Pérdida de orden, alta dimensionalidad, dispersión, falta de semántica, dominio de palabras comunes.
+    \item \textbf{"¿Qué son los n-gramas y para qué sirven?"}
+    Secuencias de n palabras consecutivas; capturan contexto local. Útiles cuando el orden importa, pero aumentan la dimensionalidad.
+\end{itemize}
+
+\section{Conexión con el resto del curso}
+\begin{itemize}
+    \item \textbf{Sesión 4}: Clasificación de textos usando estas representaciones.
+    \item \textbf{Sesión 5}: Word embeddings, que superan las limitaciones semánticas.
+    \item \textbf{Sesión 6}: Modelos secuenciales (RNN) que capturan orden.
+    \item \textbf{Sesión 7}: Transformers, que usan subword tokenization y embeddings.
+\end{itemize}
+
+\section{Resumen}
+\begin{itemize}
+    \item \textbf{Bag of Words (BOW)}: vector de frecuencias de términos. Simple pero limitado.
+    \item \textbf{N-gramas}: extienden BOW capturando contexto local, aumentando dimensionalidad.
+    \item \textbf{TF-IDF}: pondera términos según su importancia, penalizando palabras comunes.
+    \item Las representaciones dispersas sufren de alta dimensionalidad y falta de semántica.
+    \item Se usan ampliamente en clasificación, búsqueda y extracción de keywords.
+    \item scikit-learn proporciona implementaciones eficientes (\texttt{CountVectorizer}, \texttt{TfidfVectorizer}).
+\end{itemize}
+
+\end{document}
