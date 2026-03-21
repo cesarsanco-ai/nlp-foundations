@@ -1,0 +1,382 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python (configurado para evitar problemas con UTF-8) ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1 {ü}{{\"u}}1
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesi\'on 12
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESI\'ON 12 NLP]{\textbf{Sesi\'on 12}}
+\subtitle{Retrieval-Augmented Generation (RAG) y Bases de Datos Vectoriales}
+\author[Prof. C. S\'anchez]{Carlos C\'esar S\'anchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: LIMITACIONES DE LOS LLMS
+% ============================================================================
+\section{Limitaciones de los LLMs}
+
+\begin{frame}{Problemas de los modelos generativos puros}
+    \begin{itemize}
+        \item \textbf{Conocimiento desactualizado}: entrenados con un corte temporal (ej. 2023). No saben eventos recientes.
+        \item \textbf{Alucinaciones}: generan respuestas falsas pero coherentes cuando no tienen informaci\'on.
+        \item \textbf{Datos privados}: no conocen documentos internos de una empresa.
+        \item \textbf{Soluci\'on}: Retrieval-Augmented Generation (RAG).
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: ¿QUÉ ES RAG?
+% ============================================================================
+\section{¿Qu\'e es RAG?}
+
+\begin{frame}{Definici\'on de RAG}
+    \begin{block}{RAG (Retrieval-Augmented Generation)}
+        Framework que optimiza la salida de un LLM consultando una base de conocimiento externa antes de generar la respuesta.
+    \end{block}
+    \begin{columns}[t]
+        \column{0.33\textwidth}
+        \textbf{Retrieval}
+        \begin{itemize}
+            \item Busca documentos relevantes en una base de datos.
+        \end{itemize}
+        \column{0.33\textwidth}
+        \textbf{Augmentation}
+        \begin{itemize}
+            \item Combina consulta y documentos en un prompt enriquecido.
+        \end{itemize}
+        \column{0.33\textwidth}
+        \textbf{Generation}
+        \begin{itemize}
+            \item LLM genera respuesta basada en el prompt.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Ventajas de RAG}
+    \begin{itemize}
+        \item \textbf{Conocimiento actualizado}: se actualiza la base, no el modelo.
+        \item \textbf{Reducci\'on de alucinaciones}: el modelo se fuerza a basarse en el contexto.
+        \item \textbf{Datos privados}: no se exponen en el entrenamiento.
+        \item \textbf{Transparencia}: puede citar fuentes.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: EMBEDDINGS Y BÚSQUEDA SEMÁNTICA
+% ============================================================================
+\section{Embeddings y B\'usqueda Sem\'antica}
+
+\begin{frame}{Embeddings de texto}
+    \begin{itemize}
+        \item Representaciones vectoriales densas de fragmentos de texto.
+        \item Textos con significado similar tienen vectores cercanos en el espacio.
+        \item Ejemplo: $ \text{Vector}(\text{``Rey''}) - \text{Vector}(\text{``Hombre''}) + \text{Vector}(\text{``Mujer''}) \approx \text{Vector}(\text{``Reina''}) $
+        \item Modelos: Sentence-BERT, E5, BGE, OpenAI embeddings.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Similitud del coseno}
+    \begin{block}{F\'ormula}
+        \[
+        \text{sim}(\mathbf{A}, \mathbf{B}) = \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|}
+        \]
+        \begin{itemize}
+            \item Mide el \'angulo entre dos vectores.
+            \item Valores cercanos a 1 indican alta similitud sem\'antica.
+            \item Es la m\'etrica est\'andar en bases vectoriales.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: BASES DE DATOS VECTORIALES
+% ============================================================================
+\section{Bases de Datos Vectoriales}
+
+\begin{frame}{Tecnolog\'ias de almacenamiento vectorial}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Herramienta} & \textbf{Tipo} & \textbf{Uso Principal} \\
+            \midrule
+            FAISS & Librer\'ia (Meta) & B\'usqueda local, alta velocidad en RAM. \\
+            Pinecone & Servicio gestionado & Escalabilidad en la nube, nivel empresarial. \\
+            Weaviate & Open Source & Base de datos con b\'usqueda h\'ibrida. \\
+            ChromaDB & Open Source & F\'acil integraci\'on con Python, prototipos. \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: EVALUACIÓN DE SISTEMAS RAG (RAG TRIAD)
+% ============================================================================
+\section{Evaluaci\'on de Sistemas RAG}
+
+\begin{frame}{El RAG Triad}
+    \begin{itemize}
+        \item \textbf{Faithfulness (Fidelidad)}: ¿La respuesta se deriva estrictamente del contexto recuperado? (no alucina)
+        \item \textbf{Relevance (Relevancia del contexto)}: ¿Los documentos recuperados son \'utiles para responder la pregunta?
+        \item \textbf{Answer Relevance}: ¿La respuesta responde la pregunta del usuario? (puede medirse con similitud sem\'antica)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{M\'etricas offline para retrieval}
+    \begin{itemize}
+        \item \textbf{Recall@k}: proporci\'on de documentos relevantes recuperados en top-$k$.
+        \item \textbf{MRR (Mean Reciprocal Rank)}: posici\'on del primer documento relevante.
+        \item \textbf{NDCG}: relevancia con descuento por posici\'on.
+        \item Se necesita un dataset de evaluaci\'on con pares pregunta-documento relevante.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: IMPLEMENTACIÓN CONCEPTUAL EN PYTHON
+% ============================================================================
+\section{Implementaci\'on Conceptual}
+
+\begin{frame}[fragile]{Ejemplo con LangChain}
+    \begin{lstlisting}
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings, ChatGPT
+from langchain.chains import RetrievalQA
+
+# 1. Preparar datos y embeddings
+embeddings = OpenAIEmbeddings()
+texts = ["La Sesion 12 trata sobre RAG", "Carlos es el profesor"]
+vector_db = FAISS.from_texts(texts, embeddings)
+
+# 2. Configurar el LLM
+llm = ChatGPT(model_name="gpt-4", temperature=0)
+
+# 3. Crear la cadena RAG
+rag_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=vector_db.as_retriever()
+)
+
+# 4. Consulta
+query = "De que trata la Sesion 12?"
+response = rag_chain.invoke(query)
+print(response["result"])
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: RAG vs FINE-TUNING
+% ============================================================================
+\section{RAG vs Fine-Tuning}
+
+\begin{frame}{Comparaci\'on RAG vs Fine-Tuning}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Caracter\'istica} & \textbf{Fine-Tuning} & \textbf{RAG} \\
+            \midrule
+            Conocimiento & Est\'atico (en pesos) & Din\'amico (base de datos) \\
+            Costo & Alto (requiere GPUs) & Bajo (solo inferencia) \\
+            Alucinaciones & Posibles & Reducidas \\
+            Transparencia & Baja & Alta (cita fuentes) \\
+            Actualizaci\'on & Reentrenar & Indexar nuevos docs \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparaci\'on para Entrevistas}
+
+\begin{frame}{Preguntas t\'ipicas}
+    \begin{itemize}
+        \item ¿Qu\'e es RAG y cu\'ando lo usar\'ias?
+        \item Diferencias entre RAG y Fine-Tuning.
+        \item ¿Qu\'e son los embeddings y la similitud del coseno?
+        \item ¿Qu\'e bases de datos vectoriales conoces?
+        \item ¿C\'omo evaluar\'ias un sistema RAG? (RAG Triad)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿C\'omo elegir\'ias el tama\~no de chunk para los documentos?
+        \item ¿Qu\'e estrategias de re-ranking propondr\'ias?
+        \item ¿C\'omo manejar\'ias consultas que requieren informaci\'on de m\'ultiples documentos?
+        \item ¿Qu\'e consideraciones de privacidad hay al usar RAG en salud?
+        \item ¿C\'omo implementar\'ias un sistema RAG multimodal?
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: CASO INTEGRADO - SISTEMA DE INTELIGENCIA DE NEGOCIOS
+% ============================================================================
+\section{Caso Integrado: Inteligencia de Negocios en Importaci\'on/Exportaci\'on}
+
+\begin{frame}{Problema}
+    \begin{itemize}
+        \item Empresa con miles de documentos: regulaciones aduaneras, aranceles, tratados, contratos.
+        \item Informaci\'on dispersa en PDFs, bases de datos, sitios web que cambian frecuentemente.
+        \item Analistas necesitan respuestas r\'apidas a preguntas como ``¿Cu\'al es el arancel para importar textiles desde Vietnam?''
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Arquitectura propuesta}
+    \begin{enumerate}
+        \item \textbf{Procesamiento}: extraer texto de PDFs, dividir en chunks sem\'anticos (por art\'iculos). Convertir tablas a texto.
+        \item \textbf{Embeddings}: usar BGE-M3 o E5 (multiling\"ue, alta calidad).
+        \item \textbf{Base vectorial}: Weaviate (open source, b\'usqueda h\'ibrida, filtrado por metadatos).
+        \item \textbf{LLM}: modelo local (Llama 3, Mistral) por privacidad y costo.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Actualizaci\'on y evaluaci\'on}
+    \begin{itemize}
+        \item \textbf{Indexaci\'on incremental}: al llegar nuevos documentos, se generan embeddings y se insertan.
+        \item \textbf{Evaluaci\'on offline}: dataset de preguntas con documentos relevantes anotados; m\'etricas Recall@k, MRR.
+        \item \textbf{Evaluaci\'on online}: muestreo de respuestas, evaluaci\'on humana de fidelidad y relevancia.
+        \item \textbf{M\'etricas de negocio}: tiempo ahorrado por analista, precisi\'on de decisiones.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Prompting para minimizar alucinaciones}
+    \begin{block}{Ejemplo de prompt}
+        \begin{lstlisting}
+Responde unicamente con la informacion de los documentos proporcionados.
+Si la respuesta requiere combinar varios fragmentos, hazlo.
+Cita los documentos al final de la respuesta.
+Si no encuentras la informacion, di "No lo se".
+        \end{lstlisting}
+    \end{block}
+    Incluir ejemplos few-shot mejora la adherencia.
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+\section{Conexi\'on con el resto del curso}
+
+\begin{frame}{Relaci\'on con sesiones anteriores}
+    \begin{itemize}
+        \item \textbf{Sesi\'on 4 (Word Embeddings)}: base de los embeddings.
+        \item \textbf{Sesi\'on 9 (Transformers)}: arquitectura de los LLMs usados en generaci\'on.
+        \item \textbf{Sesi\'on 10 (BERT, GPT)}: modelos pre-entrenados que se usan en RAG.
+        \item \textbf{Sesi\'on 11 (Tareas Avanzadas)}: QA y summarization se benefician de RAG.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{RAG}: arquitectura que combina recuperaci\'on y generaci\'on para superar limitaciones de LLMs.
+            \item \textbf{Embeddings}: representaciones vectoriales para b\'usqueda sem\'antica.
+            \item \textbf{Similitud del coseno}: m\'etrica para comparar vectores.
+            \item \textbf{Bases de datos vectoriales}: FAISS, Pinecone, Weaviate, ChromaDB.
+            \item \textbf{RAG Triad}: fidelidad, relevancia del contexto, relevancia de la respuesta.
+            \item \textbf{RAG vs Fine-Tuning}: din\'amico vs est\'atico, menor costo y alucinaciones.
+            \item \textbf{Implementaci\'on}: LangChain para prototipos r\'apidos.
+            \item \textbf{Caso pr\'actico}: sistema de inteligencia de negocios.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

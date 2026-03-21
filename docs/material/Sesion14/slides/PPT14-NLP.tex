@@ -1,0 +1,539 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 14
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 14 NLP]{\textbf{Sesión 14}}
+\subtitle{Despliegue de Modelos NLP: MLOps, APIs, Contenerización y Monitoreo}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: ARQUITECTURA DE UN CHATBOT EN PRODUCCIÓN
+% ============================================================================
+\section{Arquitectura de un Chatbot en Producción}
+
+\begin{frame}{Arquitectura multicapa}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Frontend}
+        \begin{itemize}
+            \item Interfaz de usuario (web, app).
+            \item Captura la consulta y muestra la respuesta.
+        \end{itemize}
+        \textbf{Backend}
+        \begin{itemize}
+            \item Lógica de negocio, gestión de sesiones.
+            \item Se comunica con el modelo y BD.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Base de datos}
+        \begin{itemize}
+            \item Historial de conversaciones, usuarios.
+            \item Caché de respuestas (Redis).
+        \end{itemize}
+        \textbf{Modelo}
+        \begin{itemize}
+            \item Servicio de inferencia (API).
+            \item Modelo serializado y optimizado.
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 1
+    % IMAGEN: Diagrama de arquitectura
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: SERIALIZACIÓN DE MODELOS
+% ============================================================================
+\section{Serialización de Modelos}
+
+\begin{frame}{Formatos de serialización}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c|c}
+            \toprule
+            \textbf{Formato} & \textbf{Ventajas} & \textbf{Desventajas} & \textbf{Uso típico} \\
+            \midrule
+            Pickle/Joblib & Simple, nativo Python & Inseguro, solo Python & Prototipos, notebooks \\
+            ONNX & Interoperable, optimizado & Curva de aprendizaje & Producción, baja latencia \\
+            TorchScript & Optimizado PyTorch & Solo PyTorch & Producción con C++ \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en Pregunta 2
+\end{frame}
+
+\begin{frame}[fragile]{Exportar a ONNX (PyTorch)}
+    \begin{lstlisting}
+import torch
+import onnx
+
+model = ...  # modelo entrenado
+dummy_input = torch.randn(1, 3, 224, 224)
+
+torch.onnx.export(
+    model,
+    dummy_input,
+    "model.onnx",
+    input_names=["input"],
+    output_names=["output"],
+    dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
+)
+
+# Verificar
+onnx_model = onnx.load("model.onnx")
+onnx.checker.check_model(onnx_model)
+    \end{lstlisting}
+    % Basado en Pregunta 2
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: CREACIÓN DE APIS CON FASTAPI
+% ============================================================================
+\section{Creación de APIs con FastAPI}
+
+\begin{frame}{¿Por qué FastAPI?}
+    \begin{itemize}
+        \item \textbf{Asíncrono}: maneja alta concurrencia con \texttt{async/await}.
+        \item \textbf{Rendimiento}: comparable a Node.js y Go.
+        \item \textbf{Documentación automática}: Swagger UI, ReDoc.
+        \item \textbf{Validación de datos}: Pydantic integrado.
+        \item Ideal para servicios de ML.
+    \end{itemize}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}[fragile]{Endpoint básico en FastAPI}
+    \begin{lstlisting}
+from fastapi import FastAPI
+from pydantic import BaseModel
+import joblib
+
+app = FastAPI()
+model = joblib.load("model.pkl")
+
+class Texto(BaseModel):
+    texto: str
+
+@app.post("/predict")
+async def predict(data: Texto):
+    pred = model.predict([data.texto])[0]
+    return {"sentimiento": pred}
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: CONTENERIZACIÓN CON DOCKER
+% ============================================================================
+\section{Contenerización con Docker}
+
+\begin{frame}{¿Por qué Docker?}
+    \begin{itemize}
+        \item Empaqueta la aplicación y dependencias en una imagen.
+        \item Garantiza el mismo entorno en desarrollo, pruebas y producción.
+        \item Facilita el escalado y despliegue.
+    \end{itemize}
+    % Basado en Pregunta 4
+\end{frame}
+
+\begin{frame}[fragile]{Dockerfile para una API de NLP}
+    \begin{lstlisting}
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY app.py .
+COPY model.pkl .
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Docker Compose}
+    \begin{itemize}
+        \item Define y levanta múltiples contenedores (API, base de datos, caché).
+        \item Usa un archivo \texttt{docker-compose.yml}.
+        \item Ejemplo: API + Redis para caché.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: MONITOREO Y MLOPS
+% ============================================================================
+\section{Monitoreo y MLOps}
+
+\begin{frame}{Métricas críticas en producción}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c}
+            \toprule
+            \textbf{Métrica} & \textbf{Descripción} \\
+            \midrule
+            Latencia & Tiempo de respuesta (p95 < 500ms) \\
+            Throughput & Peticiones por segundo \\
+            Data Drift & Cambios en distribución de entradas \\
+            Concept Drift & Cambios en relación entrada-salida \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF y Pregunta 5
+\end{frame}
+
+\begin{frame}{Herramientas de monitoreo}
+    \begin{itemize}
+        \item \textbf{Prometheus + Grafana}: métricas y dashboards.
+        \item \textbf{ELK (Elasticsearch, Logstash, Kibana)}: centralización de logs.
+        \item \textbf{Evidently AI}: detección de drift.
+        \item \textbf{WhyLabs / Whylogs}: perfiles de datos.
+    \end{itemize}
+    % Basado en Pregunta 5
+\end{frame}
+
+\begin{frame}{Data Drift vs Concept Drift}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Data Drift}
+        \begin{itemize}
+            \item Cambios en las entradas.
+            \item Ej: nuevas palabras, consultas más largas.
+            \item Se detecta con PSI, test KS.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Concept Drift}
+        \begin{itemize}
+            \item Cambios en la relación entrada-salida.
+            \item Ej: nueva política cambia las respuestas correctas.
+            \item Requiere reentrenamiento.
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: VERSIONADO DE MODELOS Y DATOS
+% ============================================================================
+\section{Versionado de Modelos y Datos}
+
+\begin{frame}{Herramientas de versionado}
+    \begin{itemize}
+        \item \textbf{DVC}: versiona datos y modelos, integrado con Git.
+        \item \textbf{Hugging Face Hub}: repositorio de modelos.
+        \item \textbf{MLflow}: registro de experimentos y modelos (Model Registry).
+    \end{itemize}
+    % Basado en Pregunta 7
+\end{frame}
+
+\begin{frame}{Estrategias de despliegue}
+    \begin{itemize}
+        \item \textbf{A/B testing}: comparar dos versiones en paralelo.
+        \item \textbf{Canary deployment}: lanzar nueva versión a un % de usuarios.
+        \item \textbf{Blue-Green}: dos entornos idénticos, cambiar el tráfico.
+        \item \textbf{Shadow mode}: evaluar nueva versión sin impactar al usuario.
+    \end{itemize}
+    % Basado en Preguntas 12 y 13
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: ESCALABILIDAD Y RENDIMIENTO
+% ============================================================================
+\section{Escalabilidad y Rendimiento}
+
+\begin{frame}{Escalado horizontal}
+    \begin{itemize}
+        \item Múltiples réplicas detrás de un balanceador de carga (Nginx, ALB).
+        \item \textbf{Stateless}: cualquier réplica puede atender cualquier petición.
+        \item Auto-escalado con Kubernetes (HPA) basado en CPU, memoria o colas.
+    \end{itemize}
+    % Basado en Preguntas 8 y 14
+\end{frame}
+
+\begin{frame}{Caché de respuestas}
+    \begin{itemize}
+        \item Usar Redis para respuestas de consultas frecuentes.
+        \item Clave: hash del prompt (o embedding de la pregunta).
+        \item TTL para expiración automática.
+        \item Invalidación al actualizar el modelo.
+    \end{itemize}
+    % Basado en Pregunta 19
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: PRUEBAS DE CARGA
+% ============================================================================
+\section{Pruebas de Carga}
+
+\begin{frame}{Herramientas y métricas}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Herramientas}
+        \begin{itemize}
+            \item Locust (Python)
+            \item JMeter (Java)
+            \item k6 (JavaScript)
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Métricas a observar}
+        \begin{itemize}
+            \item Latencia media y percentil 95
+            \item Throughput (req/s)
+            \item Tasa de errores (5xx)
+        \end{itemize}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{itemize}
+        \item Determinar punto de quiebre aumentando carga gradualmente.
+    \end{itemize}
+    % Basado en Pregunta 11
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: SEGURIDAD Y PRIVACIDAD
+% ============================================================================
+\section{Seguridad y Privacidad}
+
+\begin{frame}{Riesgos y mitigaciones}
+    \begin{itemize}
+        \item \textbf{Inyección de prompts}: validar y sanitizar entrada.
+        \item \textbf{Extracción del modelo}: rate limiting, límites de consultas.
+        \item \textbf{DoS}: autenticación (API keys, OAuth) y balanceo.
+    \end{itemize}
+    % Basado en Pregunta 9
+\end{frame}
+
+\begin{frame}{Cumplimiento GDPR}
+    \begin{itemize}
+        \item Almacenar logs de forma segura y con acceso restringido.
+        \item Seudonimización: reemplazar identificadores por tokens.
+        \item Derecho al olvido: implementar funciones de eliminación de datos.
+        \item No retener datos personales más tiempo del necesario.
+    \end{itemize}
+    % Basado en Preguntas 10 y 18
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: ESTRATEGIAS DE DESPLIEGUE AVANZADAS
+% ============================================================================
+\section{Estrategias de Despliegue Avanzadas}
+
+\begin{frame}{A/B Testing y Canary Deployment}
+    \begin{block}{A/B Testing}
+        \begin{itemize}
+            \item Asignar usuarios aleatoriamente (hash de user\_id).
+            \item Comparar métricas de negocio (CTR, conversión).
+            \item Período suficiente para significancia estadística.
+        \end{itemize}
+    \end{block}
+    \begin{block}{Canary}
+        \begin{itemize}
+            \item Enrutar un pequeño porcentaje de tráfico a la nueva versión.
+            \item Monitorear errores y latencia.
+            \item Aumentar gradualmente si es exitoso.
+        \end{itemize}
+    \end{block}
+    % Basado en Preguntas 12 y 13
+\end{frame}
+
+\begin{frame}{CI/CD para ML (MLOps)}
+    \begin{enumerate}
+        \item Integración de código y datos.
+        \item Entrenamiento automático con validación.
+        \item Registro en MLflow.
+        \item Despliegue canario / shadow.
+        \item Monitoreo y alertas.
+        \item Rollback automático si falla.
+    \end{enumerate}
+    Herramientas: GitHub Actions, Jenkins, Kubeflow.
+    % Basado en Pregunta 12
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Pregunta clave}
+    \begin{block}{¿Cómo desplegarías un modelo NLP en producción?}
+        \begin{enumerate}
+            \item Serializar el modelo (ONNX para optimización).
+            \item Crear una API con FastAPI (asíncrona, validación).
+            \item Contenerizar con Docker.
+            \item Orquestar con Kubernetes (auto-escalado, balanceo).
+            \item Monitorear latencia, throughput y drift (Prometheus, Grafana).
+            \item Versionar modelos (MLflow) y usar estrategias de despliegue (canary, A/B).
+        \end{enumerate}
+    \end{block}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Qué arquitectura usarías para un chatbot?
+        \item Compara formatos de serialización (Pickle, ONNX, TorchScript).
+        \item ¿Cómo manejarías picos de tráfico?
+        \item ¿Cómo detectarías data drift?
+        \item ¿Qué herramientas de monitoreo conoces?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Cómo implementarías un A/B test para modelos?
+        \item ¿Qué estrategias de caching propondrías para consultas frecuentes?
+        \item ¿Cómo garantizarías el cumplimiento GDPR?
+        \item ¿Qué es el shadow scoring y para qué sirve?
+        \item ¿Cómo diseñarías un pipeline CI/CD para ML?
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 12: CASO INTEGRADO - SISTEMA DE RECOMENDACIÓN
+% ============================================================================
+\section{Caso Integrado: Sistema de Recomendación}
+
+\begin{frame}{Problema}
+    \begin{itemize}
+        \item Plataforma de e-commerce (Mercado Libre) necesita recomendar productos en tiempo real a millones de usuarios.
+        \item Modelo basado en BERT (embeddings de productos y usuarios).
+    \end{itemize}
+    % Basado en Pregunta 20
+\end{frame}
+
+\begin{frame}{Arquitectura propuesta}
+    \begin{itemize}
+        \item \textbf{Serialización}: ONNX (baja latencia).
+        \item \textbf{Backend}: FastAPI asíncrono.
+        \item \textbf{Contenerización}: Docker.
+        \item \textbf{Orquestación}: Kubernetes (auto-escalado horizontal).
+        \item \textbf{Bases de datos}: Vectorial (FAISS/Pinecone) para productos, SQL para usuarios.
+        \item \textbf{Caché}: Redis para consultas frecuentes.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Monitoreo y evolución}
+    \begin{itemize}
+        \item Métricas de sistema: latencia p95, throughput, errores (Prometheus/Grafana).
+        \item Métricas de negocio: CTR, conversión, ingresos.
+        \item Detección de concept drift: monitorear CTR; si baja, reentrenar.
+        \item A/B testing para nuevas versiones.
+        \item Seguridad: API keys, rate limiting, logs seudonimizados.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 13: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{Arquitectura}: frontend, backend, base de datos, modelo.
+            \item \textbf{Serialización}: ONNX, TorchScript, Pickle.
+            \item \textbf{APIs}: FastAPI (asíncrono, documentación automática).
+            \item \textbf{Contenerización}: Docker, Docker Compose.
+            \item \textbf{Monitoreo}: latencia, throughput, data drift, concept drift.
+            \item \textbf{Herramientas}: Prometheus, Grafana, ELK, Evidently.
+            \item \textbf{Versionado}: DVC, Hugging Face Hub, MLflow.
+            \item \textbf{Escalado}: horizontal, caché (Redis).
+            \item \textbf{Seguridad}: autenticación, rate limiting, GDPR.
+            \item \textbf{Despliegue avanzado}: A/B testing, canary, CI/CD.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

@@ -1,0 +1,472 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 9
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 9 NLP]{\textbf{Sesión 9}}
+\subtitle{Transformers y Atención Multi-Head}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN
+% ============================================================================
+\section{Introducción}
+
+\begin{frame}{El fin de las recurrencias}
+    \begin{itemize}
+        \item Hasta 2017, las RNN/LSTM dominaban el NLP.
+        \item Limitaciones:
+        \begin{itemize}
+            \item \textbf{Procesamiento secuencial}: no paralelizable, lentas en GPU.
+            \item \textbf{Dependencias largas}: a pesar de LSTM, aún sufren gradiente desvaneciente.
+            \item \textbf{Memoria limitada}: estado oculto comprime toda la información.
+        \end{itemize}
+        \item \textbf{Solución}: Transformers (Vaswani et al., 2017) – ``Attention is All You Need''.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+\begin{frame}{Ventajas de los Transformers}
+    \begin{itemize}
+        \item \textbf{Paralelización total}: todas las posiciones se procesan simultáneamente.
+        \item \textbf{Conexiones directas}: cada palabra atiende a cualquier otra en una sola capa.
+        \item \textbf{Escalabilidad}: modelos con miles de millones de parámetros (GPT, BERT).
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: ARQUITECTURA GENERAL
+% ============================================================================
+\section{Arquitectura General del Transformer}
+
+\begin{frame}{Visión general}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Encoder}
+        \begin{itemize}
+            \item N bloques idénticos (típicamente 6).
+            \item Cada bloque: Multi-Head Self-Attention + Feed-Forward Network.
+            \item Conexiones residuales y layer norm.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Decoder}
+        \begin{itemize}
+            \item N bloques idénticos.
+            \item Añade una capa de Cross-Attention.
+            \item Self-Attention enmascarada (para autoregresividad).
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 2
+    % IMAGEN: Diagrama del transformer
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: SELF-ATTENTION
+% ============================================================================
+\section{Self-Attention}
+
+\begin{frame}{Intuición de self-attention}
+    \begin{itemize}
+        \item Cada palabra calcula la relevancia de las demás para actualizar su representación.
+        \item Analogía: reunión donde cada persona (token) pregunta a las demás qué tan relevantes son.
+    \end{itemize}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Formulación matemática}
+    Para una secuencia de $T$ palabras representada por $\mathbf{X} \in \mathbb{R}^{T \times d}$:
+    \begin{enumerate}
+        \item Proyectar en Queries, Keys, Values:
+        \[
+        \mathbf{Q} = \mathbf{X}\mathbf{W}^Q,\quad \mathbf{K} = \mathbf{X}\mathbf{W}^K,\quad \mathbf{V} = \mathbf{X}\mathbf{W}^V
+        \]
+        \item Calcular puntuaciones: $\mathbf{S} = \mathbf{Q}\mathbf{K}^T \in \mathbb{R}^{T \times T}$
+        \item Escalar: $\mathbf{S}_{\text{scaled}} = \frac{\mathbf{S}}{\sqrt{d_k}}$
+        \item Normalizar con softmax: $\mathbf{A} = \text{softmax}(\mathbf{S}_{\text{scaled}})$
+        \item Salida: $\mathbf{Z} = \mathbf{A}\mathbf{V}$
+    \end{enumerate}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Escalado del producto punto}
+    \begin{itemize}
+        \item $\frac{1}{\sqrt{d_k}}$ evita que las puntuaciones sean demasiado grandes.
+        \item Si los productos punto son grandes, el softmax se satura y los gradientes se vuelven muy pequeños.
+        \item Mejora la estabilidad numérica.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: MULTI-HEAD ATTENTION
+% ============================================================================
+\section{Multi-Head Attention}
+
+\begin{frame}{Motivación}
+    \begin{itemize}
+        \item Una sola cabeza puede promediar demasiado.
+        \item Diferentes cabezas pueden aprender diferentes tipos de relaciones:
+        \begin{itemize}
+            \item Sintácticas (sujeto-verbo).
+            \item Semánticas (sinónimos).
+            \item De distancia.
+        \end{itemize}
+    \end{itemize}
+    % Basado en Pregunta 4
+\end{frame}
+
+\begin{frame}{Formulación}
+    \begin{enumerate}
+        \item Para cada cabeza $i$: $\mathbf{Q}_i = \mathbf{X}\mathbf{W}_i^Q$, $\mathbf{K}_i = \mathbf{X}\mathbf{W}_i^K$, $\mathbf{V}_i = \mathbf{X}\mathbf{W}_i^V$.
+        \item Calcular atención por cabeza: $\mathbf{Z}_i = \text{Attention}(\mathbf{Q}_i, \mathbf{K}_i, \mathbf{V}_i)$.
+        \item Concatenar: $\mathbf{Z} = \text{Concat}(\mathbf{Z}_1, \dots, \mathbf{Z}_h)$.
+        \item Proyectar: $\mathbf{Z}_{\text{final}} = \mathbf{Z}\mathbf{W}^O$.
+    \end{enumerate}
+    % Basado en Pregunta 4
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: POSITIONAL ENCODING
+% ============================================================================
+\section{Positional Encoding}
+
+\begin{frame}{Necesidad de positional encoding}
+    \begin{itemize}
+        \item Self-attention es invariante a la posición: permutar las palabras produce las mismas representaciones.
+        \item Para inyectar información de orden, se suman positional encodings a los embeddings de entrada.
+    \end{itemize}
+    % Basado en Pregunta 5
+\end{frame}
+
+\begin{frame}{Fórmula de positional encoding}
+    \[
+    \begin{align*}
+        PE_{(pos, 2i)} &= \sin\left(\frac{pos}{10000^{2i/d}}\right) \\
+        PE_{(pos, 2i+1)} &= \cos\left(\frac{pos}{10000^{2i/d}}\right)
+    \end{align*}
+    \]
+    \begin{itemize}
+        \item Funciones periódicas que permiten extrapolar a longitudes no vistas.
+        \item No añaden parámetros entrenables.
+    \end{itemize}
+    % Basado en Pregunta 5
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: CAPA FEED-FORWARD
+% ============================================================================
+\section{Feed-Forward Network (FFN)}
+
+\begin{frame}{FFN en transformers}
+    \begin{block}{Arquitectura}
+        \[
+        \text{FFN}(x) = \max(0, x\mathbf{W}_1 + b_1)\mathbf{W}_2 + b_2
+        \]
+        \begin{itemize}
+            \item Capa lineal con expansión (típicamente $4 \times d_{\text{model}}$).
+            \item Activación ReLU (o GELU).
+            \item Misma FFN para todas las posiciones, pero con parámetros compartidos.
+        \end{itemize}
+    \end{block}
+    \begin{itemize}
+        \item Aporta no linealidad y capacidad de transformación por token.
+    \end{itemize}
+    % Basado en Pregunta 10
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: CONEXIONES RESIDUALES Y LAYER NORM
+% ============================================================================
+\section{Conexiones Residuales y Layer Normalization}
+
+\begin{frame}{Conexiones residuales}
+    \begin{block}{Fórmula}
+        \[
+        x' = x + \text{Sublayer}(x)
+        \]
+    \end{block}
+    \begin{itemize}
+        \item Facilitan el flujo del gradiente en redes profundas.
+        \item Permiten apilar muchas capas (ej. BERT Large: 24 capas).
+    \end{itemize}
+    % Basado en Pregunta 9
+\end{frame}
+
+\begin{frame}{Layer Normalization}
+    \begin{block}{Fórmula}
+        \[
+        \text{LayerNorm}(x) = \frac{x - \mu}{\sigma} \odot \gamma + \beta
+        \]
+    \end{block}
+    \begin{itemize}
+        \item Normaliza las activaciones a lo largo de la dimensión de características.
+        \item Independiente del batch size, funciona bien con secuencias de longitud variable.
+    \end{itemize}
+    % Basado en Pregunta 9
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: BLOQUES COMPLETOS
+% ============================================================================
+\section{Bloques Encoder y Decoder}
+
+\begin{frame}{Encoder block}
+    \begin{enumerate}
+        \item Multi-Head Self-Attention con conexión residual + layer norm.
+        \item Feed-Forward Network con conexión residual + layer norm.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Decoder block}
+    \begin{enumerate}
+        \item \textbf{Masked Multi-Head Self-Attention}: evita que el decoder vea tokens futuros (máscara triangular).
+        \item \textbf{Cross-Attention}: queries del decoder, keys/values del encoder.
+        \item Feed-Forward Network.
+    \end{enumerate}
+    Cada subcapa con residual y layer norm.
+    % Basado en Preguntas 7 y 8
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: COMPARACIÓN CON RNN
+% ============================================================================
+\section{Comparación Transformer vs RNN/LSTM}
+
+\begin{frame}{Tabla comparativa}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Característica} & \textbf{Transformer} & \textbf{RNN/LSTM} \\
+            \midrule
+            Paralelización & Total (todas las posiciones) & Secuencial \\
+            Dependencias largas & Conexiones directas & Gradiente desvaneciente \\
+            Memoria & Acceso directo a todas las posiciones & Estado oculto comprimido \\
+            Entrenamiento & Rápido en GPU & Lento \\
+            Escalabilidad & Miles de millones de parámetros & Difícil de escalar \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: MODELOS DERIVADOS
+% ============================================================================
+\section{Modelos Derivados}
+
+\begin{frame}{BERT (Bidirectional Encoder Representations from Transformers)}
+    \begin{itemize}
+        \item Usa solo el encoder (bidireccional).
+        \item Entrenado con Masked Language Model (MLM) y Next Sentence Prediction (NSP).
+        \item Ideal para tareas de comprensión (clasificación, NER, QA).
+    \end{itemize}
+    % Basado en Preguntas 11 y 13
+\end{frame}
+
+\begin{frame}{GPT (Generative Pre-trained Transformer)}
+    \begin{itemize}
+        \item Usa solo el decoder (autoregresivo).
+        \item Entrenado con modelado de lenguaje (predecir la siguiente palabra).
+        \item Ideal para generación de texto (ChatGPT).
+    \end{itemize}
+    % Basado en Pregunta 12
+\end{frame}
+
+\begin{frame}{T5 (Text-to-Text Transfer Transformer)}
+    \begin{itemize}
+        \item Arquitectura encoder-decoder.
+        \item Formula todas las tareas como texto a texto.
+        \item Ventaja: mismo pre-entrenamiento y fine-tuning para múltiples tareas.
+    \end{itemize}
+    % Basado en Pregunta 15
+\end{frame}
+
+\begin{frame}{Vision Transformer (ViT)}
+    \begin{itemize}
+        \item Aplica transformers a imágenes dividiéndolas en parches.
+        \item Cada parche se proyecta linealmente y se añade positional encoding.
+        \item Captura relaciones globales desde las primeras capas.
+    \end{itemize}
+    % Basado en Pregunta 16
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: IMPLEMENTACIÓN CONCEPTUAL
+% ============================================================================
+\section{Implementación Conceptual}
+
+\begin{frame}[fragile]{Self-attention en Python}
+    \begin{lstlisting}
+import numpy as np
+
+def softmax(x, axis=-1):
+    e_x = np.exp(x - np.max(x, axis=axis, keepdims=True))
+    return e_x / np.sum(e_x, axis=axis, keepdims=True)
+
+def self_attention(X, W_q, W_k, W_v):
+    # X: (T, d)
+    Q = X @ W_q  # (T, d_k)
+    K = X @ W_k  # (T, d_k)
+    V = X @ W_v  # (T, d_k)
+    scores = Q @ K.T  # (T, T)
+    scaled = scores / np.sqrt(Q.shape[-1])
+    weights = softmax(scaled)  # (T, T)
+    output = weights @ V  # (T, d_k)
+    return output, weights
+
+# Ejemplo
+T, d, d_k = 4, 8, 4
+X = np.random.rand(T, d)
+W_q = np.random.rand(d, d_k)
+W_k = np.random.rand(d, d_k)
+W_v = np.random.rand(d, d_k)
+out, attn = self_attention(X, W_q, W_k, W_v)
+print("Matriz de atención:\n", attn)
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 12: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas estrella}
+    \begin{itemize}
+        \item ¿Cómo funciona el transformer y qué problema resuelve?
+        \item ¿Qué es positional encoding y por qué es necesario?
+        \item Diferencia entre self-attention y cross-attention.
+        \item Explica multi-head attention.
+        \item ¿Por qué se escala el producto punto en atención?
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Qué es la máscara en el decoder?
+        \item ¿Cómo se calcula la complejidad computacional de la atención? $O(T^2 \cdot d)$
+        \item ¿Qué ventajas tiene la atención relativa?
+        \item ¿Cómo manejan contextos largos modelos como GPT-4? (atención dispersa, attention sinks)
+        \item ¿Qué técnicas de optimización se usan para desplegar transformers en móviles? (pruning, quantization, distillation)
+    \end{itemize}
+    % Basado en Preguntas 7, 13, 14, 18, 19
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 13: CONEXIÓN CON EL RESTO DEL CURSO
+% ========================================================
+
+% ============================================================================
+% SECCIÓN 14: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{Transformer}: arquitectura basada únicamente en atención, sin recurrencia.
+            \item \textbf{Self-attention}: cada palabra atiende a todas las demás.
+            \item \textbf{Multi-head attention}: varias cabezas capturan diferentes relaciones.
+            \item \textbf{Positional encoding}: inyecta información de orden.
+            \item \textbf{Encoder-decoder}: bloques con atención, FFN, residual y layer norm.
+            \item \textbf{Ventajas}: paralelización, dependencias largas, escalabilidad.
+            \item \textbf{Modelos derivados}: BERT (encoder), GPT (decoder), T5 (encoder-decoder), ViT (imágenes).
+            \item \textbf{Desafíos}: complejidad cuadrática, inferencia en dispositivos pequeños.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

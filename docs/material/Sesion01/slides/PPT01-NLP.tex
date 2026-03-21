@@ -1,0 +1,449 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 1
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 1 NLP]{\textbf{Sesión 1}}
+\subtitle{Introducción a NLP y Fundamentos Lingüísticos}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN A NLP
+% ============================================================================
+\section{Introducción a NLP}
+
+\begin{frame}{¿Qué es NLP?}
+    \begin{block}{Definición}
+        Procesamiento del Lenguaje Natural (NLP) es una subdisciplina de la IA que se ocupa de dotar a las computadoras de la capacidad de entender, interpretar y generar lenguaje humano.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Objetivo}: puente entre el lenguaje humano (discreto, simbólico) y las computadoras (números).
+        \item \textbf{Desafíos únicos}: ambigüedad, creatividad, dependencia del contexto, conocimiento de mundo.
+    \end{itemize}
+    % Basado en introducción del PDF
+\end{frame}
+
+\begin{frame}{Breve historia del NLP}
+    \begin{itemize}
+        \item \textbf{1950-60}: enfoques basados en reglas, traducción palabra por palabra.
+        \item \textbf{1980-90}: métodos estadísticos y corpus anotados.
+        \item \textbf{2000}: modelos clásicos (Naive Bayes, SVM) aplicados a texto.
+        \item \textbf{2010}: word embeddings (Word2Vec, GloVe) y redes neuronales.
+        \item \textbf{2017-presente}: Transformers (BERT, GPT), modelos fundacionales.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: NIVELES DEL LENGUAJE
+% ============================================================================
+\section{Niveles del Lenguaje}
+
+\begin{frame}{Morfología: estructura de las palabras}
+    \begin{block}{Definición}
+        Estudia la estructura interna de las palabras y sus constituyentes mínimos con significado: los \textbf{morfemas}.
+    \end{block}
+    \begin{exampleblock}{Ejemplo: ``inextinguible''}
+        \begin{itemize}
+            \item Prefijo ``in-'' (negación)
+            \item Lexema ``extingu'' (raíz)
+            \item Sufijo ``-ible'' (posibilidad)
+        \end{itemize}
+    \end{exampleblock}
+    \textbf{Problemas computacionales:} segmentación morfológica, lematización, stemming.
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Sintaxis: estructura de las oraciones}
+    \begin{block}{Definición}
+        Estudia cómo se combinan las palabras para formar oraciones gramaticales.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Estructura de constituyentes}: oración → SN + SV, SN → Det + N + Adj, etc.
+        \item \textbf{Representación}: árboles sintácticos (grafo dirigido acíclico).
+    \end{itemize}
+    % Basado en PDF
+    % IMAGEN: Árbol sintáctico simple
+\end{frame}
+
+\begin{frame}{Semántica: el significado}
+    \begin{block}{Niveles semánticos}
+        \begin{itemize}
+            \item \textbf{Léxica}: significado de palabras y relaciones (sinonimia, antonimia, hiperonimia).
+            \item \textbf{Composicional}: cómo se combinan los significados de las palabras.
+            \item \textbf{Del discurso}: significado en contexto extendido.
+        \end{itemize}
+    \end{block}
+    \begin{exampleblock}{Problemas computacionales}
+        \begin{itemize}
+            \item Desambiguación del sentido de las palabras (WSD)
+            \item Reconocimiento de entidades nombradas (NER)
+            \item Análisis de relaciones semánticas
+        \end{itemize}
+    \end{exampleblock}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Pragmática: el uso en contexto}
+    \begin{block}{Definición}
+        Estudia cómo el contexto influye en la interpretación del significado: intención del hablante, conocimiento compartido, normas sociales.
+    \end{block}
+    \begin{exampleblock}{Ejemplos}
+        \begin{itemize}
+            \item Ironía: ``Qué buen tiempo hace'' durante una tormenta.
+            \item Implicaturas: ``¿Tienes hora?'' no es una pregunta sobre posesión.
+            \item Actos de habla: prometer, preguntar, ordenar.
+        \end{itemize}
+    \end{exampleblock}
+    \textbf{Desafíos computacionales}: detección de sarcasmo, comprensión de intenciones.
+    % Basado en PDF y Pregunta 1 (ironía)
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: PART-OF-SPEECH TAGGING
+% ============================================================================
+\section{Part-of-Speech (POS) Tagging}
+
+\begin{frame}{Definición y formalización}
+    \begin{block}{POS Tagging}
+        Asignar a cada palabra de un texto su categoría gramatical (sustantivo, verbo, adjetivo, etc.) según su contexto.
+    \end{block}
+    \begin{block}{Formalización matemática}
+        Dada una secuencia de palabras $w_1^n$, buscar la secuencia de etiquetas $t_1^n$ más probable:
+        \[
+        \hat{t}_1^n = \arg\max_{t_1^n} P(t_1^n | w_1^n) \propto P(w_1^n | t_1^n) P(t_1^n)
+        \]
+        Modelos: HMM (asume independencia de primer orden), CRF, BiLSTM, Transformers.
+    \end{block}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Conjuntos de etiquetas y aplicaciones}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Tagsets comunes}
+        \begin{itemize}
+            \item Penn Treebank (inglés): 45 etiquetas (NN, NNS, VB, VBD, JJ, RB...)
+            \item EAGLES (lenguas europeas)
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Aplicaciones}
+        \begin{itemize}
+            \item Parsing sintáctico
+            \item NER
+            \item Análisis de sentimiento
+        \end{itemize}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{exampleblock}{Corpus anotado: Petrolés (Petro NLP)}
+        Documentos técnicos geocientíficos en portugués con anotación POS para el dominio del petróleo y gas.
+    \end{exampleblock}
+    % Basado en PDF y Pregunta 2 (dominio médico)
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: PARSING (ANÁLISIS SINTÁCTICO)
+% ============================================================================
+\section{Parsing: Análisis Sintáctico}
+
+\begin{frame}{Tipos de parsing}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Constituyentes}
+        \begin{itemize}
+            \item Árbol con frases (SN, SV)
+            \item Gramáticas libres de contexto (CFG)
+            \item Parsing probabilístico (PCFG)
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Dependencias}
+        \begin{itemize}
+            \item Relaciones binarias entre palabras
+            \item Cada palabra tiene un ``cabeza'' y una relación
+            \item Más útil para extracción de relaciones
+        \end{itemize}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{exampleblock}{Ejemplo de dependencias}
+        ``Juan compró un auto'': \\
+        \hspace*{1cm} ``compró'' es raíz, ``Juan'' es nsubj, ``auto'' es obj, ``un'' es det.
+    \end{exampleblock}
+    % Basado en PDF y Pregunta 4
+\end{frame}
+
+\begin{frame}{Formalización matemática (dependencias)}
+    \begin{block}{Árbol de dependencias}
+        Para una oración de $n$ palabras, $G=(V,E)$ con:
+        \begin{itemize}
+            \item $V = \{1,\dots,n\}$ (posiciones de las palabras)
+            \item Cada vértice tiene exactamente un arco entrante, excepto la raíz.
+            \item Grafo acíclico.
+        \end{itemize}
+    \end{block}
+    \begin{block}{Objetivo}
+        Maximizar la puntuación:
+        \[
+        T^* = \arg\max_T \sum_{(i,j)\in T} s(i,j)
+        \]
+        donde $s(i,j)$ es la puntuación de que $j$ dependa de $i$.
+    \end{block}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Treebanks (corpus de árboles sintácticos)}
+    \begin{itemize}
+        \item \textbf{CINTIL-TreeBank} (portugués): 10,039 oraciones, anotación semi-automática.
+        \item \textbf{Penn Treebank} (inglés): estándar para constituyentes.
+        \item \textbf{Universal Dependencies}: árboles de dependencias para múltiples idiomas.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: CORPUS Y DATASETS ANOTADOS
+% ============================================================================
+\section{Corpus y Datasets Anotados}
+
+\begin{frame}{Tipos de corpus}
+    \begin{itemize}
+        \item \textbf{Generales}: British National Corpus.
+        \item \textbf{Dominio específico}: medicina, derecho, petróleo.
+        \item \textbf{Monolingües vs. multilingües}.
+        \item \textbf{Anotados vs. no anotados}.
+    \end{itemize}
+    \vspace{0.3cm}
+    \begin{block}{Principios FAIR}
+        Findable, Accessible, Interoperable, Reusable. Esencial para la ciencia abierta.
+    \end{block}
+    % Basado en PDF y Pregunta 18
+\end{frame}
+
+\begin{frame}{Ejemplos de corpus anotados (I)}
+    \begin{itemize}
+        \item \textbf{RareDis} (salud): enfermedades raras y manifestaciones clínicas. 1,041 textos, F1 83.5\%.
+        \item \textbf{SAMSum} (diálogos): 16,000 chats con resúmenes humanos.
+        \item \textbf{ELEXIS} (multilingüe): 24 corpus (1,000M palabras cada uno) con anotación semántica.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Ejemplos de corpus anotados (II)}
+    \begin{itemize}
+        \item \textbf{Petro NLP} (industria petrolera): Petro KGraph, Petrolés, PetroGold, PetroNER, PetroRE.
+        \item \textbf{Text2Story Lusa} (narrativas periodísticas): 357 artículos con anotación narrativa.
+        \item \textbf{NLUCat} (asistentes virtuales): 12,000 instrucciones en catalán con intenciones y segmentos.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: APLICACIONES EN LA INDUSTRIA
+% ============================================================================
+\section{Aplicaciones en la Industria}
+
+\begin{frame}{Chatbots y asistentes virtuales}
+    \begin{itemize}
+        \item Clasificación de intenciones, extracción de entidades, gestión de diálogo.
+        \item Ejemplo: asistente bancario, NLUCat para personas vulnerables.
+    \end{itemize}
+    % Basado en PDF y Pregunta 20
+\end{frame}
+
+\begin{frame}{Análisis de sentimiento y redes sociales}
+    \begin{itemize}
+        \item Monitoreo de marca, detección de crisis.
+        \item Desafío: ironía y sarcasmo (pragmática).
+        \item Corpus con anotación de ironía.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+\begin{frame}{Traducción automática y búsqueda semántica}
+    \begin{itemize}
+        \item Modelos secuencia a secuencia, Transformers.
+        \item Búsqueda semántica con embeddings de oraciones (Sentence-BERT).
+        \item Indexación con bases de datos vectoriales (FAISS, Pinecone).
+    \end{itemize}
+    % Basado en Preguntas 9 y 10
+\end{frame}
+
+\begin{frame}{Extracción de información en dominios específicos}
+    \begin{itemize}
+        \item Petro NLP: extracción de entidades geocientíficas de informes técnicos.
+        \item RareDis: extracción de enfermedades y síntomas de literatura médica.
+        \item Contratos legales: extracción de partes, fechas, cláusulas.
+    \end{itemize}
+    % Basado en PDF y Preguntas 6, 12
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: DESAFÍOS ACTUALES EN NLP
+% ============================================================================
+\section{Desafíos Actuales}
+
+\begin{frame}{Ambigüedad y dependencia del contexto}
+    \begin{itemize}
+        \item \textbf{Ambigüedad}: ``banco'' (financiero / asiento).
+        \item \textbf{Solución}: modelos contextuales como BERT.
+    \end{itemize}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Conocimiento de mundo y lenguas minoritarias}
+    \begin{itemize}
+        \item \textbf{Conocimiento de mundo}: ``El Papa no puede casarse'' requiere hechos extralingüísticos.
+        \item \textbf{Solución}: integración con bases de conocimiento (RAG, Wikidata).
+        \item \textbf{Lenguas minoritarias}: escasez de recursos. Transfer learning desde lenguas relacionadas.
+    \end{itemize}
+    % Basado en Preguntas 5 y 19
+\end{frame}
+
+\begin{frame}{Sesgos y equidad}
+    \begin{itemize}
+        \item Modelos aprenden sesgos de los datos.
+        \item \textbf{Identificación}: comparar métricas por grupo demográfico.
+        \item \textbf{Mitigación}: balanceo de datos, regularización de equidad, post-procesamiento.
+        \item \textbf{Cumplimiento}: GDPR, Ley de IA de la UE.
+    \end{itemize}
+    % Basado en Pregunta 7
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas conceptuales típicas}
+    \begin{itemize}
+        \item ¿Qué es NLP y cuáles son sus principales desafíos?
+        \item Explica la diferencia entre sintaxis y semántica con ejemplos.
+        \item ¿Qué es POS tagging y por qué es importante?
+        \item ¿Qué es un corpus anotado? Menciona ejemplos.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas sobre aplicaciones y desambiguación}
+    \begin{itemize}
+        \item ¿Cómo diseñarías un chatbot para atención al cliente?
+        \item ¿Cómo detectarías menciones de enfermedades en textos médicos?
+        \item ¿Cómo resolverías la ambigüedad de ``banco''?
+        \item ¿Qué consideraciones hay al crear un corpus de dominio específico?
+    \end{itemize}
+    % Basado en PDF y solucionario
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item NLP: definición, historia, desafíos.
+            \item Niveles del lenguaje: morfología, sintaxis, semántica, pragmática.
+            \item POS tagging: formalización, modelos, aplicaciones, corpus.
+            \item Parsing: constituyentes vs dependencias, treebanks.
+            \item Corpus anotados: tipos, ejemplos (RareDis, SAMSum, Petro NLP, etc.), principios FAIR.
+            \item Aplicaciones industriales: chatbots, sentimiento, traducción, extracción.
+            \item Desafíos actuales: ambigüedad, conocimiento de mundo, lenguas minoritarias, sesgos.
+            \item Preguntas típicas de entrevista.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

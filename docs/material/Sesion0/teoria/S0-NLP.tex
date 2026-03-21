@@ -1,0 +1,568 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{array}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+% --- Estilo de Código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Cabecera y Pie de Página ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Procesamiento de Lenguaje Natural (NLP)}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sílabo del Curso} \\ 
+    \Huge \textbf{PROCESAMIENTO DE LENGUAJE NATURAL (NLP)} \\
+    \Large \textsc{para Inteligencia Artificial} \\[1cm]
+    \normalsize De los fundamentos lingüísticos a los modelos generativos
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+% ------------------------------------------------------------------
+% PRESENTACIÓN DEL CURSO
+% ------------------------------------------------------------------
+\chapter*{Presentación del Curso}
+\addcontentsline{toc}{chapter}{Presentación del Curso}
+
+Este curso ha sido diseñado para futuros ingenieros en inteligencia artificial que deseen dominar el Procesamiento de Lenguaje Natural (NLP) desde una perspectiva práctica y orientada a la industria. A lo largo de 14 semanas, exploraremos desde las técnicas clásicas de preprocesamiento hasta la arquitectura de transformers y los modelos generativos, con un enfoque en las preguntas y habilidades que se esperan en entrevistas técnicas.
+
+Cada tema será abordado con teoría sólida, implementaciones en Python usando librerías estándar (NLTK, spaCy, Hugging Face, PyTorch) y ejemplos de casos reales como chatbots, análisis de sentimiento, sistemas de búsqueda semántica y asistentes virtuales. Al finalizar, el estudiante estará preparado para enfrentar desafíos de modelado de lenguaje y comprender el ciclo completo de un proyecto de NLP, desde la recolección de datos hasta el despliegue en producción.
+
+\vspace{0.5cm}
+\textbf{Estructura del curso (14 semanas):}
+\begin{itemize}
+    \item[$\square$] Semanas 1-3: Fundamentos y preprocesamiento
+    \item[$\square$] Semanas 4-6: Representación del lenguaje y modelos clásicos
+    \item[$\square$] Semanas 7-9: Modelos de deep learning para secuencias
+    \item[$\square$] Semanas 10-12: Transformers y modelos pre-entrenados
+    \item[$\square$] Semanas 13-14: Aplicaciones avanzadas y despliegue
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 1: INTRODUCCIÓN A NLP Y FUNDAMENTOS LINGÜÍSTICOS
+% ------------------------------------------------------------------
+\chapter{Semana 1: Introducción a NLP y Fundamentos Lingüísticos}
+
+\section{Logro de la sesión}
+Comprender el alcance del NLP, sus aplicaciones en la industria y los conceptos lingüísticos básicos que subyacen al procesamiento del lenguaje.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Definición de NLP: objetivos, desafíos y áreas de aplicación.
+    \item Niveles del lenguaje: morfología, sintaxis, semántica, pragmática.
+    \item Part-of-Speech (POS) tagging y parsing.
+    \item Corpus y datasets anotados.
+    \item Aplicaciones reales: chatbots, análisis de sentimiento, traducción automática, búsqueda semántica.
+\end{itemize}
+
+\subsection{Aplicaciones en el mundo laboral y entrevistas}
+\begin{itemize}
+    \item Pregunta típica: "¿Qué es NLP y dónde se usa?" Se espera mencionar casos concretos como atención al cliente, detección de fraudes en textos financieros, análisis de redes sociales.
+    \item Entender la diferencia entre sintaxis (estructura) y semántica (significado).
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Introducción a NLTK y spaCy: carga de pipelines, exploración de corpora.
+    \item Visualización de árboles de dependencia con spaCy.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 2: PREPROCESAMIENTO DE TEXTO
+% ------------------------------------------------------------------
+\chapter{Semana 2: Preprocesamiento de Texto}
+
+\section{Logro de la sesión}
+Aplicar técnicas de limpieza y normalización de texto para preparar datos para modelos de NLP.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Tokenización: palabras, oraciones, subpalabras (BPE, WordPiece, Unigram).
+    \item Normalización: minúsculas, eliminación de caracteres especiales, manejo de URLs y emojis.
+    \item Eliminación de stopwords.
+    \item Stemming vs. Lemmatization: diferencias y cuándo usar cada una.
+    \item Manejo de expresiones regulares (regex) para limpieza avanzada.
+    \item Desafíos en NLP: Out-of-Vocabulary (OOV) words y cómo los métodos de subpalabras los resuelven.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta clave: "¿Cuándo usar stemming y cuándo lematización?"
+    \item Conocimiento de algoritmos de tokenización como BPE (usado en GPT) y WordPiece (usado en BERT).
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Uso de NLTK y spaCy para tokenización, lematización y eliminación de stopwords.
+    \item Práctica con regex para limpieza de texto ruidoso.
+    \item Implementación simple de BPE con librerías como \texttt{tokenizers}.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 3: REPRESENTACIÓN DEL TEXTO: BOW, TF-IDF Y N-GRAMAS
+% ------------------------------------------------------------------
+\chapter{Semana 3: Representación del Texto: BOW, TF-IDF y N-gramas}
+
+\section{Logro de la sesión}
+Transformar texto en vectores numéricos utilizando técnicas clásicas de representación.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Bag of Words (BOW): frecuencia de términos, limitaciones (pérdida de orden y semántica).
+    \item N-gramas: capturar contexto local.
+    \item TF-IDF (Term Frequency-Inverse Document Frequency): ponderación de términos según su importancia.
+    \item Limitaciones de las representaciones dispersas (sparse representations).
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta frecuente: "Compara Bag of Words, TF-IDF y embeddings. ¿Cuándo usarías cada uno?"
+    \item Saber que TF-IDF penaliza palabras muy comunes (como artículos) y resalta términos distintivos.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Implementación con \texttt{sklearn.feature\_extraction.text.CountVectorizer} y \texttt{TfidfVectorizer}.
+    \item Análisis de documentos con estas representaciones.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 4: WORD EMBEDDINGS: WORD2VEC Y GLOVE
+% ------------------------------------------------------------------
+\chapter{Semana 4: Word Embeddings: Word2Vec y GloVe}
+
+\section{Logro de la sesión}
+Comprender el concepto de embeddings densos y entrenar/visualizar word embeddings.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Limitaciones de las representaciones dispersas: maldición de la dimensionalidad, falta de semántica.
+    \item Word2Vec: modelos Skip-gram y CBOW, entrenamiento con ventanas de contexto.
+    \item GloVe (Global Vectors): factorización de matrices de co-ocurrencia.
+    \item Propiedades de los embeddings: relaciones semánticas (rey - hombre + mujer ≈ reina).
+    \item Embeddings contextuales vs. estáticos.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta técnica: "Explica la diferencia entre Skip-gram y CBOW".
+    \item Saber interpretar la analogía de embeddings en entrevistas.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Entrenar Word2Vec con \texttt{gensim} sobre un corpus pequeño.
+    \item Visualizar embeddings con PCA/t-SNE y matplotlib.
+    \item Cargar embeddings pre-entrenados de GloVe y explorar similitudes.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 5: MODELOS CLÁSICOS PARA NLP (NAIVE BAYES, SVM)
+% ------------------------------------------------------------------
+\chapter{Semana 5: Modelos Clásicos para NLP (Naive Bayes, SVM)}
+
+\section{Logro de la sesión}
+Aplicar algoritmos de machine learning clásicos a tareas de NLP como clasificación de texto.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Naive Bayes para clasificación de texto: supuesto de independencia, cálculo de probabilidades.
+    \item Support Vector Machines (SVM) con kernels lineales para textos.
+    \item Ventajas y limitaciones de modelos clásicos frente a deep learning.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta típica: "Menciona dos algoritmos clásicos para clasificación de textos".
+    \item Saber que Naive Bayes es rápido y funciona bien con datos pequeños, pero asume independencia de características.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Implementación de clasificador Naive Bayes con \texttt{sklearn} sobre dataset de noticias (20 Newsgroups).
+    \item Comparación con SVM lineal.
+    \item Evaluación con métricas de clasificación (accuracy, F1-score).
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 6: REDES NEURONALES PARA NLP Y EMBEDDINGS ENTRENABLES
+% ------------------------------------------------------------------
+\chapter{Semana 6: Redes Neuronales para NLP y Embeddings Entrenables}
+
+\section{Logro de la sesión}
+Construir redes neuronales simples para tareas de NLP usando PyTorch.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item De los embeddings estáticos a los embeddings entrenables.
+    \item Capa de embedding en PyTorch.
+    \item Redes feed-forward para clasificación de texto (promedio de embeddings + MLP).
+    \item Función de pérdida: Cross-Entropy.
+    \item Regularización en NLP: dropout, weight decay.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta: "¿Cómo representarías una oración para ingresarla a una red neuronal?" (respuesta: promedio de embeddings o concatenación).
+    \item Saber que los embeddings entrenables se ajustan a la tarea específica.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Implementación de un clasificador simple con embeddings entrenables en PyTorch.
+    \item Entrenamiento sobre dataset de IMDb para análisis de sentimiento.
+    \item Comparación con embeddings pre-entrenados estáticos.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 7: REDES RECURRENTES (RNN, LSTM, GRU) PARA NLP
+% ------------------------------------------------------------------
+\chapter{Semana 7: Redes Recurrentes (RNN, LSTM, GRU) para NLP}
+
+\section{Logro de la sesión}
+Modelar secuencias de texto utilizando redes recurrentes y entender sus limitaciones.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item RNN (Recurrent Neural Networks): cómo procesan secuencias, estado oculto.
+    \item Problema del gradiente desvaneciente (vanishing gradient).
+    \item LSTM (Long Short-Term Memory): celdas de memoria, puertas (input, forget, output).
+    \item GRU (Gated Recurrent Unit): versión simplificada de LSTM.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta avanzada: "Explica por qué LSTM funciona mejor que RNN vanilla para secuencias largas".
+    \item Saber que LSTM fue el estado del arte antes de los transformers.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Implementación de LSTM para clasificación de sentimiento con PyTorch.
+    \item Comparación de rendimiento entre RNN simple y LSTM.
+    \item Uso de embeddings pre-entrenados con LSTM.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 8: MODELOS SEQ2SEQ Y ATENCIÓN
+% ------------------------------------------------------------------
+\chapter{Semana 8: Modelos Seq2Seq y Atención}
+
+\section{Logro de la sesión}
+Construir modelos de secuencia a secuencia (Seq2Seq) para tareas como traducción automática y summarization.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Arquitectura Encoder-Decoder.
+    \item Context vector fijo y su limitación.
+    \item Mecanismo de atención: alineación entre palabras de entrada y salida.
+    \item Tipos de atención: global vs. local.
+    \item Métricas para traducción: BLEU (Bilingual Evaluation Understudy).
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta fundamental: "¿Cómo funciona el mecanismo de atención?"
+    \item La atención es la base de los transformers; entenderla es clave.
+    \item Saber que BLEU mide la similitud entre traducción automática y referencia.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Implementación de un modelo Seq2Seq con atención usando PyTorch.
+    \item Entrenamiento para tarea de traducción simple (ej. inglés-español con dataset pequeño).
+    \item Evaluación con BLEU usando \texttt{sacrebleu}.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 9: TRANSFORMERS - ARQUITECTURA Y ATENCIÓN MULTI-HEAD
+% ------------------------------------------------------------------
+\chapter{Semana 9: Transformers - Arquitectura y Atención Multi-Head}
+
+\section{Logro de la sesión}
+Comprender la arquitectura del transformer y su revolución en NLP.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item El paper "Attention is All You Need".
+    \item Arquitectura del transformer: encoder, decoder, multi-head attention, positional encoding, feed-forward layers.
+    \item Self-attention y atención cruzada (cross-attention).
+    \item Ventajas sobre RNN: paralelización, captura de dependencias largas.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta estrella: "Explica cómo funciona el transformer y qué problema resuelve".
+    \item Saber qué es positional encoding y por qué es necesario.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Implementación de una capa de self-attention desde cero con PyTorch.
+    \item Exploración de la librería Hugging Face Transformers.
+    \item Uso de modelos pre-entrenados para inferencia.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 10: MODELOS PRE-ENTRENADOS (BERT, GPT) Y FINE-TUNING
+% ------------------------------------------------------------------
+\chapter{Semana 10: Modelos Pre-entrenados (BERT, GPT) y Fine-tuning}
+
+\section{Logro de la sesión}
+Utilizar y fine-tunar modelos pre-entrenados como BERT y GPT para tareas específicas.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item BERT (Bidirectional Encoder Representations from Transformers): entrenamiento con MLM (Masked Language Model) y NSP (Next Sentence Prediction).
+    \item GPT (Generative Pre-trained Transformer): entrenamiento autorregresivo.
+    \item Fine-tuning vs. feature-based approaches.
+    \item Tokenizadores de subpalabras (WordPiece, BPE).
+    \item Métricas para clasificación: accuracy, F1, AUC.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta común: "¿Cuál es la diferencia entre BERT y GPT?"
+    \item Saber cuándo usar fine-tuning completo y cuándo usar adaptadores (LoRA).
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Fine-tuning de BERT para clasificación de textos usando Hugging Face.
+    \item Uso de GPT para generación de texto.
+    \item Implementación de early stopping y guardado de checkpoints.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 11: TAREAS AVANZADAS: NER, QUESTION ANSWERING, SUMMARIZATION
+% ------------------------------------------------------------------
+\chapter{Semana 11: Tareas Avanzadas: NER, Question Answering, Summarization}
+
+\section{Logro de la sesión}
+Aplicar modelos pre-entrenados a tareas específicas de NLP como Named Entity Recognition (NER) y extracción de respuestas.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Named Entity Recognition (NER): etiquetado de entidades (personas, organizaciones, lugares).
+    \item Question Answering (QA): modelos extractivos (SQuAD) y generativos.
+    \item Summarization: extractivo vs. abstractivo.
+    \item Métricas de evaluación: F1 para NER, exact match para QA, ROUGE para summarization.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta: "¿Qué métrica usarías para evaluar un sistema de NER?" (F1-score por entidad).
+    \item Saber que ROUGE mide solapamiento de n-gramas entre resumen generado y referencia.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Fine-tuning de BERT para NER con Hugging Face.
+    \item Uso de pipelines de Hugging Face para QA y summarization.
+    \item Evaluación con métricas específicas.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 12: RAG (RETRIEVAL-AUGMENTED GENERATION) Y BASES DE DATOS VECTORIALES
+% ------------------------------------------------------------------
+\chapter{Semana 12: RAG (Retrieval-Augmented Generation) y Bases de Datos Vectoriales}
+
+\section{Logro de la sesión}
+Diseñar sistemas que combinan recuperación de información con generación de lenguaje (RAG).
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Limitaciones de los LLMs: conocimiento desactualizado, alucinaciones.
+    \item RAG (Retrieval-Augmented Generation): recuperar información relevante de una base de conocimiento y pasarla al LLM como contexto.
+    \item Embeddings para búsqueda semántica.
+    \item Bases de datos vectoriales: FAISS, Pinecone, Weaviate.
+    \item Evaluación de sistemas RAG: faithfulness, relevance.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta clave: "¿Qué es RAG y cuándo lo usarías?"
+    \item Saber que RAG reduce alucinaciones y permite usar conocimiento actualizado sin reentrenar.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Construcción de un pipeline RAG: cargar documentos, crear embeddings con Sentence Transformers, almacenar en FAISS, recuperar y generar con GPT.
+    \item Implementación de un chatbot que responda sobre documentos propios.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 13: PROMPT ENGINEERING Y OPTIMIZACIÓN DE MODELOS
+% ------------------------------------------------------------------
+\chapter{Semana 13: Prompt Engineering y Optimización de Modelos}
+
+\section{Logro de la sesión}
+Dominar técnicas de prompt engineering y métodos de optimización como LoRA y cuantización.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Prompt engineering: zero-shot, few-shot, chain-of-thought.
+    \item In-context learning.
+    \item Fine-tuning eficiente: LoRA (Low-Rank Adaptation), adaptadores.
+    \item Cuantización: reducción de precisión para inferencia más rápida (INT8, FP16).
+    \item Exportación de modelos a ONNX.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta avanzada: "¿Qué es LoRA y por qué es útil?"
+    \item Saber que la cuantización reduce el tamaño del modelo y acelera inferencia a costa de pequeña pérdida de precisión.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Experimentación con prompts para GPT usando librerías como \texttt{openai} o modelos locales.
+    \item Fine-tuning con LoRA usando \texttt{peft} y \texttt{transformers}.
+    \item Cuantización con \texttt{torch.quantization} u ONNX.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% SEMANA 14: DESPLIEGUE DE MODELOS NLP (MLOPS)
+% ------------------------------------------------------------------
+\chapter{Semana 14: Despliegue de Modelos NLP (MLOps)}
+
+\section{Logro de la sesión}
+Llevar un modelo NLP a producción, crear APIs y monitorear su rendimiento.
+
+\subsection{Conceptos}
+\begin{itemize}
+    \item Separación entre entrenamiento e inferencia.
+    \item Serialización de modelos: pickle, joblib, ONNX, TorchScript.
+    \item Creación de APIs REST con Flask o FastAPI.
+    \item Contenerización con Docker.
+    \item Monitoreo de modelos en producción: data drift, concept drift, latencia, throughput.
+    \item Versionamiento de modelos con DVC o Hugging Face Hub.
+\end{itemize}
+
+\subsection{Aplicaciones y entrevistas}
+\begin{itemize}
+    \item Pregunta clave: "¿Cómo desplegarías un modelo NLP en producción?"
+    \item Saber que se debe monitorear la deriva de datos y la latencia.
+\end{itemize}
+
+\subsection{Python}
+\begin{itemize}
+    \item Creación de una API con FastAPI que carga un modelo fine-tuneado y recibe textos para clasificar.
+    \item Dockerización de la aplicación.
+    \item Pruebas de carga y monitoreo básico.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% METODOLOGÍA Y EVALUACIÓN
+% ------------------------------------------------------------------
+\chapter{Metodología y Evaluación}
+
+\section{Estrategias metodológicas}
+\begin{itemize}
+    \item \textbf{Clases síncronas:} Exposición conceptual con diapositivas, programación en vivo con Python utilizando cuadernos de Jupyter y Hugging Face.
+    \item \textbf{Trabajo asíncrono:} Lectura de papers seminales ("Attention is All You Need"), ejercicios prácticos y proyectos semanales.
+    \item \textbf{Aprendizaje activo:} Simulacros de entrevistas técnicas, discusión de casos reales, retos de código.
+    \item \textbf{Recursos:} Plataforma virtual, Zoom, grabaciones, foros y repositorio GitHub.
+\end{itemize}
+
+\section{Materiales educativos}
+\begin{itemize}
+    \item Cuadernos de Jupyter con ejemplos y ejercicios.
+    \item Acceso a modelos en Hugging Face y datasets.
+    \item Bibliografía: Jurafsky \& Martin (Speech and Language Processing), papers originales.
+    \item Google Colab Pro para GPU.
+\end{itemize}
+
+\section{Evaluación}
+\begin{table}[h]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Ítem} & \textbf{Ponderación} \\
+\midrule
+Evaluaciones continuas (EC) & 40\% \\
+Examen parcial (EP) - Semana 7 & 30\% \\
+Examen final (EF) - Semana 14 & 30\% \\
+\midrule
+\textbf{Promedio final (PF)} & PF = 0.4 \times EC + 0.3 \times EP + 0.3 \times EF \\
+\bottomrule
+\end{tabular}
+\caption{Sistema de evaluación}
+\end{table}
+\begin{itemize}
+    \item \textbf{Evaluaciones continuas:} Controles de lectura, entrega de ejercicios de programación, participación en foros y quiz semanales.
+    \item \textbf{Examen parcial:} Cubre semanas 1-7 (fundamentos, word embeddings, RNN, atención).
+    \item \textbf{Examen final:} Proyecto integrador (ej. construir un chatbot con RAG y desplegarlo como API).
+    \item \textbf{Examen sustitutorio:} Semana 15, reemplaza la nota más baja entre parcial y final.
+\end{itemize}
+
+% ------------------------------------------------------------------
+% BIBLIOGRAFÍA
+% ------------------------------------------------------------------
+\chapter*{Bibliografía}
+\addcontentsline{toc}{chapter}{Bibliografía}
+
+\begin{itemize}
+    \item Jurafsky, D., \& Martin, J. H. (2023). \textit{Speech and Language Processing} (3rd ed. draft). Stanford University.
+    \item Vaswani, A., et al. (2017). \textit{Attention is All You Need}. NeurIPS.
+    \item Devlin, J., et al. (2019). \textit{BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding}. NAACL.
+    \item Radford, A., et al. (2018). \textit{Improving Language Understanding by Generative Pre-Training} (GPT). OpenAI.
+    \item Lewis, P., et al. (2020). \textit{Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks}. NeurIPS.
+    \item Documentación oficial de Hugging Face Transformers, spaCy, NLTK, PyTorch.
+\end{itemize}
+
+\vspace{1cm}
+\begin{flushright}
+\textit{Elaborado por:} Mg. Carlos César Sánchez Coronel \\
+\textit{Aprobado por:} Dirección de Ingeniería de Inteligencia Artificial \\
+\textit{Fecha:} 29/03/2024
+\end{flushright}
+
+\end{document}

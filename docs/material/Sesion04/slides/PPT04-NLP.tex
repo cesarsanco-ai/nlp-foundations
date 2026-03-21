@@ -1,0 +1,452 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 4
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 4 NLP]{\textbf{Sesión 4}}
+\subtitle{Word Embeddings: Word2Vec y GloVe}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: LIMITACIONES DE REPRESENTACIONES DISPERSAS
+% ============================================================================
+\section{Limitaciones de Representaciones Dispersas}
+
+\begin{frame}{Problemas de BOW y TF-IDF}
+    \begin{itemize}
+        \item \textbf{Alta dimensionalidad}: vocabulario de miles/millones de términos.
+        \item \textbf{Esparsidad}: la mayoría de entradas son cero.
+        \item \textbf{Falta de semántica}: ``gato'' y ``felino'' son independientes.
+        \item \textbf{Pérdida de relaciones}: no capturan analogías (rey - hombre + mujer $\approx$ reina).
+        \item \textbf{LSA} (Latent Semantic Analysis) intenta reducir dimensionalidad, pero es lineal y limitado.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: CONCEPTO DE WORD EMBEDDINGS
+% ============================================================================
+\section{Word Embeddings}
+
+\begin{frame}{Definición}
+    \begin{block}{Word Embedding}
+        Representación densa de palabras en un espacio vectorial continuo de baja dimensión (típicamente 50-300).
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Hipótesis distribucional} (Harris 1954): ``palabras que ocurren en contextos similares tienen significados similares''.
+        \item Las relaciones semánticas se reflejan como operaciones vectoriales.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: WORD2VEC
+% ============================================================================
+\section{Word2Vec}
+
+\begin{frame}{Arquitecturas de Word2Vec}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{CBOW (Continuous Bag of Words)}
+        \begin{itemize}
+            \item Predice la palabra objetivo a partir del contexto.
+            \item Más rápido, mejor para palabras frecuentes.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Skip-gram}
+        \begin{itemize}
+            \item Predice el contexto a partir de la palabra objetivo.
+            \item Mejor para palabras poco frecuentes.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF y Pregunta 2
+\end{frame}
+
+\begin{frame}{CBOW: formalización}
+    \begin{block}{Objetivo}
+        Dado un contexto de $C$ palabras $\{w_{c1}, \dots, w_{cC}\}$, maximizar $P(w_t | \text{contexto})$.
+    \end{block}
+    \begin{enumerate}
+        \item Embeddings de contexto: $\mathbf{v}_{c_i} = W[w_{c_i}]$.
+        \item Promedio: $\mathbf{h} = \frac{1}{C}\sum \mathbf{v}_{c_i}$.
+        \item Puntuaciones: $\mathbf{u} = \mathbf{h}^T W'$.
+        \item Softmax: $P(w_t|\text{contexto}) = \frac{\exp(u_t)}{\sum_k \exp(u_k)}$.
+    \end{enumerate}
+    Pérdida: entropía cruzada negativa $-\log P(w_t|\text{contexto})$.
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Skip-gram y negative sampling}
+    \begin{block}{Skip-gram}
+        Para una palabra objetivo $w_t$, maximizar $P(w_c | w_t)$ para cada contexto $w_c$.
+    \end{block}
+    \begin{block}{Negative Sampling (aproximación)}
+        Para un par $(w_t, w_c)$:
+        \[
+        L = -\log \sigma(\mathbf{v}_{w_t}^T \mathbf{u}_{w_c}) - \sum_{i=1}^{k} \log \sigma(-\mathbf{v}_{w_t}^T \mathbf{u}_{w_{n_i}})
+        \]
+        donde $\sigma$ es sigmoide, $w_{n_i}$ son palabras negativas muestreadas.
+    \end{block}
+    \begin{itemize}
+        \item Evita el costoso softmax sobre todo el vocabulario.
+        \item Distribución de ruido: $P_n(w) \propto \text{freq}(w)^{3/4}$.
+    \end{itemize}
+    % Basado en PDF y Pregunta 2, 8
+\end{frame}
+
+\begin{frame}{Comparación CBOW vs Skip-gram}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Característica} & \textbf{CBOW} & \textbf{Skip-gram} \\
+            \midrule
+            Dirección & Contexto $\rightarrow$ Objetivo & Objetivo $\rightarrow$ Contexto \\
+            Velocidad & Más rápida & Más lenta \\
+            Palabras frecuentes & Bueno & Bueno \\
+            Palabras poco frecuentes & Regular & Excelente \\
+            Uso típico & Corpus grandes, eficiencia & Corpus pequeños, palabras raras \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: GLOVE
+% ============================================================================
+\section{GloVe}
+
+\begin{frame}{GloVe: fundamento}
+    \begin{block}{Matriz de co-ocurrencia}
+        $X_{ij}$ = número de veces que la palabra $j$ aparece en el contexto de $i$ (ventana fija).
+    \end{block}
+    \begin{block}{Hipótesis}
+        \[
+        \mathbf{v}_i^T \mathbf{v}_j + b_i + b_j \approx \log X_{ij}
+        \]
+        donde $\mathbf{v}_i$, $\mathbf{v}_j$ son embeddings y $b_i$, $b_j$ sesgos.
+    \end{block}
+    % Basado en PDF y Pregunta 12
+\end{frame}
+
+\begin{frame}{Función de pérdida de GloVe}
+    \[
+    \mathcal{L} = \sum_{i,j=1}^{|V|} f(X_{ij}) (\mathbf{v}_i^T \mathbf{v}_j + b_i + b_j - \log X_{ij})^2
+    \]
+    \begin{block}{Función de ponderación $f$}
+        \[
+        f(x) = \begin{cases}
+            (x/x_{\max})^\alpha & \text{si } x < x_{\max} \\
+            1 & \text{en otro caso}
+        \end{cases}
+        \]
+        ($x_{\max}=100$, $\alpha=0.75$) para dar menos peso a co-ocurrencias muy raras o muy frecuentes.
+    \end{block}
+    % Basado en PDF y Pregunta 12
+\end{frame}
+
+\begin{frame}{Ventajas de GloVe}
+    \begin{itemize}
+        \item Aprovecha estadísticas globales del corpus (matriz de co-ocurrencia).
+        \item Buenas propiedades en tareas de analogía.
+        \item Entrenamiento eficiente (procesa pares no nulos).
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: PROPIEDADES DE LOS EMBEDDINGS
+% ============================================================================
+\section{Propiedades de los Embeddings}
+
+\begin{frame}{Relaciones semánticas y sintácticas}
+    \begin{block}{Analogías}
+        \[
+        \mathbf{v}_{\text{rey}} - \mathbf{v}_{\text{hombre}} + \mathbf{v}_{\text{mujer}} \approx \mathbf{v}_{\text{reina}}
+        \]
+        Otros ejemplos:
+        \begin{itemize}
+            \item Madrid - España + Francia $\approx$ París
+            \item caminar - camino + nado $\approx$ nadar
+        \end{itemize}
+    \end{block}
+    % Basado en PDF y Pregunta 3, 19
+\end{frame}
+
+\begin{frame}{Evaluación intrínseca de embeddings}
+    \begin{itemize}
+        \item \textbf{Conjuntos de analogías}: Google Analogies Dataset (semánticas y sintácticas).
+        \item Se mide la precisión con que el modelo predice la palabra correcta mediante operaciones vectoriales.
+        \item Otras evaluaciones: similitud de palabras (WordSim-353), etc.
+    \end{itemize}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Visualización con t-SNE}
+    \begin{itemize}
+        \item t-SNE reduce embeddings a 2D preservando la estructura local.
+        \item Palabras semánticamente similares aparecen agrupadas.
+        \item Precaución: las distancias globales no son interpretables.
+    \end{itemize}
+    % Basado en PDF y Pregunta 10
+    % IMAGEN: Gráfico t-SNE de embeddings
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: EMBEDDINGS CONTEXTUALES
+% ============================================================================
+\section{Embeddings Contextuales}
+
+\begin{frame}{Estáticos vs Contextuales}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Estáticos}
+        \begin{itemize}
+            \item Un vector por palabra (Word2Vec, GloVe).
+            \item No resuelven polisemia (``banco'' = mismo vector).
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Contextuales}
+        \begin{itemize}
+            \item Vector depende del contexto (ELMo, BERT, GPT).
+            \item Diferentes sentidos tienen diferentes representaciones.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF y Pregunta 5, 15
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: CASO INTEGRADO - ENTRENAMIENTO CON GENSIM
+% ============================================================================
+\section{Caso Integrado: Entrenamiento con Gensim}
+
+\begin{frame}[fragile]{Paso 1: Preprocesamiento}
+    \begin{lstlisting}
+from gensim.models import Word2Vec
+from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('punkt')
+
+sentences = [
+    "el gato persigue al ratón",
+    "el perro persigue al gato",
+    "el ratón huye del gato"
+]
+tokenized = [word_tokenize(s.lower()) for s in sentences]
+    \end{lstlisting}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}[fragile]{Paso 2: Entrenar Word2Vec}
+    \begin{lstlisting}
+model = Word2Vec(
+    sentences=tokenized,
+    vector_size=100,
+    window=5,
+    min_count=1,
+    workers=4,
+    sg=1  # 1 para Skip-gram, 0 para CBOW
+)
+    \end{lstlisting}
+    % Basado en PDF y Pregunta 6
+\end{frame}
+
+\begin{frame}[fragile]{Paso 3: Explorar embeddings}
+    \begin{lstlisting}
+# Embedding de una palabra
+vector_gato = model.wv['gato']
+
+# Palabras más similares
+model.wv.most_similar('gato', topn=5)
+
+# Analogías: rey - hombre + mujer = ?
+result = model.wv.most_similar(positive=['mujer', 'rey'],
+                               negative=['hombre'])
+    \end{lstlisting}
+    % Basado en PDF y Pregunta 3
+\end{frame}
+
+\begin{frame}[fragile]{Paso 4: Visualización con t-SNE}
+    \begin{lstlisting}
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+
+words = list(model.wv.index_to_key)[:100]
+vectors = [model.wv[word] for word in words]
+
+tsne = TSNE(n_components=2, random_state=42)
+vectors_2d = tsne.fit_transform(vectors)
+
+plt.figure(figsize=(12,8))
+for i, word in enumerate(words):
+    plt.scatter(vectors_2d[i,0], vectors_2d[i,1])
+    plt.annotate(word, (vectors_2d[i,0], vectors_2d[i,1]))
+plt.show()
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Paso 5: Cargar GloVe pre-entrenado}
+    \begin{lstlisting}
+from gensim.scripts.glove2word2vec import glove2word2vec
+from gensim.models import KeyedVectors
+
+glove2word2vec('glove.6B.100d.txt', 'glove.6B.100d.word2vec.txt')
+glove = KeyedVectors.load_word2vec_format('glove.6B.100d.word2vec.txt')
+    \end{lstlisting}
+    % Basado en PDF y Pregunta 9
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Qué son los word embeddings y por qué son mejores que BOW/TF-IDF?
+        \item Explica CBOW y Skip-gram. ¿Cuándo usarías cada uno?
+        \item ¿Qué es negative sampling y por qué es necesario?
+        \item ¿Cómo capturan relaciones semánticas los embeddings? (analogías)
+        \item Diferencia entre Word2Vec y GloVe.
+        \item ¿Qué son los embeddings contextuales? ¿En qué mejoran a los estáticos?
+    \end{itemize}
+    % Basado en PDF y solucionario
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Cómo funciona la función de pérdida de GloVe?
+        \item ¿Qué es OOV y cómo lo manejan FastText o subword embeddings?
+        \item ¿Cómo detectar y mitigar sesgos en embeddings?
+        \item ¿Cómo evaluarías la calidad de embeddings? (intrínseca vs extrínseca)
+    \end{itemize}
+    % Basado en Preguntas 7, 11, 12, 16, 17
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+\section{Conexión con el resto del curso}
+
+\begin{frame}{Próximos pasos}
+    \begin{itemize}
+        \item \textbf{Sesión 5}: Clasificación de textos con embeddings.
+        \item \textbf{Sesión 6}: Modelos secuenciales (RNN, LSTM) que usan embeddings.
+        \item \textbf{Sesión 7}: Transformers (BERT) que generan embeddings contextuales.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{Limitaciones de representaciones dispersas}: alta dimensionalidad, falta de semántica.
+            \item \textbf{Word2Vec}: CBOW (contexto $\rightarrow$ palabra) y Skip-gram (palabra $\rightarrow$ contexto). Negative sampling.
+            \item \textbf{GloVe}: factorización de matriz de co-ocurrencia global.
+            \item \textbf{Propiedades}: analogías vectoriales, evaluación intrínseca, visualización t-SNE.
+            \item \textbf{Embeddings contextuales}: solucionan polisemia (BERT, ELMo).
+            \item \textbf{Caso práctico}: entrenamiento y exploración con Gensim.
+            \item \textbf{Sesgos}: detección y mitigación.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

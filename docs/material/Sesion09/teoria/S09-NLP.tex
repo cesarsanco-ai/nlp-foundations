@@ -1,0 +1,451 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, shapes, chains, scopes, fit}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+
+% --- Colores y estilos para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Estilo de cabecera y pie ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Sesión 9: Transformers}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sesión 9} \\ 
+    \Huge \textbf{TRANSFORMERS} \\
+    \Large Arquitectura y Atención Multi-Head
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\addcontentsline{toc}{chapter}{Índice general}
+
+% ------------------------------------------------------------------
+% CAPÍTULO 9: SESIÓN 9 - TRANSFORMERS
+% ------------------------------------------------------------------
+\chapter{Transformers - Arquitectura y Atención Multi-Head}
+
+En 2017, un paper titulado ``Attention is All You Need'' (Vaswani et al.) cambió para siempre el procesamiento del lenguaje natural. Los Transformers, la arquitectura propuesta, eliminaron las recurrencias y las convoluciones, basándose únicamente en mecanismos de atención. Esta sesión desglosa la arquitectura del transformer: self-attention, multi-head attention, positional encoding, el bloque encoder-decoder, y las ventajas que supuso sobre las RNN. Se incluyen diagramas, fundamentos matemáticos, implementaciones conceptuales y aplicaciones que han dado lugar a modelos como BERT y GPT.
+
+\section{Logro de la sesión}
+Comprender la arquitectura del transformer y su revolución en NLP, analizando sus componentes, ventajas y aplicaciones.
+
+\section{Introducción: El fin de las recurrencias}
+Antes de los Transformers, las RNN y LSTM dominaban el NLP. Sin embargo, tenían limitaciones inherentes:
+\begin{itemize}
+    \item \textbf{Procesamiento secuencial}: no pueden paralelizarse, lo que las hace lentas en GPUs.
+    \item \textbf{Dependencias largas}: aunque LSTM mejora, aún tiene dificultades con secuencias muy largas.
+    \item \textbf{Memoria limitada}: el estado oculto debe comprimir toda la información.
+\end{itemize}
+
+El transformer resuelve estos problemas utilizando únicamente atención, permitiendo:
+\begin{itemize}
+    \item \textbf{Paralelización total}: todas las posiciones se procesan simultáneamente.
+    \item \textbf{Conexiones directas}: cada palabra puede atender a cualquier otra en una sola capa.
+    \item \textbf{Escalabilidad}: se pueden construir modelos con miles de millones de parámetros.
+\end{itemize}
+
+\section{Arquitectura general del Transformer}
+
+El transformer original es una arquitectura encoder-decoder diseñada para traducción automática. El encoder transforma la secuencia de entrada en una representación continua; el decoder genera la secuencia de salida autoregresivamente.
+
+\begin{center}
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=3cm, minimum height=1.2cm, align=center},
+    arrow/.style={-latex, thick}
+]
+\node[block] (enc) at (0,3) {Encoder};
+\node[block] (dec) at (5,3) {Decoder};
+\node[block, below=1cm of enc] (enc1) {Encoder Block 1};
+\node[block, below=1cm of enc1] (encN) {Encoder Block N};
+\node[block, below=1cm of dec] (dec1) {Decoder Block 1};
+\node[block, below=1cm of dec1] (decN) {Decoder Block N};
+\node[block, below=1cm of encN] (emb_in) {Embedding + Positional Encoding};
+\node[block, below=1cm of decN] (emb_out) {Embedding + Positional Encoding};
+\node[block, below=1cm of emb_in] (input) {Input Tokens};
+\node[block, below=1cm of emb_out] (output) {Output Tokens};
+
+\draw[arrow] (input) -- (emb_in);
+\draw[arrow] (emb_in) -- (encN);
+\draw[arrow] (encN) -- (enc1);
+\draw[arrow] (enc1) -- (enc);
+\draw[arrow] (output) -- (emb_out);
+\draw[arrow] (emb_out) -- (decN);
+\draw[arrow] (decN) -- (dec1);
+\draw[arrow] (dec1) -- (dec);
+\draw[arrow] (enc) -- (dec);
+\end{tikzpicture}
+\caption{Arquitectura general del Transformer (encoder-decoder).}
+\end{center}
+
+\subsection{Encoder}
+El encoder está compuesto por \(N\) bloques idénticos (típicamente \(N=6\)). Cada bloque tiene:
+\begin{itemize}
+    \item \textbf{Multi-Head Self-Attention}.
+    \item \textbf{Feed-Forward Network (FFN)}.
+    \item Conexiones residuales y normalización de capa (Layer Normalization).
+\end{itemize}
+
+\subsection{Decoder}
+El decoder también tiene \(N\) bloques, pero cada bloque añade una capa de \textbf{atención cruzada (cross-attention)} que atiende a la salida del encoder. Además, la primera capa de atención está enmascarada para evitar que el decoder vea tokens futuros (autoregresividad).
+
+\section{Self-Attention: El corazón del transformer}
+
+\subsection{Intuición}
+La self-attention permite que cada palabra de una secuencia calcule la relevancia de las demás palabras (incluyéndose a sí misma) para actualizar su representación. Es como si cada palabra ``preguntara'' a las demás qué tan importantes son.
+
+\subsection{Formulación matemática}
+Para una secuencia de \(T\) palabras, representadas por una matriz \(\mathbf{X} \in \mathbb{R}^{T \times d}\) (donde \(d\) es la dimensión del embedding), la self-attention se calcula así:
+
+\begin{enumerate}
+    \item Se proyecta la entrada en tres matrices: \textbf{Queries} (\(\mathbf{Q}\)), \textbf{Keys} (\(\mathbf{K}\)) y \textbf{Values} (\(\mathbf{V}\)):
+    \[
+    \mathbf{Q} = \mathbf{X} \mathbf{W}^Q,\quad 
+    \mathbf{K} = \mathbf{X} \mathbf{W}^K,\quad 
+    \mathbf{V} = \mathbf{X} \mathbf{W}^V
+    \]
+    donde \(\mathbf{W}^Q, \mathbf{W}^K, \mathbf{W}^V \in \mathbb{R}^{d \times d_k}\) son matrices de pesos aprendibles. Normalmente \(d_k = d/h\) en multi-head.
+
+    \item Se calculan las puntuaciones de atención (similitud entre cada query y todas las keys):
+    \[
+    \mathbf{S} = \mathbf{Q} \mathbf{K}^T \in \mathbb{R}^{T \times T}
+    \]
+
+    \item Se escala para evitar que el producto punto sea demasiado grande (lo que llevaría a gradientes muy pequeños después de softmax):
+    \[
+    \mathbf{S}_{\text{scaled}} = \frac{\mathbf{S}}{\sqrt{d_k}}
+    \]
+
+    \item Se aplica softmax a lo largo de la dimensión de keys para obtener pesos de atención:
+    \[
+    \mathbf{A} = \text{softmax}(\mathbf{S}_{\text{scaled}}) \in \mathbb{R}^{T \times T}
+    \]
+
+    \item Finalmente, se pondera \(\mathbf{V}\) con los pesos:
+    \[
+    \mathbf{Z} = \mathbf{A} \mathbf{V} \in \mathbb{R}^{T \times d_k}
+    \]
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+\matrix (M) [matrix of math nodes, left delimiter={[}, right delimiter={]}] at (0,0) {
+\mathbf{X} \\
+};
+\node[draw, rectangle, minimum width=2cm, minimum height=1cm] (Q) at (3,2) {$\mathbf{Q} = \mathbf{X}\mathbf{W}^Q$};
+\node[draw, rectangle, minimum width=2cm, minimum height=1cm] (K) at (3,0) {$\mathbf{K} = \mathbf{X}\mathbf{W}^K$};
+\node[draw, rectangle, minimum width=2cm, minimum height=1cm] (V) at (3,-2) {$\mathbf{V} = \mathbf{X}\mathbf{W}^V$};
+
+\node[draw, rectangle, minimum width=2cm, minimum height=1cm] (S) at (6,0) {$\mathbf{Q}\mathbf{K}^T$};
+\node[draw, rectangle, minimum width=2cm, minimum height=1cm] (softmax) at (9,0) {Softmax};
+\node[draw, rectangle, minimum width=2cm, minimum height=1cm] (Z) at (12,0) {$\mathbf{A}\mathbf{V}$};
+
+\draw[-latex] (M) -- (Q);
+\draw[-latex] (M) -- (K);
+\draw[-latex] (M) -- (V);
+\draw[-latex] (Q) -- (S);
+\draw[-latex] (K) -- (S);
+\draw[-latex] (S) -- (softmax);
+\draw[-latex] (softmax) -- (Z);
+\draw[-latex] (V) -- (Z);
+\end{tikzpicture}
+\caption{Diagrama de self-attention.}
+\end{center}
+
+\subsection{Interpretación}
+La matriz de pesos \(\mathbf{A}\) indica, para cada palabra \(i\), cuánto debe prestar atención a cada palabra \(j\). Esto permite que la representación de cada palabra incorpore información contextual de toda la secuencia.
+
+\section{Atención Multi-Head}
+
+\subsection{Motivación}
+Una sola cabeza de atención puede promediar demasiado; diferentes cabezas pueden aprender diferentes tipos de relaciones (sintácticas, semánticas, de distancia). La atención multi-head ejecuta varias atenciones en paralelo y concatena los resultados.
+
+\subsection{Formulación}
+Para \(h\) cabezas:
+\begin{enumerate}
+    \item Para cada cabeza \(i\), se calcula:
+    \[
+    \mathbf{Q}_i = \mathbf{X} \mathbf{W}_i^Q,\quad 
+    \mathbf{K}_i = \mathbf{X} \mathbf{W}_i^K,\quad 
+    \mathbf{V}_i = \mathbf{X} \mathbf{W}_i^V
+    \]
+    con \(\mathbf{W}_i^Q, \mathbf{W}_i^K, \mathbf{W}_i^V \in \mathbb{R}^{d \times d_k}\), donde \(d_k = d/h\).
+    \item Se obtiene la salida de cada cabeza: \(\mathbf{Z}_i = \text{Attention}(\mathbf{Q}_i, \mathbf{K}_i, \mathbf{V}_i)\).
+    \item Se concatenan todas las cabezas:
+    \[
+    \mathbf{Z} = \text{Concat}(\mathbf{Z}_1, ..., \mathbf{Z}_h) \in \mathbb{R}^{T \times d}
+    \]
+    \item Se proyecta linealmente:
+    \[
+    \mathbf{Z}_{\text{final}} = \mathbf{Z} \mathbf{W}^O
+    \]
+    donde \(\mathbf{W}^O \in \mathbb{R}^{d \times d}\).
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+\draw[fill=blue!10] (0,0) rectangle (1,2) node[midway, rotate=90] {Cabeza 1};
+\draw[fill=blue!10] (1,0) rectangle (2,2) node[midway, rotate=90] {Cabeza 2};
+\draw[fill=blue!10] (2,0) rectangle (3,2) node[midway, rotate=90] {Cabeza h};
+\node at (1.5, -0.5) {Multi-Head Attention};
+\node at (1.5, -1) {Concatenar y proyectar};
+\end{tikzpicture}
+\caption{Esquema de atención multi-head.}
+\end{center}
+
+\section{Positional Encoding}
+
+\subsection{Necesidad}
+A diferencia de las RNN, el transformer no tiene noción de orden por construcción. La self-attention es permutación-invariante: si se mezclan las palabras, las mismas representaciones aparecen en diferentes posiciones. Para inyectar información de posición, se suman \textbf{positional encodings} a los embeddings de entrada.
+
+\subsection{Formulación}
+Vaswani et al. propusieron usar funciones seno y coseno de diferentes frecuencias:
+\[
+PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d}}\right)
+\]
+\[
+PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d}}\right)
+\]
+donde \(pos\) es la posición y \(i\) la dimensión.
+
+Esta elección permite que el modelo aprenda fácilmente a atender por posición relativa, ya que \(PE_{pos+k}\) puede representarse como una función lineal de \(PE_{pos}\).
+
+\subsection{Ventajas}
+- No añade parámetros entrenables.
+- Generaliza a longitudes de secuencia no vistas durante entrenamiento.
+- La periodicidad ayuda a capturar relaciones de distancia.
+
+\section{Capa Feed-Forward (FFN)}
+
+Después de la atención multi-head, cada posición pasa por una red feed-forward idéntica (pero con diferentes parámetros) que consiste en dos capas lineales con una activación ReLU en medio:
+\[
+\text{FFN}(x) = \max(0, x\mathbf{W}_1 + b_1) \mathbf{W}_2 + b_2
+\]
+Esta capa introduce no linealidad y permite que el modelo transforme las representaciones atendidas.
+
+\section{Conexiones residuales y Layer Normalization}
+
+\subsection{Conexiones residuales}
+Cada subcapa (atención y FFN) tiene una conexión residual:
+\[
+x' = x + \text{Sublayer}(x)
+\]
+Esto facilita el entrenamiento de redes profundas al permitir que el gradiente fluya directamente.
+
+\subsection{Layer Normalization}
+Después de cada conexión residual se aplica layer normalization:
+\[
+\text{LayerNorm}(x) = \frac{x - \mu}{\sigma} \odot \gamma + \beta
+\]
+Normaliza las activaciones a lo largo de la dimensión de características, estabilizando el entrenamiento.
+
+\section{Transformer completo: encoder y decoder}
+
+\subsection{Encoder block}
+Cada bloque encoder (sin máscara) realiza:
+\[
+\text{Output} = \text{LayerNorm}(x + \text{MultiHead}(x, x, x))
+\]
+\[
+\text{Output} = \text{LayerNorm}(x + \text{FFN}(x))
+\]
+
+\subsection{Decoder block}
+Cada bloque decoder tiene tres subcapas:
+\begin{enumerate}
+    \item \textbf{Masked Multi-Head Self-Attention}: similar a la self-attention, pero con máscara para evitar que las posiciones futuras influyan en las actuales. La máscara se aplica antes del softmax, poniendo \(-\infty\) en las posiciones prohibidas.
+    \item \textbf{Cross-Attention}: atiende a la salida del encoder. Las queries provienen de la salida del decoder, mientras que keys y values provienen del encoder.
+    \item \textbf{Feed-Forward Network}.
+\end{enumerate}
+Cada una con conexiones residuales y layer normalization.
+
+\begin{center}
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2.5cm, minimum height=1cm},
+    arrow/.style={-latex, thick}
+]
+\node[block] (in) at (0,5) {Input};
+\node[block] (enc) at (0,3) {Encoder Block};
+\node[block] (out) at (0,1) {Output};
+
+\node[block] (dec_in) at (5,4) {Output (shifted)};
+\node[block] (masked) at (5,2.5) {Masked Multi-Head};
+\node[block] (cross) at (5,1) {Cross-Attention};
+\node[block] (ffn) at (5,-0.5) {FFN};
+\node[block] (dec_out) at (5,-2) {Decoder Output};
+
+\draw[arrow] (in) -- (enc);
+\draw[arrow] (enc) -- (out);
+\draw[arrow] (dec_in) -- (masked);
+\draw[arrow] (masked) -- (cross);
+\draw[arrow] (cross) -- (ffn);
+\draw[arrow] (ffn) -- (dec_out);
+\draw[arrow, dashed] (out) -- (cross);
+\end{tikzpicture}
+\caption{Flujo de información en un bloque decoder.}
+\end{center}
+
+\section{Ventajas del transformer sobre RNN/LSTM}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Característica} & \textbf{Transformer} & \textbf{RNN/LSTM} \\
+\hline
+Paralelización & Total (todas las posiciones a la vez) & Secuencial \\
+Dependencias largas & Conexiones directas (máx. distancia 1) & Lineales (gradiente desvaneciente) \\
+Memoria & Acceso directo a todas las posiciones & Estado oculto comprimido \\
+Entrenamiento & Más rápido en GPUs & Lento \\
+Escalabilidad & Modelos de miles de millones de parámetros & Difícil de escalar \\
+\hline
+\end{tabular}
+\caption{Comparativa entre Transformers y RNN.}
+\end{table}
+
+\section{Aplicaciones y modelos derivados}
+
+\subsection{BERT (Bidirectional Encoder Representations from Transformers)}
+Utiliza solo el encoder del transformer (bidireccional) para tareas de comprensión del lenguaje (clasificación, NER, QA). Se entrena con masked language modeling y next sentence prediction.
+
+\subsection{GPT (Generative Pre-trained Transformer)}
+Utiliza solo el decoder (autoregresivo) para generación de texto. Es la base de ChatGPT.
+
+\subsection{T5 (Text-to-Text Transfer Transformer)}
+Formula todas las tareas como texto a texto, usando encoder-decoder.
+
+\subsection{Vision Transformer (ViT)}
+Aplica transformadores a imágenes dividiéndolas en parches.
+
+\section{Ejemplo: Implementación conceptual de self-attention en Python}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+def softmax(x, axis=-1):
+    e_x = np.exp(x - np.max(x, axis=axis, keepdims=True))
+    return e_x / np.sum(e_x, axis=axis, keepdims=True)
+
+def self_attention(X, W_q, W_k, W_v):
+    # X: (T, d)
+    Q = X @ W_q  # (T, d_k)
+    K = X @ W_k  # (T, d_k)
+    V = X @ W_v  # (T, d_k)
+    
+    scores = Q @ K.T  # (T, T)
+    scaled = scores / np.sqrt(Q.shape[-1])
+    weights = softmax(scaled)  # (T, T)
+    output = weights @ V  # (T, d_k)
+    return output, weights
+
+# Ejemplo
+T, d, d_k = 4, 8, 4
+np.random.seed(42)
+X = np.random.rand(T, d)
+W_q = np.random.rand(d, d_k)
+W_k = np.random.rand(d, d_k)
+W_v = np.random.rand(d, d_k)
+
+out, attn = self_attention(X, W_q, W_k, W_v)
+print("Matriz de atención:\n", attn)
+\end{lstlisting}
+
+\section{Preparación para entrevistas}
+
+\subsection{Preguntas estrella}
+\begin{itemize}
+    \item \textbf{"Explica cómo funciona el transformer y qué problema resuelve."}
+    Resolver: mencionar que reemplaza RNN con atención, permitiendo paralelización y mejor captura de dependencias largas. Describir componentes: self-attention, multi-head, positional encoding, encoder-decoder.
+    
+    \item \textbf{"¿Qué es positional encoding y por qué es necesario?"}
+    El transformer no tiene noción de orden por sí mismo; el positional encoding inyecta información de posición sumando vectores con patrones sinusoidales.
+    
+    \item \textbf{"¿Qué diferencia hay entre self-attention y cross-attention?"}
+    Self-attention: queries, keys y values vienen de la misma secuencia. Cross-attention: queries vienen de una secuencia (decoder), keys y values de otra (encoder).
+    
+    \item \textbf{"Explica multi-head attention."}
+    Varias cabezas de atención en paralelo, cada una puede aprender diferentes relaciones; luego se concatenan y proyectan.
+    
+    \item \textbf{"¿Por qué se escala el producto punto en atención?"}
+    Para evitar que las puntuaciones sean demasiado grandes, lo que llevaría a gradientes muy pequeños después de softmax (regiones saturadas).
+\end{itemize}
+
+\subsection{Preguntas avanzadas}
+\begin{itemize}
+    \item \textbf{"¿Qué es la máscara en el decoder?"}
+    Máscara triangular para evitar que el decoder vea tokens futuros durante el entrenamiento, preservando la autoregresividad.
+    
+    \item \textbf{"¿Cómo se calcula la complejidad computacional de la atención?"}
+    Self-attention tiene complejidad \(O(T^2 \cdot d)\), donde \(T\) es la longitud de la secuencia. Esto limita su aplicación a secuencias muy largas (aunque existen variantes sparse).
+    
+    \item \textbf{"¿Qué ventajas tiene la atención relativa?"}
+    En lugar de usar positional encodings absolutos, se añaden sesgos relativos a las puntuaciones de atención, lo que puede mejorar la generalización a longitudes no vistas.
+\end{itemize}
+
+\section{Conexión con el resto del curso}
+\begin{itemize}
+    \item \textbf{Sesión 8 (Seq2Seq y Atención)}: La atención nació allí; el transformer la lleva al extremo eliminando recurrencias.
+    \item \textbf{Sesión 10 (Modelos Pre-entrenados)}: BERT, GPT, etc., son aplicaciones directas del transformer.
+    \item \textbf{Sesiones anteriores}: Las capas de embedding y regularización son comunes.
+\end{itemize}
+
+\section{Resumen}
+\begin{itemize}
+    \item El \textbf{transformer} es una arquitectura basada únicamente en atención, propuesta en 2017.
+    \item La \textbf{self-attention} permite que cada palabra atienda a todas las demás.
+    \item \textbf{Multi-head attention} ejecuta varias atenciones en paralelo, capturando diferentes tipos de relaciones.
+    \item \textbf{Positional encoding} inyecta información de orden.
+    \item El \textbf{encoder} procesa la entrada; el \textbf{decoder} genera la salida autoregresivamente con máscara.
+    \item Ventajas: paralelización, captura de dependencias largas, escalabilidad.
+    \item Es la base de modelos como BERT, GPT, T5, que dominan el NLP actual.
+\end{itemize}
+
+\end{document}

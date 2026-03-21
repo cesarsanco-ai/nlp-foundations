@@ -1,0 +1,594 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 5
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 5 NLP]{\textbf{Sesión 5}}
+\subtitle{Modelos Clásicos para NLP: Naive Bayes, SVM, HMM, MaxEnt y CRF}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN
+% ============================================================================
+\section{Introducción}
+
+\begin{frame}{¿Por qué estudiar modelos clásicos?}
+    \begin{itemize}
+        \item Aunque el deep learning domina la investigación, los modelos clásicos siguen siendo relevantes por:
+        \begin{itemize}
+            \item \textbf{Eficiencia con datos pequeños}: funcionan bien con miles de ejemplos.
+            \item \textbf{Interpretabilidad}: sus decisiones son más fáciles de explicar y depurar.
+            \item \textbf{Línea base obligatoria}: todo proyecto serio debe comparar contra ellos.
+            \item \textbf{Producción en entornos restringidos}: bajo costo computacional.
+        \end{itemize}
+    \end{itemize}
+    % Basado en introducción del PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: NAIVE BAYES
+% ============================================================================
+\section{Naive Bayes para Clasificación de Texto}
+
+\begin{frame}{Fundamento matemático}
+    \begin{block}{Teorema de Bayes}
+        \[
+        P(c|d) = \frac{P(c) \prod_{i=1}^{n} P(w_i|c)}{P(d)}
+        \]
+        con supuesto de independencia condicional:
+        \[
+        P(\mathbf{w}|c) = \prod_i P(w_i|c)
+        \]
+    \end{block}
+    \begin{itemize}
+        \item Variantes: \textbf{MultinomialNB} (frecuencias), \textbf{BernoulliNB} (presencia/ausencia), \textbf{GaussianNB} (continuas).
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+\begin{frame}{Estimación de parámetros}
+    \begin{block}{Suavizado Laplace}
+        \[
+        P(w|c) = \frac{\text{freq}(w,c) + \alpha}{\sum_{w'\in V} \text{freq}(w',c) + \alpha |V|}
+        \]
+        \begin{itemize}
+            \item $\alpha = 1$ es común (add-1).
+            \item Evita probabilidades cero para palabras no vistas.
+        \end{itemize}
+    \end{block}
+    % Basado en PDF y Pregunta 2
+\end{frame}
+
+\begin{frame}{Ejemplo numérico}
+    Corpus:
+    \begin{itemize}
+        \item d1: "el gato caza ratones" (animales)
+        \item d2: "el perro persigue gatos" (animales)
+        \item d3: "el coche acelera rápido" (vehículos)
+    \end{itemize}
+    Clasificar "gato rápido" usando MultinomialNB con $\alpha=1$.
+    \vspace{0.3cm}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Animales}
+        \[
+        P(\text{animal}) = \frac{2}{3}
+        \]
+        \[
+        P(\text{gato}|\text{animal}) = \frac{1+1}{6+10} = 0.125
+        \]
+        \[
+        P(\text{rápido}|\text{animal}) = \frac{0+1}{6+10} = 0.0625
+        \]
+        \[
+        \text{score} \propto 0.00521
+        \]
+        \column{0.5\textwidth}
+        \textbf{Vehículos}
+        \[
+        P(\text{vehículo}) = \frac{1}{3}
+        \]
+        \[
+        P(\text{gato}|\text{vehículo}) = \frac{0+1}{4+10} = 0.0714
+        \]
+        \[
+        P(\text{rápido}|\text{vehículo}) = \frac{1+1}{4+10} = 0.1429
+        \]
+        \[
+        \text{score} \propto 0.00340
+        \]
+    \end{columns}
+    Clasificación: \textbf{animales}.
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Ventajas y limitaciones}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Ventajas}
+        \begin{itemize}
+            \item Extremadamente rápido.
+            \item Funciona bien con datos pequeños.
+            \item Maneja alta dimensionalidad.
+            \item Interpretable.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Limitaciones}
+        \begin{itemize}
+            \item Asume independencia (violada en lenguaje).
+            \item No captura relaciones entre palabras.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: SUPPORT VECTOR MACHINES (SVM)
+% ============================================================================
+\section{Support Vector Machines (SVM) para Texto}
+
+\begin{frame}{SVM lineal para texto}
+    \begin{block}{Formulación}
+        \[
+        \min_{\mathbf{w},b} \frac{1}{2}\|\mathbf{w}\|^2 + C\sum_i \xi_i
+        \]
+        sujeto a $y_i(\mathbf{w}^T\mathbf{x}_i + b) \ge 1 - \xi_i$, $\xi_i \ge 0$.
+    \end{block}
+    \begin{itemize}
+        \item $C$ controla penalización por errores.
+        \item Para texto, kernel lineal suele ser suficiente por alta dimensionalidad.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1, 9
+\end{frame}
+
+\begin{frame}{¿Por qué SVM funciona bien en texto?}
+    \begin{itemize}
+        \item \textbf{Alta dimensionalidad}: los textos tienen miles de características, SVM maneja $p \gg n$.
+        \item \textbf{Representaciones dispersas}: BOW/TF-IDF son esparsas, SVM las maneja eficientemente.
+        \item \textbf{Margen máximo}: buena generalización.
+        \item \textbf{Kernel lineal suficiente}: los datos de texto suelen ser aproximadamente separables linealmente.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Pipeline típico con scikit-learn}
+    \begin{lstlisting}
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import make_pipeline
+
+docs = ["el gato caza ratones", "el perro persigue gatos", "el coche acelera rápido"]
+y = ["animales", "animales", "vehículos"]
+
+pipeline = make_pipeline(
+    TfidfVectorizer(),
+    LinearSVC(C=1.0, class_weight='balanced')
+)
+pipeline.fit(docs, y)
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Ventajas y limitaciones de SVM}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Ventajas}
+        \begin{itemize}
+            \item Robusto, buen rendimiento.
+            \item Maneja desbalance con pesos.
+            \item Bueno para datos de alta dimensión.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Limitaciones}
+        \begin{itemize}
+            \item Menos interpretable que Naive Bayes.
+            \item Requiere normalización de características.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: MODELOS OCULTOS DE MARKOV (HMM)
+% ============================================================================
+\section{Modelos Ocultos de Markov (HMM)}
+
+\begin{frame}{Definición formal de HMM}
+    \begin{block}{Componentes}
+        \begin{itemize}
+            \item Estados ocultos $Q = \{q_1,\dots,q_N\}$ (ej. etiquetas POS).
+            \item Observaciones $O = \{o_1,\dots,o_T\}$ (ej. palabras).
+            \item Matriz de transición $A = [a_{ij}]$ con $a_{ij} = P(q_t=j|q_{t-1}=i)$.
+            \item Matriz de emisión $B = [b_j(k)]$ con $b_j(k) = P(o_t=k|q_t=j)$.
+            \item Distribución inicial $\pi = [\pi_i]$ con $\pi_i = P(q_1=i)$.
+        \end{itemize}
+    \end{block}
+    % Basado en PDF y Pregunta 3
+\end{frame}
+
+\begin{frame}{La propiedad de Markov}
+    \begin{block}{Propiedad de Markov de primer orden}
+        \[
+        P(q_{t+1}|q_t, q_{t-1}, \dots, q_1) = P(q_{t+1}|q_t)
+        \]
+        El estado futuro solo depende del estado actual.
+    \end{block}
+    \begin{itemize}
+        \item Limitación: no considera contexto más amplio.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Tres problemas fundamentales en HMM}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c}
+            \toprule
+            \textbf{Problema} & \textbf{Algoritmo} \\
+            \midrule
+            Evaluación: $P(O|\lambda)$ & Forward \\
+            Decodificación: mejor secuencia de estados & Viterbi \\
+            Aprendizaje: estimar $\lambda = (A,B,\pi)$ & Baum-Welch (EM) \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF y Pregunta 8
+\end{frame}
+
+\begin{frame}[fragile]{POS tagging con HMM en NLTK}
+    \begin{lstlisting}
+import nltk
+from nltk.tag import HiddenMarkovModelTrainer
+from nltk.corpus import treebank
+
+train_data = treebank.tagged_sents()[:3900]
+tagger = HiddenMarkovModelTrainer().train_supervised(train_data)
+
+sentence = "The cat sits on the mat".split()
+tags = tagger.tag(sentence)
+print(tags)  # [('The', 'DT'), ('cat', 'NN'), ...]
+    \end{lstlisting}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Aplicaciones y limitaciones de HMM}
+    \begin{itemize}
+        \item \textbf{Aplicaciones}: POS tagging, NER, reconocimiento de voz, segmentación.
+        \item \textbf{Ventajas}: modelo generativo, interpretable, funciona con datos etiquetados.
+        \item \textbf{Limitaciones}: asume independencia de observaciones dado el estado, dependencias de primer orden.
+    \end{itemize}
+    % Basado en PDF y Pregunta 4
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: MODELOS DE MÁXIMA ENTROPÍA (MAXENT / REGRESIÓN LOGÍSTICA)
+% ============================================================================
+\section{Modelos de Máxima Entropía (MaxEnt)}
+
+\begin{frame}{Fundamento matemático}
+    \begin{block}{Probabilidad condicional}
+        \[
+        P(c|d) = \frac{\exp\left(\sum_j \lambda_j f_j(c,d)\right)}{\sum_{c'}\exp\left(\sum_j \lambda_j f_j(c',d)\right)}
+        \]
+        donde $f_j$ son funciones características arbitrarias.
+    \end{block}
+    \begin{itemize}
+        \item Equivalente a regresión logística multinomial.
+        \item No asume independencia; puede incluir características correlacionadas.
+    \end{itemize}
+    % Basado en PDF y Pregunta 7
+\end{frame}
+
+\begin{frame}{Características (features)}
+    \begin{itemize}
+        \item Pueden ser arbitrarias: unigramas, bigramas, contexto, sufijos, etc.
+        \item Ejemplo: $f(\text{positivo}, d) = 1$ si la palabra "excelente" aparece en $d$.
+        \item Permite modelar dependencias complejas sin supuestos de independencia.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Entrenamiento y regularización}
+    \begin{block}{Log-verosimilitud negativa con regularización}
+        \[
+        \mathcal{L} = -\sum_i \log P(c_i|d_i) + \frac{1}{2C}\sum_j \lambda_j^2
+        \]
+    \end{block}
+    \begin{itemize}
+        \item Optimización con gradiente descendente o L-BFGS.
+        \item Regularización L2 (Ridge) o L1 (Lasso) evitan overfitting.
+    \end{itemize}
+    % Basado en Pregunta 17
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo con scikit-learn}
+    \begin{lstlisting}
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+X = ["buena película", "mala película", "excelente actuación"]
+y = ["positivo", "negativo", "positivo"]
+
+vectorizer = TfidfVectorizer()
+X_vec = vectorizer.fit_transform(X)
+clf = LogisticRegression(C=1.0, penalty='l2')
+clf.fit(X_vec, y)
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Ventajas y limitaciones de MaxEnt}
+    \begin{itemize}
+        \item \textbf{Ventajas}: modelo discriminativo, flexible, no asume independencia.
+        \item \textbf{Limitaciones}: no modela secuencias explícitamente (ignora dependencias entre etiquetas consecutivas).
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: CONDITIONAL RANDOM FIELDS (CRF)
+% ============================================================================
+\section{Conditional Random Fields (CRF)}
+
+\begin{frame}{De HMM a CRF}
+    \begin{itemize}
+        \item HMM: generativo, modela $P(X,Y)$, asume independencia de observaciones.
+        \item CRF: discriminativo, modela $P(Y|X)$ directamente, permite características arbitrarias y dependencias contextuales.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Definición formal de CRF}
+    \[
+    P(\mathbf{Y}|\mathbf{X}) = \frac{1}{Z(\mathbf{X})} \exp\left( \sum_{t=1}^{T} \sum_{k} \lambda_k f_k(y_t, y_{t-1}, \mathbf{X}, t) \right)
+    \]
+    \begin{itemize}
+        \item $f_k$: funciones características (pueden depender de toda la secuencia de entrada).
+        \item $\lambda_k$: pesos aprendidos.
+        \item $Z(\mathbf{X})$: función de partición (normalización).
+    \end{itemize}
+    % Basado en PDF y Pregunta 13
+\end{frame}
+
+\begin{frame}{Tipos de características}
+    \begin{itemize}
+        \item \textbf{De estado}: relación etiqueta actual con observaciones (ej. "palabra termina en -ción").
+        \item \textbf{De transición}: relación etiqueta actual con anterior (ej. "es poco probable que DT siga a JJ").
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Implementación con sklearn-crfsuite}
+    \begin{lstlisting}
+import sklearn_crfsuite
+from sklearn_crfsuite import metrics
+
+def word2features(sent, i):
+    word = sent[i][0]
+    return {
+        'word': word,
+        'is_capitalized': word[0].isupper(),
+        'suffix-2': word[-2:],
+        'prev_word': '' if i==0 else sent[i-1][0],
+    }
+
+X_train = [word2features(s, i) for s in train_sents ...]
+crf = sklearn_crfsuite.CRF(algorithm='lbfgs', c1=0.1, c2=0.1)
+crf.fit(X_train, y_train)
+    \end{lstlisting}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Ventajas de CRF sobre HMM}
+    \begin{itemize}
+        \item No asume independencia de las observaciones.
+        \item Puede incluir características arbitrarias y superpuestas.
+        \item Mejor rendimiento en tareas como NER y chunking.
+        \item Útil cuando se dispone de suficientes datos y características ricas.
+    \end{itemize}
+    % Basado en Pregunta 4
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: COMPARACIÓN DE MODELOS
+% ============================================================================
+\section{Comparación de Modelos Clásicos}
+
+\begin{frame}{Tabla comparativa}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c|c}
+            \toprule
+            \textbf{Modelo} & \textbf{Tipo} & \textbf{Velocidad} & \textbf{Interpretabilidad} \\
+            \midrule
+            Naive Bayes & Generativo & Muy rápida & Alta \\
+            SVM (lineal) & Discriminativo & Rápida & Media \\
+            HMM & Generativo secuencial & Media & Alta \\
+            MaxEnt & Discriminativo & Media & Media \\
+            CRF & Discriminativo secuencial & Lenta & Baja \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{¿Cuándo usar cada uno?}
+    \begin{itemize}
+        \item \textbf{Clasificación simple}: Naive Bayes (baseline), SVM (mejor rendimiento).
+        \item \textbf{Etiquetado secuencial}: HMM (pocos datos), CRF (características ricas).
+        \item \textbf{Cuando la independencia es insostenible}: MaxEnt o CRF.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: CASO INTEGRADO
+% ============================================================================
+\section{Caso Integrado: Clasificación y NER en Reseñas}
+
+\begin{frame}{Problema}
+    \begin{itemize}
+        \item Corpus de reseñas de productos con calificación (1-5 estrellas).
+        \item Tareas:
+        \begin{enumerate}
+            \item Clasificación de sentimiento (positivo/negativo).
+            \item Extracción de aspectos mencionados (NER: batería, pantalla, precio).
+        \end{enumerate}
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Solución con modelos clásicos}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Clasificación}
+        \begin{itemize}
+            \item SVM con TF-IDF.
+            \item MaxEnt con características adicionales.
+            \item Comparar con Naive Bayes.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{NER}
+        \begin{itemize}
+            \item HMM simple.
+            \item CRF con características ricas (contexto, sufijos).
+        \end{itemize}
+    \end{columns}
+    \vspace{0.3cm}
+    \textbf{Resultados esperados}: SVM supera a NB; CRF supera a HMM.
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Cuándo usar Naive Bayes vs SVM? (datos pequeños vs. robustez)
+        \item ¿Por qué SVM con kernel lineal funciona bien en texto?
+        \item Explica el algoritmo de Viterbi.
+        \item Diferencia entre HMM y CRF.
+        \item ¿Qué es el suavizado Laplace?
+        \item ¿Cómo manejarías desbalance en SVM?
+    \end{itemize}
+    % Basado en PDF y solucionario
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+\section{Conexión con el resto del curso}
+
+\begin{frame}{Próximos pasos}
+    \begin{itemize}
+        \item \textbf{Sesión 4} (Word Embeddings): se pueden usar como características densas en estos modelos.
+        \item \textbf{Sesión 6} (RNN/LSTM): superan a HMM/CRF en secuencias, pero requieren más datos.
+        \item \textbf{Sesión 7} (Transformers): evolución natural para secuencias.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{Naive Bayes}: clasificación rápida, asume independencia.
+            \item \textbf{SVM}: clasificación robusta, margen máximo, kernel lineal.
+            \item \textbf{HMM}: modelado de secuencias generativo, Viterbi, Baum-Welch.
+            \item \textbf{MaxEnt}: regresión logística multinomial, características arbitrarias.
+            \item \textbf{CRF}: discriminativo para secuencias, supera a HMM en rendimiento.
+            \item \textbf{Comparación}: elección según tarea, datos y necesidad de interpretabilidad.
+            \item \textbf{Caso práctico}: clasificación y NER con modelos clásicos.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

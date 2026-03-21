@@ -1,0 +1,488 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 10
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 10 NLP]{\textbf{Sesión 10}}
+\subtitle{Modelos Pre-entrenados (BERT, GPT) y Fine-tuning}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN AL TRANSFER LEARNING
+% ============================================================================
+\section{Introducción al Transfer Learning}
+
+\begin{frame}{El poder del pre-entrenamiento}
+    \begin{itemize}
+        \item Antes de 2018: modelos entrenados desde cero para cada tarea $\rightarrow$ necesitaban muchos datos etiquetados.
+        \item Modelos pre-entrenados (BERT, GPT) aprenden representaciones del lenguaje a partir de grandes corpus no etiquetados.
+        \item \textbf{Transfer learning}: adaptar (fine-tune) estos modelos a tareas específicas con pocos datos etiquetados.
+        \item Es el estándar actual en NLP.
+    \end{itemize}
+    % Basado en introducción del PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: BERT
+% ============================================================================
+\section{BERT (Bidirectional Encoder Representations from Transformers)}
+
+\begin{frame}{Arquitectura de BERT}
+    \begin{itemize}
+        \item Basado en el \textbf{encoder} del Transformer.
+        \item \textbf{Bidireccional}: cada token puede atender a tokens a izquierda y derecha (sin máscara causal).
+        \item Profundamente bidireccional, a diferencia de modelos anteriores.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+    % IMAGEN: Diagrama de BERT
+\end{frame}
+
+\begin{frame}{Tokenización: WordPiece}
+    \begin{itemize}
+        \item Vocabulario de subpalabras (aprox. 30,000 tokens).
+        \item Algoritmo: fusiona pares que maximizan la probabilidad del lenguaje:
+        \[
+        \text{score}(a,b) = \frac{\text{freq}(ab)}{\text{freq}(a) \cdot \text{freq}(b)}
+        \]
+        \item Maneja palabras desconocidas descomponiéndolas en subpalabras conocidas.
+    \end{itemize}
+    % Basado en PDF y Pregunta 5
+\end{frame}
+
+\begin{frame}{Objetivos de pre-entrenamiento de BERT}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Masked Language Model (MLM)}
+        \begin{itemize}
+            \item Se enmascara el 15\% de los tokens.
+            \item El modelo debe predecir los tokens enmascarados.
+            \item Fuerza a aprender representaciones contextuales.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Next Sentence Prediction (NSP)}
+        \begin{itemize}
+            \item Predice si dos oraciones son consecutivas.
+            \item Útil para tareas que requieren relaciones entre oraciones (QA, inferencia).
+        \end{itemize}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{exampleblock}{Detalles del MLM}
+        De los tokens enmascarados: 80\% [MASK], 10\% palabra aleatoria, 10\% se deja igual.
+    \end{exampleblock}
+    % Basado en PDF y Preguntas 2, 7
+\end{frame}
+
+\begin{frame}{Representaciones de salida}
+    \begin{itemize}
+        \item Para cada token, BERT produce un vector contextualizado.
+        \item El token \texttt{[CLS]} (primera posición) se usa como representación de toda la secuencia para tareas de clasificación.
+        \item Para tareas de etiquetado (NER, POS), se usan las representaciones de cada token.
+    \end{itemize}
+    % Basado en PDF y Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: GPT
+% ============================================================================
+\section{GPT (Generative Pre-trained Transformer)}
+
+\begin{frame}{Arquitectura de GPT}
+    \begin{itemize}
+        \item Basado en el \textbf{decoder} del Transformer.
+        \item \textbf{Unidireccional (causal)}: cada token solo puede atender a tokens anteriores (máscara causal).
+        \item Diseñado para generación de texto.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+\begin{frame}{Tokenización: BPE (Byte-Pair Encoding)}
+    \begin{itemize}
+        \item Fusiona iterativamente los pares de bytes (o caracteres) más frecuentes.
+        \item Vocabulario de subpalabras (aprox. 50,000 tokens).
+        \item Maneja palabras raras y neologismos descomponiéndolos en subpalabras conocidas.
+    \end{itemize}
+    % Basado en PDF y Pregunta 5
+\end{frame}
+
+\begin{frame}{Objetivo de pre-entrenamiento}
+    \begin{block}{Modelado autorregresivo (causal language modeling)}
+        \[
+        \mathcal{L} = \sum_{t=1}^{T} \log P(x_t | x_{<t})
+        \]
+        Maximiza la probabilidad de cada token dados los anteriores.
+    \end{block}
+    \begin{itemize}
+        \item No usa máscaras ni predicción de siguiente oración.
+        \item El modelo aprende a predecir la siguiente palabra de forma causal.
+    \end{itemize}
+    % Basado en PDF y Pregunta 3
+\end{frame}
+
+\begin{frame}{Generación con GPT}
+    \begin{itemize}
+        \item Dado un \textbf{prompt} inicial, genera texto autoregresivamente.
+        \item En cada paso, predice la siguiente palabra y la añade al contexto.
+        \item Se puede usar \textbf{beam search}, \textbf{sampling} con temperatura, etc.
+        \item Ideal para: generación de texto, chatbots, completar código, etc.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: COMPARACIÓN BERT VS GPT
+% ============================================================================
+\section{Comparación BERT vs GPT}
+
+\begin{frame}{Tabla comparativa}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Característica} & \textbf{BERT} & \textbf{GPT} \\
+            \midrule
+            Arquitectura & Encoder-only & Decoder-only \\
+            Direccionalidad & Bidireccional & Unidireccional (causal) \\
+            Objetivo de entrenamiento & MLM + NSP & Modelado autorregresivo \\
+            Tokenización & WordPiece & BPE \\
+            Uso principal & Comprensión, clasificación, NER, QA & Generación, diálogo, completado \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: FINE-TUNING
+% ============================================================================
+\section{Fine-tuning}
+
+\begin{frame}{Fine-tuning vs Feature-based}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Feature-based}
+        \begin{itemize}
+            \item Extraer embeddings del modelo pre-entrenado como características fijas.
+            \item Entrenar un clasificador simple (SVM, MLP) sobre ellas.
+            \item Más rápido, menor riesgo de sobreajuste.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Fine-tuning}
+        \begin{itemize}
+            \item Añadir una cabeza específica para la tarea.
+            \item Entrenar todos los parámetros (o algunos) conjuntamente.
+            \item Mejor rendimiento si hay suficientes datos.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF y Pregunta 4
+\end{frame}
+
+\begin{frame}{Tipos de fine-tuning}
+    \begin{itemize}
+        \item \textbf{Completo}: se actualizan todos los parámetros. Requiere más memoria y datos.
+        \item \textbf{Capas congeladas}: se congelan las primeras capas (generales) y se ajustan las últimas y la cabeza. Útil con datos pequeños.
+        \item \textbf{Adaptadores}: se insertan pequeñas capas entrenables entre las capas pre-entrenadas.
+        \item \textbf{LoRA}: matrices de bajo rango añadidas a las matrices de pesos.
+        \item \textbf{Prompt Tuning}: se aprenden ``soft prompts'' continuos; el modelo permanece congelado.
+    \end{itemize}
+    % Basado en PDF y Pregunta 9
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: TÉCNICAS AVANZADAS DE FINE-TUNING
+% ============================================================================
+\section{Técnicas Avanzadas de Fine-tuning}
+
+\begin{frame}{LoRA (Low-Rank Adaptation)}
+    \begin{itemize}
+        \item Congela los pesos pre-entrenados.
+        \item Añade matrices de descomposición de bajo rango a las matrices de atención y feed-forward.
+        \item Para una matriz $W_0 \in \mathbb{R}^{d \times k}$, aprende $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times k}$ con $r \ll \min(d,k)$.
+        \item Nueva matriz: $W = W_0 + BA$.
+        \item Solo se entrenan $B$ y $A$ (menos del 1\% de los parámetros).
+    \end{itemize}
+    % Basado en PDF y Pregunta 8
+\end{frame}
+
+\begin{frame}{Adapters y Prompt Tuning}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Adapters}
+        \begin{itemize}
+            \item Pequeños módulos (dos capas lineales con no linealidad) insertados entre capas del transformer.
+            \item Solo se entrenan los adaptadores.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Prompt Tuning}
+        \begin{itemize}
+            \item Se aprenden vectores de ``soft prompts'' que se anteponen a la entrada.
+            \item El modelo base permanece congelado.
+            \item Muy eficiente, funciona bien con modelos grandes.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF y Pregunta 9
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: TOKENIZADORES DE SUBPALABRAS
+% ============================================================================
+\section{Tokenizadores de Subpalabras}
+
+\begin{frame}{WordPiece, BPE y SentencePiece}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Algoritmo} & \textbf{Usado en} & \textbf{Métrica de fusión} \\
+            \midrule
+            WordPiece & BERT & $\frac{\text{freq}(ab)}{\text{freq}(a)\cdot\text{freq}(b)}$ \\
+            BPE & GPT & Frecuencia bruta del par \\
+            SentencePiece & T5, XLNet & BPE o Unigram (sobre caracteres Unicode, sin pre-tokenización) \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF y Pregunta 5
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: MÉTRICAS DE EVALUACIÓN
+% ============================================================================
+\section{Métricas de Evaluación}
+
+\begin{frame}{Para clasificación}
+    \begin{itemize}
+        \item \textbf{Accuracy}: porcentaje de predicciones correctas.
+        \item \textbf{F1-score}: media armónica de precisión y recall, útil para clases desbalanceadas.
+        \item \textbf{AUC-ROC}: capacidad discriminativa.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Para generación}
+    \begin{itemize}
+        \item \textbf{Perplejidad}: $\exp\left(-\frac{1}{N}\sum \log P(x_t|x_{<t})\right)$. Baja perplejidad = mejor modelo.
+        \item \textbf{BLEU}: para traducción (precisión de n-gramas con penalización por longitud).
+        \item \textbf{ROUGE}: para summarization (solapamiento de n-gramas).
+        \item \textbf{BERTScore}: basada en embeddings contextuales.
+    \end{itemize}
+    % Basado en Pregunta 12
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: EJEMPLO PRÁCTICO - FINE-TUNING DE BERT CON HUGGING FACE
+% ============================================================================
+\section{Ejemplo: Fine-tuning de BERT con Hugging Face}
+
+\begin{frame}[fragile]{Paso 1-3: Instalación, carga de datos y tokenización}
+    \begin{lstlisting}
+# Instalación
+!pip install transformers datasets evaluate
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
+from datasets import load_dataset
+import evaluate
+import numpy as np
+
+# Cargar datos (IMDb)
+dataset = load_dataset("imdb")
+
+# Tokenización
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+def tokenize_function(examples):
+    return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=512)
+tokenized_datasets = dataset.map(tokenize_function, batched=True)
+    \end{lstlisting}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}[fragile]{Paso 4-6: Modelo, métrica y configuración}
+    \begin{lstlisting}
+# Modelo pre-entrenado
+model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+
+# Métrica
+metric = evaluate.load("accuracy")
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
+# Configuración de entrenamiento
+training_args = TrainingArguments(
+    output_dir="./results",
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
+    learning_rate=2e-5,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    num_train_epochs=3,
+    weight_decay=0.01,
+    load_best_model_at_end=True,
+    metric_for_best_model="accuracy",
+)
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Paso 7-8: Entrenamiento y evaluación}
+    \begin{lstlisting}
+# Trainer
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=tokenized_datasets["train"].select(range(2000)),  # reducido para ejemplo
+    eval_dataset=tokenized_datasets["test"].select(range(500)),
+    compute_metrics=compute_metrics,
+)
+
+# Entrenar
+trainer.train()
+
+# Evaluar
+trainer.evaluate()
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Cuál es la diferencia entre BERT y GPT?
+        \item ¿Qué es el fine-tuning y cómo se diferencia de feature extraction?
+        \item ¿Qué es LoRA y por qué es útil?
+        \item ¿Por qué BERT necesita positional encoding?
+        \item ¿Qué son MLM y NSP?
+        \item ¿Cómo maneja BERT palabras desconocidas?
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Qué es el problema de la máscara en MLM y cómo se soluciona?
+        \item ¿Cómo funciona la attention mask en transformers?
+        \item ¿Qué son los embeddings de segmento en BERT?
+        \item ¿Cómo se evalúa un modelo de QA extractivo? (EM, F1)
+        \item ¿Qué son las alucinaciones en modelos generativos y cómo mitigarlas?
+    \end{itemize}
+    % Basado en PDF y Preguntas 7, 11, 13, 18
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+
+
+% ============================================================================
+% SECCIÓN 12: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{BERT}: encoder-only, bidireccional, pre-entrenado con MLM + NSP. Ideal para comprensión.
+            \item \textbf{GPT}: decoder-only, unidireccional, pre-entrenado con modelado autorregresivo. Ideal para generación.
+            \item \textbf{Fine-tuning}: adapta modelos pre-entrenados a tareas específicas, superando enfoques clásicos.
+            \item \textbf{Técnicas eficientes}: LoRA, adapters, prompt tuning (pocos parámetros entrenables).
+            \item \textbf{Tokenizadores}: WordPiece (BERT), BPE (GPT), SentencePiece.
+            \item \textbf{Métricas}: accuracy, F1, perplejidad, BLEU, ROUGE.
+            \item \textbf{Aplicaciones}: clasificación, NER, QA, generación de texto.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

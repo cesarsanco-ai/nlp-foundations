@@ -1,0 +1,416 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 13
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 13 NLP]{\textbf{Sesión 13}}
+\subtitle{Prompt Engineering y Optimización de Modelos}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: PROMPT ENGINEERING E IN-CONTEXT LEARNING
+% ============================================================================
+\section{Prompt Engineering e In-Context Learning}
+
+\begin{frame}{¿Qué es In-Context Learning (ICL)?}
+    \begin{itemize}
+        \item Capacidad de los LLMs para aprender a resolver tareas observando ejemplos en el prompt, sin actualizar sus pesos.
+        \item Se diferencia del fine-tuning en que no requiere entrenamiento ni GPU.
+        \item Estrategias principales: Zero-shot, Few-shot, Chain-of-Thought.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+\begin{frame}{Zero-shot y Few-shot}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Zero-shot}
+        \begin{itemize}
+            \item Instrucción sin ejemplos.
+            \item Ej: ``Clasifica el mensaje: ...''
+            \item Depende del conocimiento pre-entrenado.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Few-shot}
+        \begin{itemize}
+            \item Se proporcionan ejemplos en el prompt.
+            \item Ej: ``Mensaje: ... $\rightarrow$ reclamo. Mensaje: ... $\rightarrow$ consulta. Ahora clasifica: ...''
+            \item Guía el formato y estilo.
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 1
+\end{frame}
+
+\begin{frame}{Chain-of-Thought (CoT)}
+    \begin{block}{Idea}
+        Pedir al modelo que ``piense paso a paso'' antes de dar la respuesta.
+    \end{block}
+    \begin{exampleblock}{Ejemplo}
+        ``Problema: Si un tren viaja a 120 km/h durante 2.5 horas y luego a 80 km/h durante 1.5 horas, ¿qué distancia total recorre? Vamos a pensarlo paso a paso. Primero, calculamos la distancia del primer tramo: 120 km/h × 2.5 h = 300 km. Luego, la distancia del segundo tramo: 80 km/h × 1.5 h = 120 km. Finalmente, sumamos: 300 km + 120 km = 420 km. Respuesta: 420 km.''
+    \end{exampleblock}
+    \begin{itemize}
+        \item Mejora el rendimiento en tareas de razonamiento lógico y matemático.
+        \item Descompone problemas complejos en subtareas.
+    \end{itemize}
+    % Basado en Preguntas 1 y 2
+\end{frame}
+
+\begin{frame}{Self-Consistency en CoT}
+    \begin{itemize}
+        \item Generar múltiples cadenas de razonamiento independientes (con temperatura $>0$).
+        \item Votar la respuesta más frecuente.
+        \item Mejora la precisión a costa de mayor latencia y costo.
+    \end{itemize}
+    % Basado en Pregunta 15
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: FINE-TUNING EFICIENTE: LORA
+% ============================================================================
+\section{Fine-Tuning Eficiente: LoRA}
+
+\begin{frame}{El problema del fine-tuning completo}
+    \begin{itemize}
+        \item Modelos con miles de millones de parámetros (7B, 13B, 70B).
+        \item Fine-tuning completo requiere GPUs de alta memoria y tiempo.
+        \item Riesgo de ``olvido catastrófico''.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{LoRA (Low-Rank Adaptation)}
+    \begin{block}{Idea}
+        Los cambios en los pesos durante la adaptación tienen un ``rango intrínseco bajo''. En lugar de modificar la matriz original $W_0 \in \mathbb{R}^{d \times k}$, se añaden matrices de bajo rango entrenables.
+    \end{block}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Arquitectura}
+        \[
+        W = W_0 + \Delta W = W_0 + B \cdot A
+        \]
+        donde $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times k}$, $r \ll \min(d,k)$.
+        \column{0.5\textwidth}
+        \textbf{Ventajas}
+        \begin{itemize}
+            \item Parámetros entrenables: $r(d+k)$ vs $d \times k$.
+            \item Evita olvido catastrófico.
+            \item Adaptadores intercambiables para múltiples tareas.
+        \end{itemize}
+    \end{columns}
+    % Basado en Preguntas 4 y 5
+    % IMAGEN: Diagrama de LoRA
+\end{frame}
+
+\begin{frame}{Elección de hiperparámetros en LoRA}
+    \begin{itemize}
+        \item \textbf{Rango $r$}: típicamente 4, 8, 16, 32. Mayor $r$ = más capacidad, más parámetros.
+        \item \textbf{Target modules}: normalmente las proyecciones de atención (\texttt{q\_proj}, \texttt{v\_proj}, \texttt{k\_proj}, \texttt{o\_proj}).
+        \item \textbf{lora\_alpha}: escalado (similar a learning rate).
+        \item \textbf{lora\_dropout}: regularización.
+    \end{itemize}
+    % Basado en Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: CUANTIZACIÓN
+% ============================================================================
+\section{Cuantización}
+
+\begin{frame}{¿Qué es la cuantización?}
+    \begin{itemize}
+        \item Reducir la precisión numérica de los pesos del modelo (ej. de FP32 a INT8).
+        \item Reduce el uso de memoria y acelera la inferencia.
+        \item Puede introducir una pequeña pérdida de calidad.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Formatos de cuantización}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c|c}
+            \toprule
+            \textbf{Formato} & \textbf{Bits} & \textbf{Reducción} & \textbf{Pérdida típica} \\
+            \midrule
+            FP32 & 32 & 1x & - \\
+            FP16 / BF16 & 16 & 2x & Mínima \\
+            INT8 & 8 & 4x & Ligera \\
+            4-bit (NF4) & 4 & 8x & Moderada (aceptable) \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    \begin{itemize}
+        \item NF4 (NormalFloat4) optimizado para pesos de redes neuronales.
+        \item QLoRA: combina cuantización 4-bit con LoRA.
+    \end{itemize}
+    % Basado en PDF y Preguntas 7, 8
+\end{frame}
+
+\begin{frame}{Cuantización post-entrenamiento vs QAT}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{PTQ (Post-Training Quantization)}
+        \begin{itemize}
+            \item Se cuantiza un modelo ya entrenado.
+            \item Rápido, pero puede perder precisión.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{QAT (Quantization-Aware Training)}
+        \begin{itemize}
+            \item Se simula la cuantización durante el entrenamiento.
+            \item Mejor calidad, pero requiere re-entrenamiento.
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 17
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: EXPORTACIÓN A ONNX
+% ============================================================================
+\section{Exportación a ONNX}
+
+\begin{frame}{ONNX (Open Neural Network Exchange)}
+    \begin{itemize}
+        \item Formato abierto para representar modelos de ML.
+        \item Permite interoperabilidad entre frameworks (PyTorch, TensorFlow, etc.).
+        \item ONNX Runtime optimiza la inferencia en múltiples plataformas (CPU, GPU, móvil).
+        \item Ventajas: fusión de operadores, cuantización, kernels especializados.
+    \end{itemize}
+    % Basado en PDF y Pregunta 9
+\end{frame}
+
+\begin{frame}[fragile]{Exportar un modelo de PyTorch a ONNX}
+    \begin{lstlisting}
+import torch
+import onnx
+
+# Modelo de ejemplo
+model = ...  # modelo entrenado
+dummy_input = torch.randn(1, 3, 224, 224)
+
+torch.onnx.export(
+    model,
+    dummy_input,
+    "model.onnx",
+    input_names=["input"],
+    output_names=["output"],
+    dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
+)
+
+# Verificar
+onnx_model = onnx.load("model.onnx")
+onnx.checker.check_model(onnx_model)
+    \end{lstlisting}
+    % Basado en Pregunta 9
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: COMPARACIÓN DE ESTRATEGIAS
+% ============================================================================
+\section{Comparación de Estrategias}
+
+\begin{frame}{Prompt Engineering vs LoRA vs Fine-Tuning}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c|c}
+            \toprule
+            \textbf{Característica} & \textbf{Prompt Eng.} & \textbf{LoRA} & \textbf{Fine-Tuning} \\
+            \midrule
+            Costo computacional & Muy bajo & Bajo & Alto \\
+            Necesidad de datos & Ninguno & Pocos & Muchos \\
+            Calidad esperada & Variable & Alta & Muy alta \\
+            Flexibilidad & Alta (rápido) & Media & Baja (un modelo) \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en Pregunta 10
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: IMPLEMENTACIÓN CONCEPTUAL EN PYTHON
+% ============================================================================
+\section{Implementación Conceptual en Python}
+
+\begin{frame}[fragile]{LoRA con PEFT (Hugging Face)}
+    \begin{lstlisting}
+from transformers import AutoModelForCausalLM
+from peft import LoraConfig, get_peft_model
+
+model = AutoModelForCausalLM.from_pretrained("base-model")
+
+lora_config = LoraConfig(
+    r=8,
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
+
+lora_model = get_peft_model(model, lora_config)
+lora_model.print_trainable_parameters()
+    \end{lstlisting}
+    % Basado en Pregunta 11
+\end{frame}
+
+\begin{frame}[fragile]{Cargar modelo cuantizado en 4-bit}
+    \begin{lstlisting}
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+
+quant_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_quant_type="nf4"
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "modelo-13B",
+    quantization_config=quant_config,
+    device_map="auto"
+)
+    \end{lstlisting}
+    % Basado en Pregunta 12
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Qué es In-Context Learning y en qué se diferencia del fine-tuning?
+        \item Explica Zero-shot, Few-shot y Chain-of-Thought.
+        \item ¿Qué es LoRA y por qué es más eficiente que el fine-tuning completo?
+        \item ¿Qué es la cuantización? Compara FP16, INT8 y 4-bit.
+        \item ¿Qué es ONNX y para qué sirve?
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Cómo evita LoRA el olvido catastrófico?
+        \item ¿Qué ventaja tiene poder intercambiar adaptadores para diferentes tareas?
+        \item ¿Cómo afecta el rango $r$ en LoRA a la capacidad de adaptación?
+        \item ¿Qué es QLoRA y por qué es útil?
+        \item ¿Qué estrategias de prompting usarías para reducir alucinaciones?
+    \end{itemize}
+    % Basado en Preguntas 5, 6, 7, 13
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+
+
+% ============================================================================
+% SECCIÓN 9: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{Prompt Engineering}: Zero-shot, Few-shot, Chain-of-Thought, Self-Consistency.
+            \item \textbf{LoRA}: adaptación de bajo rango, eficiente en parámetros, evita olvido.
+            \item \textbf{Cuantización}: FP16, INT8, 4-bit (NF4), QLoRA. Trade-off tamaño/calidad.
+            \item \textbf{ONNX}: interoperabilidad y optimización de inferencia.
+            \item \textbf{Comparación}: cuándo usar cada técnica según datos, costo y calidad.
+            \item \textbf{Implementación}: PEFT, bitsandbytes.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

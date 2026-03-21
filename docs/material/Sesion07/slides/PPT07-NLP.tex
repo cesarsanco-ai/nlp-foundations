@@ -1,0 +1,487 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 7
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 7 NLP]{\textbf{Sesión 7}}
+\subtitle{Redes Recurrentes (RNN, LSTM, GRU) para NLP}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN
+% ============================================================================
+\section{Introducción}
+
+\begin{frame}{La necesidad de modelar secuencias}
+    \begin{itemize}
+        \item Las redes feed-forward (con average pooling) pierden el orden de las palabras.
+        \item No distinguen: ``El producto es bueno, pero la atención es pésima'' vs ``La atención es pésima, pero el producto es bueno''.
+        \item El lenguaje es inherentemente secuencial: el significado depende del contexto previo.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: RNN VANILLA
+% ============================================================================
+\section{RNN Vanilla}
+
+\begin{frame}{Arquitectura de una RNN}
+    \begin{block}{Actualización del estado oculto}
+        \[
+        h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h)
+        \]
+        \[
+        y_t = \text{softmax}(W_{hy} h_t + b_y)
+        \]
+        \begin{itemize}
+            \item $x_t$: entrada en el paso $t$ (embedding de palabra).
+            \item $h_t$: estado oculto actual (memoria de la secuencia).
+        \end{itemize}
+    \end{block}
+    % IMAGEN: Diagrama de RNN desenrollada
+\end{frame}
+
+\begin{frame}{Backpropagation Through Time (BPTT)}
+    \begin{itemize}
+        \item Desenrollar la RNN para cada paso de tiempo.
+        \item La pérdida total es la suma de pérdidas en cada paso.
+        \item El gradiente se propaga hacia atrás a través de todos los pasos.
+        \item Complejidad: $O(T)$ en tiempo, pero secuencial.
+    \end{itemize}
+    % Basado en Pregunta 5
+\end{frame}
+
+\begin{frame}{Problema del gradiente desvaneciente/explosivo}
+    \begin{itemize}
+        \item Durante BPTT, el gradiente se multiplica por $W_{hh}$ repetidamente.
+        \item Si $\|W_{hh}\| < 1$, el gradiente se desvanece (tiende a cero).
+        \item Si $\|W_{hh}\| > 1$, el gradiente explota.
+        \item \textbf{Consecuencia}: la RNN no puede aprender dependencias de largo alcance (ej. una palabra al inicio de un párrafo que afecta una palabra al final).
+    \end{itemize}
+    % Basado en Pregunta 2
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: LSTM (LONG SHORT-TERM MEMORY)
+% ============================================================================
+\section{LSTM (Long Short-Term Memory)}
+
+\begin{frame}{Arquitectura LSTM}
+    \begin{block}{Componentes}
+        \begin{itemize}
+            \item \textbf{Puerta de olvido} ($f_t$): qué información del estado de celda anterior olvidar.
+            \item \textbf{Puerta de entrada} ($i_t$): qué nueva información almacenar.
+            \item \textbf{Candidato a memoria} ($\tilde{c}_t$): nueva información propuesta.
+            \item \textbf{Puerta de salida} ($o_t$): qué parte del estado de celda emitir.
+        \end{itemize}
+    \end{block}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Ecuaciones LSTM}
+    \begin{align*}
+        f_t &= \sigma(W_f[h_{t-1}, x_t] + b_f) \\
+        i_t &= \sigma(W_i[h_{t-1}, x_t] + b_i) \\
+        \tilde{c}_t &= \tanh(W_c[h_{t-1}, x_t] + b_c) \\
+        c_t &= f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \\
+        o_t &= \sigma(W_o[h_{t-1}, x_t] + b_o) \\
+        h_t &= o_t \odot \tanh(c_t)
+    \end{align*}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Interpretación de las puertas}
+    \begin{itemize}
+        \item \textbf{Puerta de olvido} ($f_t$): valores cercanos a 0 = olvidar, 1 = recordar. Permite descartar información irrelevante.
+        \item \textbf{Puerta de entrada} ($i_t$): controla cuánto del nuevo candidato se añade.
+        \item \textbf{Estado de celda} ($c_t$): autopista lineal para el gradiente (sumas y productos), evitando el desvanecimiento.
+        \item \textbf{Puerta de salida} ($o_t$): decide qué exponer al resto de la red.
+    \end{itemize}
+    % Basado en Pregunta 12
+\end{frame}
+
+\begin{frame}{Ventajas de LSTM}
+    \begin{itemize}
+        \item Maneja dependencias a largo plazo (cientos de pasos).
+        \item El gradiente fluye fácilmente a través de $c_t$ debido a operaciones lineales.
+        \item Fue el estado del arte en muchas tareas secuenciales antes de los Transformers.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: GRU (GATED RECURRENT UNIT)
+% ============================================================================
+\section{GRU (Gated Recurrent Unit)}
+
+\begin{frame}{Arquitectura GRU}
+    \begin{block}{Componentes}
+        \begin{itemize}
+            \item \textbf{Puerta de reinicio} ($r_t$): cuánto del estado anterior olvidar.
+            \item \textbf{Puerta de actualización} ($z_t$): combina olvido y entrada de LSTM.
+        \end{itemize}
+    \end{block}
+    % Basado en Pregunta 15
+\end{frame}
+
+\begin{frame}{Ecuaciones GRU}
+    \begin{align*}
+        r_t &= \sigma(W_r[h_{t-1}, x_t] + b_r) \\
+        z_t &= \sigma(W_z[h_{t-1}, x_t] + b_z) \\
+        \tilde{h}_t &= \tanh(W_h[r_t \odot h_{t-1}, x_t] + b_h) \\
+        h_t &= (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
+    \end{align*}
+    % Basado en Pregunta 15
+\end{frame}
+
+\begin{frame}{Comparación LSTM vs GRU}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Característica} & \textbf{LSTM} & \textbf{GRU} \\
+            \midrule
+            Número de puertas & 3 (forget, input, output) & 2 (update, reset) \\
+            Estado de celda separado & Sí & No (solo estado oculto) \\
+            Parámetros & Más & Menos \\
+            Velocidad de entrenamiento & Más lenta & Más rápida \\
+            Riesgo de sobreajuste & Mayor (con pocos datos) & Menor \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en Pregunta 4
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: RNN BIDIRECCIONALES
+% ============================================================================
+\section{RNN Bidireccionales}
+
+\begin{frame}{RNN Bidireccional}
+    \begin{itemize}
+        \item Dos RNN: una procesa de izquierda a derecha (forward), otra de derecha a izquierda (backward).
+        \item Estados concatenados: $h_t = [\overrightarrow{h_t}; \overleftarrow{h_t}]$.
+        \item Ideal para tareas donde se tiene acceso a toda la secuencia (NER, clasificación de oraciones).
+    \end{itemize}
+    % Basado en Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: APLICACIONES EN NLP
+% ============================================================================
+\section{Aplicaciones en NLP}
+
+\begin{frame}{Clasificación de sentimiento}
+    \begin{itemize}
+        \item Usar el último estado oculto o promedio de todos los estados.
+        \item LSTM bidireccional + capa fully-connected + softmax.
+    \end{itemize}
+    % Basado en Pregunta 10
+\end{frame}
+
+\begin{frame}{Generación de texto}
+    \begin{itemize}
+        \item Modelo de lenguaje: predecir la siguiente palabra.
+        \item Entrenamiento con cross-entropy.
+        \item Generación: greedy search o sampling con temperatura.
+        \item Evaluación: perplejidad (perplexity).
+    \end{itemize}
+    % Basado en Pregunta 8
+\end{frame}
+
+\begin{frame}{Traducción automática (seq2seq)}
+    \begin{itemize}
+        \item Encoder RNN: codifica frase origen en un vector de contexto.
+        \item Decoder RNN: genera frase destino a partir del contexto.
+        \item Limitación: vector de contexto fijo para frases largas.
+        \item Mejora: mecanismo de atención (próxima sesión).
+    \end{itemize}
+    % Basado en Pregunta 16
+\end{frame}
+
+\begin{frame}{Reconocimiento de Entidades Nombradas (NER)}
+    \begin{itemize}
+        \item Etiquetado por token (B-PER, I-PER, O, etc.).
+        \item LSTM bidireccional + capa lineal + softmax en cada paso.
+        \item Pérdida: cross-entropy por token.
+    \end{itemize}
+    % Basado en Pregunta 13
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: EJEMPLO EN PYTORCH (CLASIFICACIÓN DE SENTIMIENTO)
+% ============================================================================
+\section{Ejemplo en PyTorch: Clasificación de Sentimiento con LSTM}
+
+\begin{frame}[fragile]{Datos y vocabulario}
+    \begin{lstlisting}
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from collections import Counter
+
+texts = [
+    "I loved this movie, it was absolutely fantastic",
+    "Terrible film, I hated it, worst movie ever",
+    "Amazing acting and great story",
+    "Boring and slow, waste of time"
+]
+labels = [1, 0, 1, 0]
+
+def build_vocab(texts, max_size=10000):
+    word_counts = Counter()
+    for text in texts:
+        word_counts.update(text.lower().split())
+    vocab = {word: idx+2 for idx, (word, _) in enumerate(word_counts.most_common(max_size))}
+    vocab['<PAD>'] = 0
+    vocab['<UNK>'] = 1
+    return vocab
+
+vocab = build_vocab(texts)
+vocab_size = len(vocab)
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Codificar y definir modelo}
+    \begin{lstlisting}
+def encode(text, vocab, max_len=20):
+    tokens = text.lower().split()[:max_len]
+    indices = [vocab.get(token, vocab['<UNK>']) for token in tokens]
+    indices += [vocab['<PAD>']] * (max_len - len(indices))
+    return indices
+
+X = torch.tensor([encode(t, vocab) for t in texts])
+y = torch.tensor(labels)
+
+class LSTMSentiment(nn.Module):
+    def __init__(self, vocab_size, embed_dim=50, hidden_dim=64, num_classes=2):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, num_classes)
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self, x):
+        embedded = self.embedding(x)
+        out, (hidden, cell) = self.lstm(embedded)
+        last_hidden = hidden[-1]
+        out = self.fc(self.dropout(last_hidden))
+        return out
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Entrenamiento y evaluación}
+    \begin{lstlisting}
+model = LSTMSentiment(vocab_size)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+
+for epoch in range(200):
+    optimizer.zero_grad()
+    logits = model(X)
+    loss = criterion(logits, y)
+    loss.backward()
+    optimizer.step()
+    if (epoch+1) % 50 == 0:
+        print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+
+with torch.no_grad():
+    logits = model(X)
+    preds = torch.argmax(logits, dim=1)
+    acc = (preds == y).float().mean()
+    print(f'Accuracy: {acc:.2%}')
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: MÉTRICAS
+% ============================================================================
+\section{Métricas en NLP con RNN}
+
+\begin{frame}{Perplejidad (Perplexity)}
+    \[
+    PPL = \exp\left(-\frac{1}{N}\sum_{i=1}^{N} \log P(w_i | \text{contexto})\right)
+    \]
+    \begin{itemize}
+        \item Mide qué tan ``sorprendido'' está el modelo por los datos.
+        \item Menor perplejidad = mejor modelo.
+        \item Límite inferior: 1 (modelo perfecto); superior: tamaño del vocabulario (uniforme).
+    \end{itemize}
+    % Basado en Pregunta 9
+\end{frame}
+
+\begin{frame}{Otras métricas}
+    \begin{itemize}
+        \item \textbf{Accuracy}: para clasificación de secuencias completas.
+        \item \textbf{Precisión, recall, F1-score}: para tareas de etiquetado (NER, POS).
+        \item \textbf{Exactitud de secuencia}: coincidencia exacta de toda la secuencia generada.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: LIMITACIONES DE RNN/LSTM
+% ============================================================================
+\section{Limitaciones de RNN/LSTM}
+
+\begin{frame}{Limitaciones}
+    \begin{itemize}
+        \item \textbf{Procesamiento secuencial}: no paralelizable a lo largo del tiempo, lento en GPU.
+        \item \textbf{Dependencias muy largas}: aunque LSTM mejora, aún puede tener dificultades con secuencias de miles de pasos.
+        \item \textbf{Memoria limitada}: el estado oculto tiene capacidad finita.
+    \end{itemize}
+    % Basado en Pregunta 11
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Por qué LSTM funciona mejor que RNN vanilla para secuencias largas?
+        \item Diferencia entre LSTM y GRU.
+        \item ¿Qué problema resuelve la puerta de olvido en LSTM?
+        \item ¿Cómo se entrena una RNN? (BPTT)
+        \item ¿Cuándo usarías una RNN en lugar de una feed-forward?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item Explica el truncamiento en BPTT.
+        \item ¿Cómo manejarías secuencias de longitud variable en un lote? (padding, pack\_padded\_sequence)
+        \item ¿Qué son las RNN bidireccionales?
+        \item ¿Cómo inicializarías los pesos de las puertas en LSTM?
+        \item ¿Qué es el dropout variacional en RNN?
+    \end{itemize}
+    % Basado en preguntas 5, 7, 18, 19
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+\section{Conexión con el resto del curso}
+
+\begin{frame}{Próximos pasos}
+    \begin{itemize}
+        \item \textbf{Sesión 4 (Word Embeddings)}: base para capas de embedding.
+        \item \textbf{Sesión 5 (Modelos Clásicos)}: superados por RNN en tareas secuenciales.
+        \item \textbf{Sesión 8 (Atención y Transformers)}: resuelven las limitaciones de RNN (paralelización, dependencias largas).
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 12: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{RNN vanilla}: procesan secuencias pero sufren gradiente desvaneciente.
+            \item \textbf{LSTM}: puertas de olvido, entrada, salida; estado de celda preserva gradientes.
+            \item \textbf{GRU}: simplificación de LSTM, menos parámetros, comparable rendimiento.
+            \item \textbf{BPTT}: algoritmo de entrenamiento para RNN.
+            \item \textbf{RNN bidireccionales}: contexto completo, útiles para NER.
+            \item \textbf{Aplicaciones}: clasificación, generación, traducción, NER.
+            \item \textbf{Métricas}: perplejidad, F1, accuracy.
+            \item \textbf{Limitaciones}: secuencialidad, memoria finita.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

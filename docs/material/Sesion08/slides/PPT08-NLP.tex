@@ -1,0 +1,415 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 8
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 8 NLP]{\textbf{Sesión 8}}
+\subtitle{Modelos Seq2Seq y Atención}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN A PROBLEMAS SEQ2SEQ
+% ============================================================================
+\section{Introducción a Problemas Seq2Seq}
+
+\begin{frame}{Problemas de secuencia a secuencia}
+    \begin{itemize}
+        \item Muchas tareas de NLP requieren transformar una secuencia de entrada en una secuencia de salida de longitud potencialmente diferente.
+        \item Ejemplos:
+        \begin{itemize}
+            \item \textbf{Traducción automática}: inglés $\rightarrow$ francés.
+            \item \textbf{Summarization}: artículo largo $\rightarrow$ resumen corto.
+            \item \textbf{Diálogo}: pregunta del usuario $\rightarrow$ respuesta del sistema.
+            \item \textbf{Generación de preguntas}: texto $\rightarrow$ pregunta relevante.
+        \end{itemize}
+    \end{itemize}
+    % Basado en introducción del PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: ARQUITECTURA ENCODER-DECODER
+% ============================================================================
+\section{Arquitectura Encoder-Decoder}
+
+\begin{frame}{Visión general}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Encoder}
+        \begin{itemize}
+            \item RNN (LSTM/GRU) que procesa la entrada $x_1,\dots,x_T$.
+            \item Produce estados ocultos $h_1,\dots,h_T$.
+            \item El último estado $h_T$ (o combinación) se usa como \textbf{vector de contexto} $c$.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Decoder}
+        \begin{itemize}
+            \item Otra RNN que genera la salida $y_1,\dots,y_{T'}$.
+            \item Estado inicial $s_0 = c$.
+            \item En cada paso, predice $y_t$ basado en $s_{t-1}$ y $y_{t-1}$.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF y Pregunta 2
+\end{frame}
+
+\begin{frame}{Limitación del contexto fijo}
+    \begin{alertblock}{Cuello de botella}
+        El vector de contexto $c$ debe comprimir toda la información de la entrada en una representación de dimensión fija. Para secuencias largas, la información se diluye y se pierden detalles.
+    \end{alertblock}
+    \begin{itemize}
+        \item Ejemplo: ``El gato que estaba durmiendo en el sofá gris persiguió al ratón''. El modelo sin atención puede confundir quién persiguió a quién.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: MECANISMO DE ATENCIÓN
+% ============================================================================
+\section{Mecanismo de Atención}
+
+\begin{frame}{Intuición de la atención}
+    \begin{itemize}
+        \item Permite al decodificador, en cada paso, ``mirar'' directamente a todos los estados del encoder y decidir qué partes son más relevantes.
+        \item Resuelve el cuello de botella del contexto fijo.
+        \item Mejora el rendimiento en secuencias largas y proporciona interpretabilidad (pesos de atención).
+    \end{itemize}
+    % Basado en PDF y Pregunta 3
+\end{frame}
+
+\begin{frame}{Atención de Bahdanau (Additive Attention)}
+    \begin{block}{Cálculo}
+        \begin{align*}
+            e_{t,i} &= \mathbf{v}_a^\top \tanh(\mathbf{W}_a \mathbf{s}_{t-1} + \mathbf{U}_a \mathbf{h}_i) \\
+            \alpha_{t,i} &= \frac{\exp(e_{t,i})}{\sum_{j=1}^T \exp(e_{t,j})} \\
+            \mathbf{c}_t &= \sum_{i=1}^T \alpha_{t,i} \mathbf{h}_i
+        \end{align*}
+        donde $\mathbf{s}_{t-1}$ es el estado oculto anterior del decodificador, $\mathbf{h}_i$ son los estados del encoder.
+    \end{block}
+    % Basado en PDF y Pregunta 4
+\end{frame}
+
+\begin{frame}{Atención de Luong (Multiplicative Attention)}
+    \begin{itemize}
+        \item Usa el estado actual $\mathbf{s}_t$ (después de actualizar con la entrada).
+        \item Variantes de puntuación:
+        \begin{itemize}
+            \item \textbf{Producto punto}: $\text{score}(\mathbf{s}_t, \mathbf{h}_i) = \mathbf{s}_t^\top \mathbf{h}_i$
+            \item \textbf{General}: $\text{score}(\mathbf{s}_t, \mathbf{h}_i) = \mathbf{s}_t^\top \mathbf{W}_a \mathbf{h}_i$
+            \item \textbf{Concat}: similar a Bahdanau pero con $\mathbf{s}_t$
+        \end{itemize}
+        \item Más eficiente computacionalmente, especialmente producto punto.
+    \end{itemize}
+    % Basado en PDF y Pregunta 5
+\end{frame}
+
+\begin{frame}{Atención global vs local}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Atención global}
+        \begin{itemize}
+            \item Considera todos los estados del encoder.
+            \item Más costosa, pero captura toda la información.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Atención local}
+        \begin{itemize}
+            \item Predice una posición alineada y usa una ventana alrededor.
+            \item Más eficiente, puede perder información lejana.
+        \end{itemize}
+    \end{columns}
+    % Basado en PDF y Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: IMPLEMENTACIÓN EN PYTORCH
+% ============================================================================
+\section{Implementación en PyTorch}
+
+\begin{frame}[fragile]{Encoder LSTM}
+    \begin{lstlisting}
+import torch
+import torch.nn as nn
+
+class Encoder(nn.Module):
+    def __init__(self, vocab_size, embed_dim, hidden_dim, num_layers=1, dropout=0.5):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers,
+                            batch_first=True, dropout=dropout)
+    def forward(self, x):
+        embedded = self.embedding(x)          # (batch, seq_len, embed_dim)
+        outputs, (hidden, cell) = self.lstm(embedded)
+        return outputs, hidden, cell
+    \end{lstlisting}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}[fragile]{Decoder con Atención (Luong)}
+    \begin{lstlisting}
+class DecoderWithAttention(nn.Module):
+    def __init__(self, vocab_size, embed_dim, hidden_dim, num_layers=1, dropout=0.5):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers, batch_first=True)
+        self.attn_proj = nn.Linear(hidden_dim * 2, hidden_dim)
+        self.fc_out = nn.Linear(hidden_dim, vocab_size)
+
+    def forward(self, y_prev, hidden, cell, encoder_outputs):
+        embedded = self.embedding(y_prev)                     # (batch, 1, embed_dim)
+        lstm_out, (hidden, cell) = self.lstm(embedded, (hidden, cell))
+        query = lstm_out.squeeze(1)                           # (batch, hidden_dim)
+        scores = torch.bmm(encoder_outputs, query.unsqueeze(2)).squeeze(2)
+        attn_weights = torch.softmax(scores, dim=1)           # (batch, seq_len)
+        context = torch.bmm(attn_weights.unsqueeze(1), encoder_outputs).squeeze(1)
+        combined = torch.tanh(self.attn_proj(torch.cat((query, context), dim=1)))
+        output = self.fc_out(combined)                         # (batch, vocab_size)
+        return output, hidden, cell, attn_weights
+    \end{lstlisting}
+    % Basado en PDF y Pregunta 7
+\end{frame}
+
+\begin{frame}[fragile]{Modelo Seq2Seq completo}
+    \begin{lstlisting}
+class Seq2Seq(nn.Module):
+    def __init__(self, encoder, decoder, device):
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.device = device
+
+    def forward(self, src, trg, teacher_forcing_ratio=0.5):
+        batch_size, trg_len = trg.shape
+        trg_vocab_size = self.decoder.fc_out.out_features
+        outputs = torch.zeros(batch_size, trg_len, trg_vocab_size).to(self.device)
+        encoder_outputs, hidden, cell = self.encoder(src)
+        decoder_input = torch.ones(batch_size, 1).long().to(self.device)  # <SOS>
+        for t in range(trg_len):
+            output, hidden, cell, attn = self.decoder(decoder_input, hidden, cell, encoder_outputs)
+            outputs[:, t, :] = output
+            # Teacher forcing
+            if torch.rand(1).item() < teacher_forcing_ratio:
+                decoder_input = trg[:, t].unsqueeze(1)
+            else:
+                decoder_input = output.argmax(1).unsqueeze(1)
+        return outputs
+    \end{lstlisting}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: MÉTRICA BLEU
+% ============================================================================
+\section{Métrica BLEU}
+
+\begin{frame}{BLEU (Bilingual Evaluation Understudy)}
+    \begin{itemize}
+        \item Métrica estándar para evaluar traducción automática.
+        \item Compara la traducción generada con una o más referencias humanas.
+        \item Se basa en la precisión de n-gramas (normalmente $n=1,2,3,4$) con una penalización por longitud (brevity penalty).
+    \end{itemize}
+    % Basado en PDF y Pregunta 10
+\end{frame}
+
+\begin{frame}{Cálculo de BLEU}
+    \begin{block}{Fórmula}
+        \[
+        \text{BLEU} = \text{BP} \cdot \exp\left( \sum_{n=1}^{4} w_n \log p_n \right)
+        \]
+        donde $w_n = 1/4$, $p_n$ es la precisión de n-gramas, y BP es la penalización por longitud:
+        \[
+        \text{BP} = \begin{cases}
+            1 & \text{si } c > r \\
+            e^{(1 - r/c)} & \text{si } c \le r
+        \end{cases}
+        \]
+        $c$ = longitud del candidato, $r$ = longitud de la referencia.
+    \end{block}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Ejemplo numérico}
+    \begin{exampleblock}{Referencia: ``the cat sits on the mat''}
+        Candidato: ``the cat on the mat''
+        \begin{itemize}
+            \item Unigramas: 5/5 = 1.0
+            \item Bigramas: 3/4 = 0.75
+            \item BP: $c=5$, $r=6$ $\Rightarrow$ $BP = e^{(1-6/5)} = e^{-0.2} = 0.8187$
+            \item BLEU (n=1,2) = $0.8187 \times \exp(0.5 \cdot \log 1 + 0.5 \cdot \log 0.75) \approx 0.709$
+        \end{itemize}
+    \end{exampleblock}
+    % Basado en PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: APLICACIONES EN LA INDUSTRIA
+% ============================================================================
+\section{Aplicaciones en la Industria}
+
+\begin{frame}{Traducción automática}
+    \begin{itemize}
+        \item Google Translate y DeepL utilizaron arquitecturas Seq2Seq con atención antes de los Transformers.
+        \item La atención permite manejar frases largas y mejorar la calidad.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Summarization abstractivo}
+    \begin{itemize}
+        \item Modelos como BART y T5 generan resúmenes a partir de documentos largos.
+        \item La atención permite enfocarse en las partes relevantes del texto original.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Diálogo y chatbots}
+    \begin{itemize}
+        \item Sistemas de diálogo (atención al cliente) usan Seq2Seq con atención para mantener el contexto de la conversación.
+        \item La atención ayuda a recordar información de turnos anteriores.
+    \end{itemize}
+    % Basado en Pregunta 13
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Cómo funciona el mecanismo de atención?
+        \item Diferencia entre atención de Bahdanau y Luong.
+        \item ¿Qué es teacher forcing y por qué se usa?
+        \item Explica la métrica BLEU.
+        \item ¿Por qué el contexto fijo de Seq2Seq básico es problemático?
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Qué es beam search y cómo mejora la generación?
+        \item ¿Cómo manejarías secuencias de longitud variable en un lote?
+        \item ¿Qué es el problema de exposure bias?
+        \item ¿Qué es copy mechanism y cuándo es útil?
+        \item ¿Qué ventajas tienen los Transformers sobre Seq2Seq con atención?
+    \end{itemize}
+    % Basado en PDF y Preguntas 9, 11, 15, 16
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+
+
+% ============================================================================
+% SECCIÓN 9: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{Seq2Seq}: arquitectura encoder-decoder para transformar secuencias.
+            \item \textbf{Vector de contexto fijo}: cuello de botella para secuencias largas.
+            \item \textbf{Atención}: permite al decoder enfocarse en partes relevantes de la entrada.
+            \item \textbf{Bahdanau (additive)} vs \textbf{Luong (multiplicative)}: diferentes formulaciones.
+            \item \textbf{Atención global vs local}: trade-off precisión/eficiencia.
+            \item \textbf{BLEU}: métrica estándar para traducción basada en n-gramas.
+            \item \textbf{Implementación}: encoder, decoder con atención, y entrenamiento en PyTorch.
+            \item \textbf{Aplicaciones}: traducción, summarization, diálogo.
+            \item \textbf{Técnicas avanzadas}: beam search, copy mechanism.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

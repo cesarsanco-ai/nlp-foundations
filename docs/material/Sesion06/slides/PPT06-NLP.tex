@@ -1,0 +1,459 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 6
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 6 NLP]{\textbf{Sesión 6}}
+\subtitle{Redes Neuronales Recurrentes (RNN, LSTM, GRU)}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN
+% ============================================================================
+\section{Introducción}
+
+\begin{frame}{Limitaciones de las redes feed-forward para texto}
+    \begin{itemize}
+        \item Las redes feed-forward con average pooling pierden el orden de las palabras.
+        \item No pueden distinguir: ``El producto es bueno, pero la atención es pésima'' vs ``La atención es pésima, pero el producto es bueno''.
+        \item \textbf{Solución}: Redes Neuronales Recurrentes (RNN), que procesan secuencias manteniendo un estado oculto.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: RNN VANILLA
+% ============================================================================
+\section{RNN Vanilla}
+
+\begin{frame}{Arquitectura de una RNN}
+    \begin{block}{Ecuación de actualización}
+        \[
+        h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h)
+        \]
+        \begin{itemize}
+            \item $x_t$: entrada en el paso $t$.
+            \item $h_{t-1}$: estado oculto anterior.
+            \item $h_t$: nuevo estado oculto.
+        \end{itemize}
+    \end{block}
+    % IMAGEN: Diagrama de RNN desenrollada
+\end{frame}
+
+\begin{frame}{Backpropagation Through Time (BPTT)}
+    \begin{itemize}
+        \item Desenrollar la RNN para cada paso de tiempo.
+        \item Calcular gradientes sumando contribuciones de cada paso.
+        \item Problema: gradiente puede \textbf{desvanecerse} o \textbf{explotar}.
+    \end{itemize}
+    % Basado en Preguntas 2 y 5
+\end{frame}
+
+\begin{frame}{Problema del gradiente desvaneciente}
+    \begin{itemize}
+        \item Durante BPTT, el gradiente se multiplica por $W_{hh}$ repetidamente.
+        \item Si $\|W_{hh}\| < 1$, el gradiente tiende a cero exponencialmente.
+        \item La red no puede aprender dependencias de largo alcance.
+        \item \textbf{Soluciones}: LSTM, GRU, inicialización cuidadosa, clipping.
+    \end{itemize}
+    % Basado en Pregunta 2
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: LSTM (LONG SHORT-TERM MEMORY)
+% ============================================================================
+\section{LSTM (Long Short-Term Memory)}
+
+\begin{frame}{Arquitectura LSTM}
+    \begin{block}{Componentes}
+        \begin{itemize}
+            \item \textbf{Puerta de olvido} ($f_t$): qué información del estado anterior olvidar.
+            \item \textbf{Puerta de entrada} ($i_t$): qué nueva información almacenar.
+            \item \textbf{Celda candidata} ($\tilde{c}_t$): nueva información propuesta.
+            \item \textbf{Puerta de salida} ($o_t$): qué información del estado pasar al siguiente paso.
+        \end{itemize}
+    \end{block}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Ecuaciones LSTM}
+    \begin{align*}
+        f_t &= \sigma(W_f [h_{t-1}, x_t] + b_f) \\
+        i_t &= \sigma(W_i [h_{t-1}, x_t] + b_i) \\
+        \tilde{c}_t &= \tanh(W_c [h_{t-1}, x_t] + b_c) \\
+        c_t &= f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \\
+        o_t &= \sigma(W_o [h_{t-1}, x_t] + b_o) \\
+        h_t &= o_t \odot \tanh(c_t)
+    \end{align*}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}{Interpretación de las puertas}
+    \begin{itemize}
+        \item \textbf{Puerta de olvido} ($f_t$): valores cercanos a 1 = recordar, 0 = olvidar.
+        \item \textbf{Puerta de entrada} ($i_t$): controla cuánto del nuevo candidato se añade.
+        \item \textbf{Estado de celda} ($c_t$): memoria a largo plazo, flujo lineal (evita desvanecimiento).
+        \item \textbf{Puerta de salida} ($o_t$): controla cuánto del estado de celda se expone.
+    \end{itemize}
+    % Basado en Pregunta 12
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: GRU (GATED RECURRENT UNIT)
+% ============================================================================
+\section{GRU (Gated Recurrent Unit)}
+
+\begin{frame}{Arquitectura GRU}
+    \begin{block}{Componentes}
+        \begin{itemize}
+            \item \textbf{Puerta de reinicio} ($r_t$): determina cuánto del estado anterior considerar.
+            \item \textbf{Puerta de actualización} ($z_t$): combina olvido y entrada de LSTM.
+        \end{itemize}
+    \end{block}
+    % Basado en Pregunta 15
+\end{frame}
+
+\begin{frame}{Ecuaciones GRU}
+    \begin{align*}
+        r_t &= \sigma(W_r [h_{t-1}, x_t] + b_r) \\
+        z_t &= \sigma(W_z [h_{t-1}, x_t] + b_z) \\
+        \tilde{h}_t &= \tanh(W_h [r_t \odot h_{t-1}, x_t] + b_h) \\
+        h_t &= (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
+    \end{align*}
+    % Basado en Pregunta 15
+\end{frame}
+
+\begin{frame}{LSTM vs GRU}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Característica} & \textbf{LSTM} & \textbf{GRU} \\
+            \midrule
+            Número de puertas & 3 & 2 \\
+            Parámetros & Más & Menos \\
+            Estado de celda separado & Sí & No \\
+            Velocidad de entrenamiento & Más lenta & Más rápida \\
+            Propenso a sobreajuste & Más (con pocos datos) & Menos \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en Pregunta 4
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: RNN BIDIRECCIONALES
+% ============================================================================
+\section{RNN Bidireccionales}
+
+\begin{frame}{RNN Bidireccional}
+    \begin{itemize}
+        \item Dos RNN: una procesa de izquierda a derecha (forward), otra de derecha a izquierda (backward).
+        \item Estado final: $h_t = [\overrightarrow{h_t}; \overleftarrow{h_t}]$ (concatenación).
+        \item Útil para tareas donde el contexto completo es necesario (NER, POS tagging).
+    \end{itemize}
+    % Basado en Pregunta 6
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: REGULARIZACIÓN EN RNN
+% ============================================================================
+\section{Regularización en RNN}
+
+\begin{frame}{Técnicas de regularización}
+    \begin{itemize}
+        \item \textbf{Dropout}: en conexiones feed-forward y, con cuidado, en conexiones recurrentes (variational dropout).
+        \item \textbf{Weight decay} (L2).
+        \item \textbf{Early stopping}.
+        \item \textbf{Gradient clipping} (para evitar explosión).
+        \item \textbf{Recurrent dropout}: misma máscara en cada paso.
+    \end{itemize}
+    % Basado en Preguntas 10 y 19
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: IMPLEMENTACIÓN EN PYTORCH
+% ============================================================================
+\section{Implementación en PyTorch}
+
+\begin{frame}[fragile]{RNN para clasificación de sentimiento}
+    \begin{lstlisting}
+import torch
+import torch.nn as nn
+
+class RNNClassifier(nn.Module):
+    def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.rnn = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
+        self.fc = nn.Linear(hidden_dim*2, num_classes)
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self, x):
+        embedded = self.embedding(x)            # (batch, seq_len, embed_dim)
+        output, (hidden, cell) = self.rnn(embedded)
+        # Concatenar últimos estados forward y backward
+        hidden_final = torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1)
+        out = self.fc(self.dropout(hidden_final))
+        return out
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Manejo de padding en RNN}
+    \begin{lstlisting}
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+
+def forward(self, x, lengths):
+    embedded = self.embedding(x)
+    packed = pack_padded_sequence(embedded, lengths.cpu(),
+                                   batch_first=True, enforce_sorted=False)
+    packed_output, (hidden, cell) = self.rnn(packed)
+    output, _ = pad_packed_sequence(packed_output, batch_first=True)
+    # Usar hidden o output con máscara...
+    \end{lstlisting}
+    % Basado en Pregunta 7
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: APLICACIONES PRÁCTICAS
+% ============================================================================
+\section{Aplicaciones Prácticas}
+
+\begin{frame}{Clasificación de reseñas (análisis de sentimiento)}
+    \begin{itemize}
+        \item Entrada: secuencia de palabras.
+        \item LSTM bidireccional + promedio de estados o último estado.
+        \item Clasificación binaria (positivo/negativo) o multiclase.
+    \end{itemize}
+    % Basado en Preguntas 1 y 10
+\end{frame}
+
+\begin{frame}{Reconocimiento de Entidades Nombradas (NER)}
+    \begin{itemize}
+        \item Etiquetado por token (B-PER, I-PER, O, etc.).
+        \item LSTM bidireccional + capa lineal + softmax en cada paso.
+        \item Pérdida: cross-entropy por token.
+    \end{itemize}
+    % Basado en Preguntas 6 y 13
+\end{frame}
+
+\begin{frame}{Modelado de lenguaje / generación de texto}
+    \begin{itemize}
+        \item Predecir la siguiente palabra dado el contexto.
+        \item LSTM + softmax sobre vocabulario.
+        \item Evaluación: perplejidad (perplexity).
+        \item Decodificación: greedy, sampling con temperatura.
+    \end{itemize}
+    % Basado en Preguntas 8 y 9
+\end{frame}
+
+\begin{frame}{Traducción automática (seq2seq)}
+    \begin{itemize}
+        \item Encoder LSTM: codifica frase origen en un vector de contexto.
+        \item Decoder LSTM: genera frase destino a partir del contexto.
+        \item Limitación: vector de contexto fijo para frases largas.
+        \item Mejora: atención (próxima sesión).
+    \end{itemize}
+    % Basado en Pregunta 16
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: CASO INTEGRADO - ANÁLISIS DE RESEÑAS HOTELERAS
+% ============================================================================
+\section{Caso Integrado: Análisis de Reseñas Hoteleras}
+
+\begin{frame}{Problema}
+    \begin{itemize}
+        \item Cadena hotelera recibe miles de reseñas.
+        \item Objetivos:
+        \begin{enumerate}
+            \item Clasificar sentimiento global (positivo/negativo/neutral).
+            \item Extraer aspectos (limpieza, ubicación, personal, precio) y su sentimiento asociado.
+        \end{enumerate}
+    \end{itemize}
+    % Basado en Pregunta 20
+\end{frame}
+
+\begin{frame}{Solución propuesta}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Tarea 1: Clasificación global}
+        \begin{itemize}
+            \item Embedding + LSTM bidireccional.
+            \item Promedio de estados ocultos.
+            \item Capa fully-connected + softmax.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Tarea 2: Extracción de aspectos}
+        \begin{itemize}
+            \item Misma capa de embedding y LSTM.
+            \item Salida por token (etiquetas BIO).
+            \item Clasificador de sentimiento por aspecto.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Multi-task learning}
+    \begin{itemize}
+        \item Arquitectura compartida (embedding + LSTM) con dos cabezas.
+        \item Ventaja: representaciones compartidas mejoran ambas tareas.
+        \item Desventaja: mayor complejidad de entrenamiento.
+        \item Métricas: F1 para clasificación, F1 a nivel de entidad para aspectos.
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Por qué una red feed-forward con average pooling falla en distinguir oraciones con el mismo vocabulario pero diferente orden?
+        \item Explica el problema del gradiente desvaneciente en RNN y cómo lo solucionan LSTM/GRU.
+        \item Escribe las ecuaciones de una celda LSTM y explica cada puerta.
+        \item Compara LSTM y GRU. ¿Cuándo usarías cada una?
+        \item ¿Qué es una RNN bidireccional y para qué sirve?
+        \item ¿Cómo manejarías secuencias de longitudes variables en un lote?
+    \end{itemize}
+    % Basado en solucionario
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Cómo funciona backpropagation through time (BPTT)?
+        \item ¿Qué es el truncamiento en BPTT y por qué es necesario?
+        \item ¿Qué técnicas de regularización usarías en una LSTM?
+        \item ¿Cómo inicializarías los embeddings y los pesos de las puertas?
+        \item ¿Qué es perplejidad y cómo se interpreta?
+    \end{itemize}
+    % Basado en Preguntas 5, 9, 18, 19
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+\section{Conexión con el resto del curso}
+
+\begin{frame}{Próximos pasos}
+    \begin{itemize}
+        \item \textbf{Sesión 4 (Embeddings)}: base para capas de embedding.
+        \item \textbf{Sesión 5 (Modelos clásicos)}: superados por RNN en secuencias.
+        \item \textbf{Sesión 7 (Atención y Transformers)}: superan limitaciones de RNN (paralelización, dependencias largas).
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 12: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{RNN vanilla}: procesan secuencias, sufren gradiente desvaneciente.
+            \item \textbf{LSTM}: puertas de olvido, entrada, salida; estado de celda preserva memoria.
+            \item \textbf{GRU}: simplificación de LSTM, menos parámetros, más rápido.
+            \item \textbf{BPTT}: algoritmo de entrenamiento para RNN.
+            \item \textbf{RNN bidireccionales}: contexto completo, ideales para NER.
+            \item \textbf{Regularización}: dropout, weight decay, clipping.
+            \item \textbf{Aplicaciones}: clasificación, NER, modelado de lenguaje, traducción.
+            \item \textbf{Caso integrado}: análisis de reseñas con multi-task.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

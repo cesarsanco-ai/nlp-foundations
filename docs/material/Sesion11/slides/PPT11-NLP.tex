@@ -1,0 +1,355 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 11
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 11 NLP]{\textbf{Sesión 11}}
+\subtitle{Tareas Avanzadas de NLP: NER, Question Answering y Summarization}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: NAMED ENTITY RECOGNITION (NER)
+% ============================================================================
+\section{Named Entity Recognition (NER)}
+
+\begin{frame}{Definición y objetivos}
+    \begin{itemize}
+        \item Identificar y clasificar menciones de entidades con nombre en texto.
+        \item Entidades típicas: personas (PER), organizaciones (ORG), lugares (LOC), fechas (DATE), cantidades (MONEY), etc.
+        \item Aplicaciones: búsqueda semántica, extracción de información, análisis de redes sociales.
+    \end{itemize}
+    % Basado en Pregunta 1
+\end{frame}
+
+\begin{frame}{Sistemas de etiquetado: BIO}
+    \begin{block}{Esquema BIO}
+        \begin{itemize}
+            \item \textbf{B} (Beginning): inicio de una entidad.
+            \item \textbf{I} (Inside): dentro de una entidad.
+            \item \textbf{O} (Outside): fuera de entidad.
+        \end{itemize}
+    \end{block}
+    \begin{exampleblock}{Ejemplo}
+        ``Banco Santander abrió oficina en Madrid'' \\
+        \vspace{0.2cm}
+        Banco (B-ORG) Santander (I-ORG) abrió (O) oficina (O) en (O) Madrid (B-LOC)
+    \end{exampleblock}
+    % Basado en Pregunta 1
+\end{frame}
+
+\begin{frame}{Arquitectura típica con BERT}
+    \begin{itemize}
+        \item Modelo pre-entrenado (BERT) más una capa lineal de clasificación por token.
+        \item Entrada: tokens con subpalabras.
+        \item Salida: logits para cada token, softmax por token.
+        \item Pérdida: entropía cruzada por token (ignorando subpalabras no deseadas).
+    \end{itemize}
+    % Basado en Pregunta 2
+    % IMAGEN: Diagrama de NER con BERT
+\end{frame}
+
+\begin{frame}{Métrica de evaluación: F1 a nivel de entidad}
+    \begin{itemize}
+        \item No se usa accuracy por token (puede ser engañoso por muchas etiquetas ``O'').
+        \item Se considera una entidad correcta si el tipo y los límites coinciden exactamente con la referencia.
+        \item Se calculan verdaderos positivos (VP), falsos positivos (FP) y falsos negativos (FN) sobre entidades completas.
+        \item Precisión = VP/(VP+FP), Recall = VP/(VP+FN), F1 = media armónica.
+    \end{itemize}
+    % Basado en Pregunta 3
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo con Hugging Face}
+    \begin{lstlisting}
+from transformers import pipeline
+
+ner_pipeline = pipeline("ner", model="dslim/bert-base-NER")
+text = "Steve Jobs founded Apple in Cupertino."
+entities = ner_pipeline(text)
+for entity in entities:
+    print(entity)
+    \end{lstlisting}
+    % Basado en Pregunta 15
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: QUESTION ANSWERING (QA)
+% ============================================================================
+\section{Question Answering (QA)}
+
+\begin{frame}{Tipos de QA}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Extractivo}
+        \begin{itemize}
+            \item La respuesta es un fragmento del contexto.
+            \item Ejemplo: SQuAD.
+            \item Ventaja: fiable, no inventa.
+            \item Desventaja: limitado a texto presente.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Generativo}
+        \begin{itemize}
+            \item La respuesta se genera libremente.
+            \item Ejemplo: sistemas de diálogo.
+            \item Ventaja: flexible, puede parafrasear.
+            \item Desventaja: riesgo de alucinaciones.
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 5
+\end{frame}
+
+\begin{frame}{QA extractivo con BERT}
+    \begin{itemize}
+        \item Entrada: ``[CLS] pregunta [SEP] contexto [SEP]''.
+        \item Dos cabezas lineales adicionales:
+        \begin{itemize}
+            \item Una predice logits de inicio.
+            \item Otra predice logits de fin.
+        \end{itemize}
+        \item Softmax sobre todos los tokens para inicio y fin.
+        \item Pérdida: suma de entropías cruzadas de inicio y fin.
+        \item Inferencia: seleccionar span $(i,j)$ que maximice $p_{\text{start}}(i) \cdot p_{\text{end}}(j)$ con $i \le j$.
+    \end{itemize}
+    % Basado en Pregunta 6
+\end{frame}
+
+\begin{frame}{Métricas para QA extractivo}
+    \begin{block}{Exact Match (EM)}
+        Porcentaje de respuestas que coinciden exactamente (carácter por carácter) con la referencia.
+    \end{block}
+    \begin{block}{F1-score}
+        Media armónica de precisión y recall sobre tokens de la respuesta.
+    \end{block}
+    \begin{exampleblock}{Ejemplo}
+        Referencia: ``Steve Jobs'', Predicción: ``Steve'' \\
+        EM = 0, F1 = 0.667 (precisión 1, recall 0.5)
+    \end{exampleblock}
+    % Basado en Pregunta 7
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo con Hugging Face}
+    \begin{lstlisting}
+from transformers import pipeline
+
+qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad")
+context = "Steve Jobs founded Apple in Cupertino."
+question = "Who founded Apple?"
+result = qa_pipeline(question=question, context=context)
+print(f"Answer: {result['answer']}, score: {result['score']}")
+    \end{lstlisting}
+    % Basado en Pregunta 15
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: SUMMARIZATION
+% ============================================================================
+\section{Summarization}
+
+\begin{frame}{Tipos de resumen}
+    \begin{columns}[t]
+        \column{0.5\textwidth}
+        \textbf{Extractivo}
+        \begin{itemize}
+            \item Selecciona oraciones del texto original.
+            \item Más simple, garantiza fluidez.
+            \item Puede ser menos cohesivo.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Abstractivo}
+        \begin{itemize}
+            \item Genera nuevas oraciones parafraseando.
+            \item Más flexible, puede condensar mejor.
+            \item Riesgo de alucinaciones.
+        \end{itemize}
+    \end{columns}
+    % Basado en Pregunta 9
+\end{frame}
+
+\begin{frame}{Arquitectura para summarization abstractivo}
+    \begin{itemize}
+        \item Modelos seq2seq pre-entrenados: BART, T5.
+        \item Encoder: bidireccional (procesa documento).
+        \item Decoder: autoregresivo (genera resumen).
+        \item Atención cruzada entre decoder y encoder.
+    \end{itemize}
+    % Basado en Pregunta 10
+    % IMAGEN: Diagrama encoder-decoder
+\end{frame}
+
+\begin{frame}{Métrica: ROUGE}
+    \begin{block}{ROUGE-N}
+        Solapamiento de n-gramas entre resumen generado y referencia.
+    \end{block}
+    \begin{block}{ROUGE-L}
+        Basado en la subsecuencia común más larga (LCS).
+    \end{block}
+    \begin{block}{ROUGE-S}
+        Skip-bigrams (pares de palabras con gap).
+    \end{block}
+    % Basado en Pregunta 11
+\end{frame}
+
+\begin{frame}{Ejemplo numérico de ROUGE}
+    \textbf{Referencia}: ``El gato persigue al ratón'' \\
+    \textbf{Generado}: ``El gato caza ratones'' \\
+    \begin{itemize}
+        \item ROUGE-1 (recall): unigramas comunes: El, gato (2/5 = 0.4)
+        \item ROUGE-2 (recall): bigramas comunes: ``El gato'' (1/4 = 0.25)
+        \item ROUGE-L: LCS = ``El gato'' (2 palabras) → recall = 2/5 = 0.4
+    \end{itemize}
+    % Basado en Pregunta 11
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo con Hugging Face}
+    \begin{lstlisting}
+from transformers import pipeline
+
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+text = "Elon Musk, CEO of Tesla and SpaceX, announced that Tesla's new factory in Berlin will begin production next month. The factory, which cost over $5 billion, is expected to create 10,000 jobs."
+summary = summarizer(text, max_length=50, min_length=25)
+print(summary[0]['summary_text'])
+    \end{lstlisting}
+    % Basado en Pregunta 15
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas típicas}
+    \begin{itemize}
+        \item ¿Qué métrica usarías para evaluar un sistema de NER? (F1 a nivel de entidad)
+        \item Explica la diferencia entre QA extractivo y generativo.
+        \item ¿Qué es ROUGE y cómo se calcula?
+        \item ¿Qué problemas tiene el summarization abstractivo? (alucinaciones, repeticiones)
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas avanzadas}
+    \begin{itemize}
+        \item ¿Cómo manejarías contextos largos en QA con modelos de ventana limitada? (división, Longformer)
+        \item ¿Qué es el esquema BILOU y cómo mejora a BIO?
+        \item ¿Cómo detectarías alucinaciones en summarization? (métricas de factualidad)
+        \item ¿Qué modelos pre-entrenados existen para QA sobre tablas? (TAPAS)
+    \end{itemize}
+    % Basado en Preguntas 8, 12, 13, 14, 18
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: CONEXIÓN CON EL RESTO DEL CURSO
+% ============================================================================
+
+
+% ============================================================================
+% SECCIÓN 6: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item \textbf{NER}: identificación de entidades con esquemas BIO/BILOU; arquitectura con BERT; evaluación con F1 a nivel de entidad.
+            \item \textbf{QA extractivo}: BERT con dos cabezas para inicio y fin; métricas EM y F1.
+            \item \textbf{Summarization abstractivo}: modelos seq2seq (BART, T5); métrica ROUGE.
+            \item \textbf{Implementación}: pipelines de Hugging Face para cada tarea.
+            \item \textbf{Desafíos}: alucinaciones, contextos largos, datos desbalanceados.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

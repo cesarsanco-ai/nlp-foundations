@@ -1,0 +1,413 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, shapes}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+
+% --- Colores y estilos para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Estilo de cabecera y pie ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Sesión 4: Word Embeddings: Word2Vec y GloVe}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sesión 4} \\ 
+    \Huge \textbf{WORD EMBEDDINGS: WORD2VEC Y GLOVE} \\
+    \Large De vectores dispersos a representaciones densas y semánticas
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\addcontentsline{toc}{chapter}{Índice general}
+
+% ------------------------------------------------------------------
+% CAPÍTULO 4: SESIÓN 4 - WORD EMBEDDINGS
+% ------------------------------------------------------------------
+\chapter{Word Embeddings: Word2Vec y GloVe}
+
+En la sesión anterior se trabajó con representaciones dispersas (BOW, TF-IDF) que, aunque útiles, presentan limitaciones fundamentales: alta dimensionalidad, falta de semántica y pobre generalización. Esta sesión introduce los **word embeddings**: representaciones densas y de baja dimensión que capturan relaciones semánticas y sintácticas entre palabras. Se exploran los dos modelos más influyentes: Word2Vec (con sus arquitecturas Skip-gram y CBOW) y GloVe, basado en factorización de matrices de co-ocurrencia. Se analizan sus fundamentos matemáticos, propiedades y aplicaciones.
+
+\section{Logro de la sesión}
+Comprender el concepto de embeddings densos y entrenar/visualizar word embeddings, interpretando sus propiedades semánticas y su relevancia en NLP moderno.
+
+\section{Limitaciones de las representaciones dispersas}
+
+\subsection{Maldición de la dimensionalidad}
+Las representaciones tipo BOW generan vectores de dimensionalidad igual al tamaño del vocabulario (\(|V|\)), que puede ser fácilmente de 100,000 o más. Esto provoca:
+\begin{itemize}
+    \item \textbf{Alta esparsidad}: la mayoría de las componentes son cero.
+    \item \textbf{Problemas computacionales}: almacenamiento y procesamiento ineficientes.
+    \item \textbf{Sobreajuste}: los modelos tienen demasiados parámetros para la cantidad de datos.
+\end{itemize}
+
+\subsection{Falta de semántica}
+En BOW y TF-IDF, palabras como "gato" y "felino" son tratadas como dimensiones completamente independientes. El modelo no puede generalizar de una a otra. Si el corpus contiene "gato" pero no "felino", no podrá entender que "felino" es similar.
+
+\subsection{Pérdida de relaciones}
+No se capturan relaciones como sinonimia, hiperonimia o analogías. Por ejemplo, la relación "rey" es a "reina" como "hombre" es a "mujer" no es detectable.
+
+\subsection{Soluciones preliminares: LSA}
+Latent Semantic Analysis (LSA) aplica SVD a la matriz TF-IDF para obtener representaciones densas de menor dimensión. Sin embargo, tiene limitaciones: es puramente lineal y no captura bien las relaciones semánticas complejas.
+
+\section{Word Embeddings: concepto fundamental}
+
+Un \textbf{word embedding} es una representación de cada palabra como un vector denso de dimensión fija (típicamente 50-300) en un espacio continuo. La idea central es que palabras con significados similares deben tener representaciones cercanas en ese espacio.
+
+\subsection{Propiedades deseables}
+\begin{itemize}
+    \item \textbf{Dimensionalidad reducida}: típicamente 100-300, mucho menor que \(|V|\).
+    \item \textbf{Densidad}: todas las componentes son no nulas (generalmente).
+    \item \textbf{Continuidad}: el espacio es continuo, permitiendo interpolaciones.
+    \item \textbf{Estructura semántica}: las relaciones entre palabras se reflejan como operaciones vectoriales.
+\end{itemize}
+
+\subsection{La hipótesis distribucional}
+La base teórica de los embeddings es la \textbf{hipótesis distribucional} de Harris (1954): "palabras que ocurren en los mismos contextos tienden a tener significados similares". Es decir, el significado de una palabra puede inferirse de las palabras que la rodean.
+
+\section{Word2Vec}
+
+Word2Vec, desarrollado por Mikolov et al. en 2013, es un modelo neuronal para aprender embeddings a partir de grandes corpus. Existen dos arquitecturas principales: CBOW (Continuous Bag of Words) y Skip-gram.
+
+\subsection{CBOW (Continuous Bag of Words)}
+\subsubsection{Idea fundamental}
+CBOW predice la palabra objetivo a partir de su contexto (palabras circundantes). Por ejemplo, dado un contexto de tamaño 2 a cada lado: ["el", "gato", "al", "ratón"], se predice la palabra central "persigue".
+
+\subsubsection{Arquitectura}
+\begin{itemize}
+    \item \textbf{Entrada}: vectores one-hot de las palabras de contexto (cada una de tamaño \(|V|\)).
+    \item \textbf{Capa oculta}: se promedian los embeddings de las palabras de contexto. La matriz de pesos entre entrada y oculta es la matriz de embeddings \(W\) (tamaño \(|V| \times d\)).
+    \item \textbf{Capa de salida}: se calcula la similitud entre el vector promedio y cada palabra del vocabulario mediante otra matriz \(W'\) (tamaño \(d \times |V|\)). Se aplica softmax para obtener una distribución de probabilidad sobre el vocabulario.
+\end{itemize}
+
+\subsubsection{Formalización matemática}
+Dado un contexto de \(C\) palabras \(\{w_{c1}, w_{c2}, ..., w_{cC}\}\) alrededor de la palabra objetivo \(w_t\):
+
+\begin{enumerate}
+    \item Se obtienen los embeddings de cada palabra de contexto: \(\mathbf{v}_{c_i} = W[:, w_{c_i}]\) (fila de \(W\) correspondiente a la palabra).
+    \item Se promedian: \(\mathbf{h} = \frac{1}{C} \sum_{i=1}^C \mathbf{v}_{c_i}\).
+    \item Se calculan las puntuaciones para cada palabra: \(\mathbf{u}_j = \mathbf{h}^T W'[:, j]\).
+    \item Se aplica softmax: \(P(w_j | \text{contexto}) = \frac{\exp(\mathbf{u}_j)}{\sum_{k=1}^{|V|} \exp(\mathbf{u}_k)}\).
+    \item La pérdida es la entropía cruzada negativa entre la distribución predicha y la verdadera (one-hot de \(w_t\)):
+    \[
+    \mathcal{L} = -\log P(w_t | \text{contexto})
+    \]
+\end{enumerate}
+
+\subsubsection{Entrenamiento}
+Se utiliza backpropagation y gradiente descendente estocástico para actualizar tanto \(W\) como \(W'\). Tras el entrenamiento, la matriz \(W\) contiene los embeddings de las palabras.
+
+\subsubsection{Ventajas y desventajas}
+\begin{itemize}
+    \item \textbf{Ventaja}: más rápido de entrenar que Skip-gram para el mismo corpus.
+    \item \textbf{Desventaja}: no funciona tan bien con palabras poco frecuentes.
+\end{itemize}
+
+\subsection{Skip-gram}
+\subsubsection{Idea fundamental}
+Skip-gram invierte el problema: dada la palabra objetivo, predice las palabras de contexto. Por ejemplo, dada "persigue", predice "el", "gato", "al", "ratón".
+
+\subsubsection{Arquitectura}
+\begin{itemize}
+    \item \textbf{Entrada}: vector one-hot de la palabra objetivo.
+    \item \textbf{Capa oculta}: se obtiene el embedding de la palabra objetivo: \(\mathbf{h} = W[:, w_t]\).
+    \item \textbf{Capa de salida}: para cada posición de contexto \(j\), se calcula la probabilidad de que la palabra en esa posición sea \(w\) mediante softmax sobre el vocabulario.
+\end{itemize}
+
+\subsubsection{Formalización matemática}
+Para una palabra objetivo \(w_t\) y una palabra de contexto \(w_c\) en una ventana:
+
+\[
+P(w_c | w_t) = \frac{\exp(\mathbf{v}_{w_t}^T \mathbf{u}_{w_c})}{\sum_{k=1}^{|V|} \exp(\mathbf{v}_{w_t}^T \mathbf{u}_{k})}
+\]
+donde \(\mathbf{v}_{w_t}\) es el embedding de entrada (fila de \(W\)) y \(\mathbf{u}_{w_c}\) es el embedding de salida (columna de \(W'\)).
+
+La función de pérdida para un par (objetivo, contexto) es:
+\[
+\mathcal{L} = -\log P(w_c | w_t)
+\]
+y se suma sobre todas las posiciones de contexto.
+
+\subsubsection{Muestreo negativo (Negative Sampling)}
+Calcular el softmax sobre todo el vocabulario es prohibitivo. Skip-gram utiliza \textbf{muestreo negativo} para aproximar la pérdida. La idea es distinguir la palabra de contexto verdadera de unas pocas palabras negativas (ruido) muestreadas aleatoriamente.
+
+La función de pérdida para un par (objetivo, contexto) con \(k\) muestras negativas es:
+\[
+\mathcal{L} = -\log \sigma(\mathbf{v}_{w_t}^T \mathbf{u}_{w_c}) - \sum_{i=1}^k \log \sigma(-\mathbf{v}_{w_t}^T \mathbf{u}_{w_i})
+\]
+donde \(\sigma\) es la función sigmoide y \(w_i\) son palabras muestreadas de una distribución de ruido (típicamente unigrama elevado a 3/4 para dar más peso a palabras frecuentes).
+
+\subsubsection{Ventajas y desventajas}
+\begin{itemize}
+    \item \textbf{Ventaja}: funciona mejor con palabras poco frecuentes que CBOW.
+    \item \textbf{Desventaja}: más lento de entrenar.
+\end{itemize}
+
+\subsection{Comparación CBOW vs Skip-gram}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Característica} & \textbf{CBOW} & \textbf{Skip-gram} \\
+\hline
+Dirección & Contexto → Objetivo & Objetivo → Contexto \\
+Velocidad de entrenamiento & Más rápida & Más lenta \\
+Rendimiento con palabras frecuentes & Bueno & Bueno \\
+Rendimiento con palabras poco frecuentes & Regular & Excelente \\
+Uso típico & Corpus grandes, eficiencia & Corpus pequeños, palabras raras \\
+\hline
+\end{tabular}
+\caption{Comparación entre CBOW y Skip-gram.}
+\end{table}
+
+\section{GloVe (Global Vectors)}
+
+GloVe, desarrollado por Pennington et al. en 2014, combina ideas de Word2Vec con factorización de matrices de co-ocurrencia.
+
+\subsection{Matriz de co-ocurrencia}
+Se construye una matriz \(X\) de tamaño \(|V| \times |V|\) donde \(X_{ij}\) es el número de veces que la palabra \(j\) aparece en el contexto de la palabra \(i\) (en una ventana de tamaño fijo). A diferencia de Word2Vec, que solo usa ventanas locales, GloVe explota estadísticas globales del corpus.
+
+\subsection{Fundamento matemático}
+La hipótesis de GloVe es que los embeddings deben satisfacer:
+\[
+\mathbf{v}_i^T \mathbf{v}_j + b_i + b_j \approx \log X_{ij}
+\]
+para palabras que co-ocurren frecuentemente, donde \(b_i\) y \(b_j\) son sesgos.
+
+La función de pérdida es una suma ponderada de errores cuadráticos:
+\[
+\mathcal{L} = \sum_{i,j=1}^{|V|} f(X_{ij}) (\mathbf{v}_i^T \mathbf{v}_j + b_i + b_j - \log X_{ij})^2
+\]
+donde \(f\) es una función de ponderación que da menos peso a co-ocurrencias muy raras y muy frecuentes:
+\[
+f(x) = \begin{cases}
+(x / x_{\max})^\alpha & \text{si } x < x_{\max} \\
+1 & \text{en otro caso}
+\end{cases}
+\]
+con \(x_{\max}\) típicamente 100 y \(\alpha = 0.75\).
+
+\subsection{Entrenamiento}
+Se optimiza mediante gradiente descendente. A diferencia de Word2Vec, GloVe procesa todo el corpus de una vez para construir la matriz de co-ocurrencia, y luego entrena en los pares no nulos.
+
+\subsection{Ventajas}
+\begin{itemize}
+    \item Aprovecha estadísticas globales del corpus.
+    \item Produce embeddings con buenas propiedades de analogía.
+    \item Más rápido de entrenar que Skip-gram en algunos casos.
+\end{itemize}
+
+\section{Propiedades de los embeddings}
+
+\subsection{Relaciones semánticas y sintácticas}
+Una de las propiedades más sorprendentes de los embeddings es que las relaciones entre palabras se manifiestan como operaciones vectoriales. Por ejemplo:
+\[
+\mathbf{v}_{\text{rey}} - \mathbf{v}_{\text{hombre}} + \mathbf{v}_{\text{mujer}} \approx \mathbf{v}_{\text{reina}}
+\]
+Esto indica que el embedding de "reina" es cercano al resultado de la operación.
+
+Otros ejemplos:
+\begin{itemize}
+    \item Madrid - España + Francia ≈ París
+    \item caminar - caminó + nadó ≈ nadar
+    \item mejor - bueno + malo ≈ peor
+\end{itemize}
+
+\subsection{Evaluación de embeddings}
+Las analogías se utilizan como tarea de evaluación intrínseca. Un conjunto de prueba típico contiene pares como:
+\[
+\text{("París", "Francia") : ("Roma", "Italia")}
+\]
+Se evalúa si el embedding de "Italia" es el más cercano a \(\mathbf{v}_{\text{París}} - \mathbf{v}_{\text{Francia}} + \mathbf{v}_{\text{Roma}}\).
+
+\subsection{Vizualización de embeddings}
+Para visualizar embeddings (típicamente en 2D o 3D), se utilizan técnicas de reducción de dimensionalidad como t-SNE o PCA. Por ejemplo, proyectando embeddings de países y capitales, se observan agrupaciones por región.
+
+\section{Embeddings contextuales vs. estáticos}
+
+\subsection{Embeddings estáticos}
+Word2Vec y GloVe producen un único embedding por palabra, independientemente del contexto. Esto tiene limitaciones:
+\begin{itemize}
+    \item No resuelven la polisemia: la palabra "banco" tiene el mismo embedding en "banco de peces" que en "banco de inversión".
+    \item No capturan significado dependiente del contexto.
+\end{itemize}
+
+\subsection{Embeddings contextuales}
+Modelos posteriores (ELMo, BERT, GPT) generan embeddings que dependen del contexto. Cada aparición de una palabra puede tener un vector diferente, calculado en función de las palabras circundantes. Esto permite manejar la polisemia y capturar matices contextuales.
+
+\textbf{Evolución}:
+\begin{itemize}
+    \item Estáticos → Contextuales (ELMo, 2018)
+    \item Contextuales con Transformers (BERT, 2018)
+    \item Modelos generativos (GPT)
+\end{itemize}
+
+\section{Caso integrado: Entrenamiento y visualización de embeddings con Gensim}
+
+\subsection{Paso 1: Preparar el corpus}
+Usaremos el dataset de noticias de 20 Newsgroups (aproximadamente 20,000 documentos). Preprocesamos con tokenización, minúsculas y eliminación de puntuación.
+
+\begin{lstlisting}[language=Python]
+from gensim.models import Word2Vec
+from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('punkt')
+import pandas as pd
+
+# Cargar datos (simulado)
+sentences = [
+    "el gato persigue al ratón",
+    "el perro persigue al gato",
+    "el ratón huye del gato"
+]
+tokenized = [word_tokenize(s.lower()) for s in sentences]
+\end{lstlisting}
+
+\subsection{Paso 2: Entrenar modelo Word2Vec}
+\begin{lstlisting}[language=Python]
+model = Word2Vec(
+    sentences=tokenized,
+    vector_size=100,      # dimensión de los embeddings
+    window=5,              # ventana de contexto
+    min_count=1,           # ignorar palabras con frecuencia < min_count
+    workers=4,             # paralelización
+    sg=1                   # 1 para Skip-gram, 0 para CBOW
+)
+\end{lstlisting}
+
+\subsection{Paso 3: Explorar embeddings}
+\begin{lstlisting}[language=Python]
+# Obtener embedding de una palabra
+vector_gato = model.wv['gato']
+
+# Palabras más similares
+model.wv.most_similar('gato', topn=5)
+
+# Analogías: rey - hombre + mujer ≈ reina
+result = model.wv.most_similar(positive=['mujer', 'rey'], negative=['hombre'])
+\end{lstlisting}
+
+\subsection{Paso 4: Visualización con t-SNE}
+\begin{lstlisting}[language=Python]
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+
+words = list(model.wv.index_to_key)[:100]  # primeras 100 palabras
+vectors = [model.wv[word] for word in words]
+
+tsne = TSNE(n_components=2, random_state=42)
+vectors_2d = tsne.fit_transform(vectors)
+
+plt.figure(figsize=(12,8))
+for i, word in enumerate(words):
+    plt.scatter(vectors_2d[i,0], vectors_2d[i,1])
+    plt.annotate(word, (vectors_2d[i,0], vectors_2d[i,1]))
+plt.show()
+\end{lstlisting}
+
+\subsection{Paso 5: Cargar embeddings pre-entrenados (GloVe)}
+\begin{lstlisting}[language=Python]
+from gensim.scripts.glove2word2vec import glove2word2vec
+from gensim.models import KeyedVectors
+
+# Convertir GloVe a formato Word2Vec
+glove2word2vec('glove.6B.100d.txt', 'glove.6B.100d.word2vec.txt')
+
+# Cargar embeddings
+glove = KeyedVectors.load_word2vec_format('glove.6B.100d.word2vec.txt')
+\end{lstlisting}
+
+\section{Preparación para entrevistas}
+
+\subsection{Preguntas típicas}
+\begin{itemize}
+    \item \textbf{"Explica la diferencia entre Skip-gram y CBOW."}
+    CBOW predice la palabra objetivo a partir del contexto; Skip-gram predice el contexto a partir de la palabra objetivo. Skip-gram funciona mejor con palabras poco frecuentes, CBOW es más rápido.
+    
+    \item \textbf{"¿Qué es el muestreo negativo y por qué se usa?"}
+    Técnica para aproximar el softmax en Word2Vec. En lugar de actualizar todas las palabras, solo se actualiza la palabra objetivo positiva y unas pocas negativas (ruido). Reduce drásticamente el costo computacional.
+    
+    \item \textbf{"¿Cómo interpretas la operación vectorial rey - hombre + mujer ≈ reina?"}
+    Los embeddings codifican relaciones semánticas como vectores. La diferencia rey - hombre captura la relación de "masculino a femenino" (o "real a no real"). Sumar mujer aplica esa relación, dando cerca de reina.
+    
+    \item \textbf{"¿Cuál es la diferencia entre embeddings estáticos y contextuales?"}
+    Estáticos: una representación fija por palabra, independiente del contexto. Contextuales: la representación varía según el contexto, resolviendo polisemia.
+    
+    \item \textbf{"¿En qué se diferencia GloVe de Word2Vec?"}
+    Word2Vec usa ventanas locales y entrena con predicción; GloVe usa estadísticas globales de co-ocurrencia y optimiza una factorización matricial. Ambos producen embeddings similares, pero GloVe puede converger más rápido.
+\end{itemize}
+
+\subsection{Preguntas avanzadas}
+\begin{itemize}
+    \item \textbf{"¿Por qué el muestreo negativo usa una distribución de ruido con exponente 3/4?"}
+    Esto da más peso a palabras frecuentes en el muestreo, haciendo que el modelo las distinga mejor sin sobrecargar con las muy frecuentes.
+    
+    \item \textbf{"¿Qué problemas tienen los embeddings con palabras polisémicas?"}
+    Al ser estáticos, mezclan todos los significados en un solo vector, lo que puede ser subóptimo para tareas que requieren discriminación de sentidos.
+\end{itemize}
+
+\section{Conexión con el resto del curso}
+\begin{itemize}
+    \item \textbf{Sesión 5}: Modelos secuenciales (RNN, LSTM) que utilizan embeddings como entrada.
+    \item \textbf{Sesión 6}: Mecanismos de atención y Transformers, que combinan embeddings con contexto.
+    \item \textbf{Sesión 7}: Modelos pre-entrenados (BERT, GPT) que generan embeddings contextuales.
+\end{itemize}
+
+\section{Resumen}
+\begin{itemize}
+    \item Los \textbf{word embeddings} son representaciones densas que capturan semántica.
+    \item \textbf{Word2Vec} tiene dos arquitecturas: CBOW (contexto→objetivo, rápido) y Skip-gram (objetivo→contexto, mejor para palabras raras).
+    \item \textbf{Muestreo negativo} acelera el entrenamiento de Skip-gram.
+    \item \textbf{GloVe} factoriza la matriz de co-ocurrencia global, combinando ventajas de ambos.
+    \item Los embeddings permiten \textbf{analogías} mediante operaciones vectoriales.
+    \item Son la base de modelos más avanzados, aunque han sido superados por \textbf{embeddings contextuales}.
+\end{itemize}
+
+\end{document}

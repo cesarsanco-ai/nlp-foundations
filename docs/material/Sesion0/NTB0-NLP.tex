@@ -1,0 +1,455 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries\color{blue}}{Semana \thesection}{1em}{}
+
+\title{\textbf{Curso de Procesamiento de Lenguaje Natural (NLP)}\\ \large Syllabus de Notebooks por Semana}
+\author{Carlos César Sánchez Coronel}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introducción}
+Cada semana se trabajará con dos tipos de notebooks:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Notebook Conceptual (NB1):} Enfocado en la comprensión profunda. Se utilizan datos \textit{dummy} (textos inventados, secuencias cortas) para operaciones matemáticas, visualización de conceptos lingüísticos, implementación de algoritmos desde cero y experimentación con parámetros de modelos y librerías (NLTK, spaCy, Hugging Face, PyTorch). Aquí se exploran desde tokenización hasta mecanismos de atención.
+    \item \textbf{Notebook de Ejercicios (NB2):} Aplicación práctica sobre conjuntos de datos reales (IMDb, SQuAD, corpora de noticias, etc.). Se plantean problemas concretos de clasificación, generación, extracción de información, etc., donde el estudiante debe aplicar lo aprendido, evaluar métricas y justificar decisiones.
+\end{itemize}
+
+\newpage
+
+\section{Fundamentos Lingüísticos y Primeros Pasos con NLP}
+\subsection*{Propósito}
+Introducir al estudiante en el campo del NLP, sus desafíos y las herramientas básicas de procesamiento. Se exploran los niveles del lenguaje y se realiza una primera toma de contacto con NLTK y spaCy.
+
+\subsection*{Notebook Conceptual (NB1) – Explorando el Lenguaje con Datos Dummy}
+\begin{itemize}
+    \item \textbf{Datos:} Frases inventadas, oraciones con ambigüedad léxica y estructural.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Definir un pequeño corpus de oraciones y etiquetarlas manualmente con Part-of-Speech (sustantivo, verbo, etc.).
+        \item Usar NLTK y spaCy para obtener automáticamente los POS tags y comparar.
+        \item Visualizar árboles de dependencia con spaCy (displacy).
+        \item Identificar entidades nombradas (NER) en textos dummy.
+        \item Discutir la ambigüedad: ejemplos de misma palabra con diferente significado según contexto.
+    \end{enumerate}
+    \item \textbf{Conceptos:} Morfología, sintaxis, semántica, pragmática, POS tagging, NER, parsing.
+    \item \textbf{Herramientas:} NLTK, spaCy, displacy.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Análisis de un Corpus Real}
+\begin{itemize}
+    \item \textbf{Dataset:} Fragmento de Brown Corpus (NLTK) o noticias cortas.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Cargar el corpus y realizar estadísticas básicas (número de oraciones, palabras, vocabulario).
+        \item Aplicar POS tagging y NER con spaCy.
+        \item Identificar las entidades más frecuentes.
+        \item Reflexionar sobre los desafíos del lenguaje no estructurado.
+    \end{enumerate}
+\end{itemize}
+
+\section{Preprocesamiento de Texto: Tokenización, Lematización y Expresiones Regulares}
+\subsection*{Propósito}
+Dominar las técnicas de limpieza y normalización de texto, incluyendo tokenización a nivel de palabra y subpalabra, stemming, lematización y uso de regex.
+
+\subsection*{Notebook Conceptual (NB1) – Manipulación de Texto Dummy}
+\begin{itemize}
+    \item \textbf{Datos:} Textos inventados que incluyen URLs, emojis, números, mayúsculas, palabras con prefijos/sufijos.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Implementar tokenización manual con Python (split, expresiones regulares).
+        \item Comparar tokenizadores de NLTK, spaCy y Hugging Face (BERT tokenizer).
+        \item Aplicar stemming con PorterStemmer y SnowballStemmer; comparar resultados.
+        \item Aplicar lematización con WordNetLemmatizer y spaCy; observar diferencias con stemming.
+        \item Limpiar texto usando regex: eliminar URLs, menciones, caracteres especiales.
+        \item Introducir tokenización por subpalabras: mostrar cómo BPE y WordPiece dividen palabras poco frecuentes.
+    \end{enumerate}
+    \item \textbf{Conceptos:} OOV, BPE, WordPiece, stemming vs lematización.
+    \item \textbf{Herramientas:} re, NLTK, spaCy, tokenizers (Hugging Face).
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Preprocesamiento de Reseñas de Películas}
+\begin{itemize}
+    \item \textbf{Dataset:} IMDb reviews (subconjunto).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Aplicar un pipeline de preprocesamiento completo: limpieza con regex, tokenización, eliminación de stopwords, lematización.
+        \item Crear una función que normalice cualquier texto nuevo.
+        \item Visualizar las palabras más frecuentes antes y después del preprocesamiento.
+    \end{enumerate}
+\end{itemize}
+
+\section{Representación del Texto: BOW, TF-IDF y N-gramas}
+\subsection*{Propósito}
+Transformar texto en vectores numéricos utilizando técnicas clásicas y entender sus limitaciones.
+
+\subsection*{Notebook Conceptual (NB1) – Construcción Manual de Vectores}
+\begin{itemize}
+    \item \textbf{Datos:} Tres oraciones muy cortas (ej. "el gato come pescado", "el perro come carne", "el gato come carne").
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Construir manualmente el vocabulario y crear la matriz BOW (Bag of Words).
+        \item Calcular TF-IDF paso a paso: frecuencia en documento, frecuencia inversa.
+        \item Comparar los vectores BOW y TF-IDF para las oraciones; discutir qué palabras se ponderan más.
+        \item Generar n-gramas (bigramas, trigramas) y observar cómo capturan contexto.
+        \item Usar CountVectorizer y TfidfVectorizer de sklearn y verificar que los resultados coinciden con el cálculo manual.
+    \end{enumerate}
+    \item \textbf{Conceptos:} BOW, TF-IDF, n-gramas, representaciones dispersas.
+    \item \textbf{Herramientas:} sklearn.feature\_extraction.text.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Clasificación de Noticias con BOW/TF-IDF}
+\begin{itemize}
+    \item \textbf{Dataset:} 20 Newsgroups (sklearn) o noticias locales.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Extraer características con CountVectorizer y TfidfVectorizer.
+        \item Entrenar un clasificador (regresión logística) y evaluar con accuracy.
+        \item Probar distintos rangos de n-gramas y ver impacto.
+        \item Identificar las palabras con mayor peso TF-IDF por categoría.
+    \end{enumerate}
+\end{itemize}
+
+\section{Word Embeddings: Word2Vec y GloVe}
+\subsection*{Propósito}
+Comprender la diferencia entre representaciones densas y dispersas, entrenar embeddings y explorar sus propiedades semánticas.
+
+\subsection*{Notebook Conceptual (NB1) – Entrenando Embeddings desde Cero}
+\begin{itemize}
+    \item \textbf{Datos:} Corpus pequeño (oraciones inventadas o fragmento de texto).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Explicar la arquitectura Skip-gram y CBOW con diagramas.
+        \item Usar gensim para entrenar Word2Vec sobre el corpus pequeño.
+        \item Visualizar los embeddings con PCA/t-SNE (matplotlib).
+        \item Probar analogías: rey - hombre + mujer = ? (si el corpus lo permite).
+        \item Cargar embeddings pre-entrenados de GloVe y explorar similitudes entre palabras.
+        \item Comparar la cobertura de vocabulario entre Word2Vec propio y GloVe.
+    \end{enumerate}
+    \item \textbf{Conceptos:} Embeddings estáticos, Skip-gram, CBOW, matriz de co-ocurrencia (GloVe).
+    \item \textbf{Herramientas:} gensim, numpy, matplotlib, sklearn.manifold.TSNE.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Búsqueda de Similitudes Semánticas}
+\begin{itemize}
+    \item \textbf{Dataset:} Corpus de Wikipedia (subconjunto) o textos de noticias.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Entrenar Word2Vec con más datos y evaluar calidad con analogías.
+        \item Construir un sistema simple de búsqueda de palabras similares.
+        \item Usar embeddings para encontrar documentos similares (promediando embeddings de palabras).
+    \end{enumerate}
+\end{itemize}
+
+\section{Modelos Clásicos para NLP: Naive Bayes y SVM}
+\subsection*{Propósito}
+Aplicar algoritmos clásicos de machine learning a tareas de clasificación de textos y comparar su rendimiento con enfoques modernos.
+
+\subsection*{Notebook Conceptual (NB1) – Clasificación con Datos Dummy}
+\begin{itemize}
+    \item \textbf{Datos:} Conjunto pequeño de textos inventados con dos categorías (ej. deportes y política).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Calcular probabilidades condicionales para Naive Bayes (manual) sobre el corpus pequeño.
+        \item Implementar un clasificador Naive Bayes desde cero usando frecuencias.
+        \item Entrenar GaussianNB y MultinomialNB con sklearn y comparar.
+        \item Visualizar la frontera de decisión de SVM lineal en un espacio reducido (usando PCA sobre TF-IDF).
+    \end{enumerate}
+    \item \textbf{Conceptos:} Teorema de Bayes, independencia condicional, margen máximo.
+    \item \textbf{Herramientas:} sklearn.naive\_bayes, sklearn.svm.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Análisis de Sentimiento de Reseñas}
+\begin{itemize}
+    \item \textbf{Dataset:} IMDb reviews (clasificación positiva/negativa).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Preprocesar textos y representar con TF-IDF.
+        \item Entrenar Naive Bayes y SVM lineal.
+        \item Evaluar con precisión, recall, F1 y matriz de confusión.
+        \item Comparar el rendimiento y velocidad de entrenamiento.
+    \end{enumerate}
+\end{itemize}
+
+\section{Redes Neuronales para NLP y Embeddings Entrenables}
+\subsection*{Propósito}
+Construir redes neuronales simples con PyTorch, introduciendo la capa de embedding y clasificadores basados en promedio de embeddings.
+
+\subsection*{Notebook Conceptual (NB1) – Clasificador con Embeddings Entrenables}
+\begin{itemize}
+    \item \textbf{Datos:} Frases cortas generadas (ej. "me gusta este producto", "es terrible").
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Construir un vocabulario y mapear palabras a índices.
+        \item Implementar una capa de embedding en PyTorch (nn.Embedding).
+        \item Crear un modelo que promedie los embeddings de las palabras y pase por una capa lineal.
+        \item Entrenar para clasificación binaria (positivo/negativo) con entropía cruzada.
+        \item Visualizar la evolución de la pérdida y accuracy.
+        \item Comparar embeddings pre-entrenados (GloVe) fijos vs. entrenables.
+    \end{enumerate}
+    \item \textbf{Conceptos:} Embedding layer, backpropagation, overfitting en NLP.
+    \item \textbf{Herramientas:} PyTorch, torch.nn, torch.optim.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Clasificación de Sentimiento con PyTorch}
+\begin{itemize}
+    \item \textbf{Dataset:} IMDb (subconjunto balanceado).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Crear DataLoader con padding y atención a longitudes variables.
+        \item Entrenar el modelo de promedio de embeddings.
+        \item Evaluar en test y comparar con modelos clásicos (Naive Bayes, SVM).
+        \item Experimentar con dropout y regularización.
+    \end{enumerate}
+\end{itemize}
+
+\section{Redes Recurrentes (RNN, LSTM, GRU) para NLP}
+\subsection*{Propósito}
+Modelar secuencias de texto capturando dependencias temporales mediante redes recurrentes.
+
+\subsection*{Notebook Conceptual (NB1) – RNN y LSTM con Datos Sintéticos}
+\begin{itemize}
+    \item \textbf{Datos:} Secuencias de números o caracteres (ej. predecir el siguiente número en [1,2,3,4,?]).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Implementar una RNN simple desde cero (o con PyTorch) y visualizar el estado oculto.
+        \item Mostrar el problema del gradiente desvaneciente con secuencias largas (usando backpropagation manual).
+        \item Construir una LSTM con PyTorch y comparar su capacidad para recordar información lejana.
+        \item Entrenar una LSTM para clasificación de secuencias (ej. decidir si una secuencia de números es creciente o no).
+    \end{enumerate}
+    \item \textbf{Conceptos:} Estado oculto, vanishing gradient, puertas LSTM.
+    \item \textbf{Herramientas:} PyTorch nn.RNN, nn.LSTM, nn.GRU.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Clasificación de Sentimiento con LSTM}
+\begin{itemize}
+    \item \textbf{Dataset:} IMDb o reviews de Yelp.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Construir un modelo LSTM con embeddings entrenables.
+        \item Entrenar y comparar con el modelo de promedio de embeddings.
+        \item Visualizar la atención (si se implementa) o las salidas ocultas.
+    \end{enumerate}
+\end{itemize}
+
+\section{Modelos Seq2Seq y Atención}
+\subsection*{Propósito}
+Implementar arquitecturas encoder-decoder con mecanismo de atención para tareas como traducción automática.
+
+\subsection*{Notebook Conceptual (NB1) – Traducción con Datos Dummy}
+\begin{itemize}
+    \item \textbf{Datos:} Pares de frases inventadas (ej. inglés "I love cats" \rightarrow español "amo a los gatos").
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Construir un encoder RNN que comprime la frase origen.
+        \item Construir un decoder RNN que genera la frase destino.
+        \item Implementar el mecanismo de atención (Bahdanau o Luong) paso a paso.
+        \item Visualizar los pesos de atención para cada paso de generación.
+        \item Entrenar el modelo en el corpus minúsculo y observar las traducciones.
+    \end{enumerate}
+    \item \textbf{Conceptos:} Encoder-decoder, contexto fijo, atención, BLEU.
+    \item \textbf{Herramientas:} PyTorch, matplotlib para heatmaps de atención.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Traducción Inglés-Alemán (simplificada)}
+\begin{itemize}
+    \item \textbf{Dataset:} Multi30k (subconjunto de frases cortas).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Preprocesar y construir vocabularios.
+        \item Entrenar un modelo Seq2Seq con atención.
+        \item Evaluar con BLEU score usando sacrebleu.
+    \end{enumerate}
+\end{itemize}
+
+\section{Transformers: Atención Multi-Head y Positional Encoding}
+\subsection*{Propósito}
+Comprender la arquitectura del transformer desde cero, implementando self-attention y positional encoding.
+
+\subsection*{Notebook Conceptual (NB1) – Implementación de Self-Attention}
+\begin{itemize}
+    \item \textbf{Datos:} Secuencias de vectores aleatorios (simulan embeddings de palabras).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Calcular self-attention: matrices Q, K, V, softmax sobre puntuaciones.
+        \item Implementar multi-head attention concatenando cabezas.
+        \item Añadir positional encoding (seno/coseno) a los embeddings.
+        \item Construir un bloque transformer completo (atención + feed-forward + residual + layer norm).
+        \item Probar la propagación hacia adelante con datos dummy.
+    \end{enumerate}
+    \item \textbf{Conceptos:} Self-attention, multi-head, positional encoding, residual connections.
+    \item \textbf{Herramientas:} PyTorch, numpy.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Clasificación de Texto con Transformer (Encoder)}
+\begin{itemize}
+    \item \textbf{Dataset:} IMDb o AG News.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Usar la implementación de transformer encoder de PyTorch (nn.TransformerEncoder) o construir una propia.
+        \item Entrenar para clasificación y comparar con LSTM.
+        \item Analizar la atención en diferentes cabezas.
+    \end{enumerate}
+\end{itemize}
+
+\section{Modelos Pre-entrenados: BERT y GPT – Fine-tuning}
+\subsection*{Propósito}
+Utilizar la librería Hugging Face para cargar modelos pre-entrenados y fine-tunearlos en tareas específicas.
+
+\subsection*{Notebook Conceptual (NB1) – Explorando BERT y GPT}
+\begin{itemize}
+    \item \textbf{Datos:} Una oración cualquiera.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Cargar el tokenizer de BERT (bert-base-uncased) y tokenizar una oración.
+        \item Inspeccionar los input_ids, attention_mask y token type ids.
+        \item Pasar por el modelo BERT y obtener los embeddings de cada token y el [CLS].
+        \item Generar texto con GPT-2 usando pipeline.
+        \item Comparar la representación contextual de una palabra en diferentes oraciones.
+    \end{enumerate}
+    \item \textbf{Conceptos:} MLM, NSP, autoregresivo, fine-tuning, tokenizers de subpalabras.
+    \item \textbf{Herramientas:} transformers (Hugging Face), torch.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Fine-tuning de BERT para Clasificación}
+\begin{itemize}
+    \item \textbf{Dataset:} IMDb o cualquier dataset de clasificación de textos.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Fine-tunear BERT para clasificación binaria usando Trainer o entrenamiento manual.
+        \item Evaluar en test y comparar con modelos clásicos y LSTM.
+        \item Guardar el modelo fine-tuneado y subirlo al Hugging Face Hub (opcional).
+    \end{enumerate}
+\end{itemize}
+
+\section{Tareas Avanzadas: NER, Question Answering, Summarization}
+\subsection*{Propósito}
+Aplicar modelos pre-entrenados a tareas específicas usando pipelines y fine-tuning.
+
+\subsection*{Notebook Conceptual (NB1) – Pipelines de Hugging Face}
+\begin{itemize}
+    \item \textbf{Datos:} Texto inventado con entidades, preguntas simples.
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Usar pipeline("ner") para extraer entidades.
+        \item Usar pipeline("question-answering") con un contexto y una pregunta.
+        \item Usar pipeline("summarization") en un párrafo.
+        \item Analizar los resultados y umbrales de confianza.
+    \end{enumerate}
+    \item \textbf{Conceptos:} NER, SQuAD, ROUGE, extractive vs abstractive summarization.
+    \item \textbf{Herramientas:} transformers, datasets (para métricas).
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Fine-tuning para NER o QA}
+\begin{itemize}
+    \item \textbf{Dataset:} CoNLL-2003 (NER) o SQuAD (QA).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Fine-tunear BERT para NER usando Hugging Face.
+        \item Evaluar con métricas por entidad.
+        \item (Opcional) Fine-tunear para QA y evaluar con exact match y F1.
+    \end{enumerate}
+\end{itemize}
+
+\section{RAG (Retrieval-Augmented Generation) y Bases de Datos Vectoriales}
+\subsection*{Propósito}
+Diseñar sistemas que combinan recuperación de información con generación para responder preguntas sobre documentos propios.
+
+\subsection*{Notebook Conceptual (NB1) – Búsqueda Semántica con FAISS}
+\begin{itemize}
+    \item \textbf{Datos:} Conjunto pequeño de documentos (ej. párrafos de Wikipedia).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Generar embeddings de los documentos usando Sentence Transformers.
+        \item Construir un índice FAISS y almacenar los embeddings.
+        \item Dada una pregunta, obtener el embedding, buscar los documentos más similares.
+        \item Pasar el documento recuperado a un modelo generativo (GPT-2) junto con la pregunta para generar respuesta.
+        \item Evaluar la relevancia de los documentos recuperados.
+    \end{enumerate}
+    \item \textbf{Conceptos:} RAG, bases vectoriales, FAISS, Sentence Transformers.
+    \item \textbf{Herramientas:} sentence-transformers, faiss, transformers.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Chatbot sobre Documentos Propios}
+\begin{itemize}
+    \item \textbf{Dataset:} PDFs o artículos propios (por ejemplo, política de empresa).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Crear un pipeline completo: chunking, embeddings, FAISS, recuperación, generación.
+        \item Probar el chatbot con preguntas reales.
+        \item Evaluar cualitativamente las respuestas.
+    \end{enumerate}
+\end{itemize}
+
+\section{Prompt Engineering y Optimización (LoRA, Cuantización)}
+\subsection*{Propósito}
+Dominar técnicas de prompting y métodos eficientes para adaptar y optimizar LLMs.
+
+\subsection*{Notebook Conceptual (NB1) – Experimentos con Prompts}
+\begin{itemize}
+    \item \textbf{Datos:} Preguntas variadas (matemáticas, razonamiento, creatividad).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Probar zero-shot, few-shot y chain-of-thought en un modelo como GPT-2 o Llama (vía Hugging Face).
+        \item Comparar respuestas y analizar la mejora con ejemplos.
+        \item Introducir LoRA: cargar un modelo base y aplicar PEFT para fine-tuning eficiente en un dataset pequeño.
+        \item Cuantizar un modelo con torch.ao (INT8) y medir reducción de tamaño y velocidad.
+    \end{enumerate}
+    \item \textbf{Conceptos:} In-context learning, LoRA, adaptadores, cuantización, ONNX.
+    \item \textbf{Herramientas:} peft, bitsandbytes, torch.ao, onnx.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Fine-tuning Eficiente con LoRA}
+\begin{itemize}
+    \item \textbf{Dataset:} Instrucciones o diálogos (ej. Alpaca).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Fine-tunar un modelo pequeño (como GPT-2) con LoRA para seguir instrucciones.
+        \item Evaluar la calidad de las respuestas antes y después.
+        \item Exportar a ONNX y medir latencia.
+    \end{enumerate}
+\end{itemize}
+
+\section{Despliegue de Modelos NLP (MLOps)}
+\subsection*{Propósito}
+Llevar un modelo NLP a producción: creación de API, contenerización y monitoreo básico.
+
+\subsection*{Notebook Conceptual (NB1) – API con FastAPI y Docker}
+\begin{itemize}
+    \item \textbf{Datos:} Modelo fine-tuneado de semanas anteriores (ej. clasificador de sentimiento).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Serializar el modelo con torch.save y tokenizer con save\_pretrained.
+        \item Crear una aplicación FastAPI con un endpoint /predict que reciba texto y devuelva la clase.
+        \item Probar localmente con requests desde el notebook.
+        \item Escribir un Dockerfile y construir la imagen.
+        \item Ejecutar el contenedor y probar el endpoint.
+    \end{enumerate}
+    \item \textbf{Conceptos:} API REST, serialización, contenedores, latencia, throughput.
+    \item \textbf{Herramientas:} FastAPI, uvicorn, docker, requests.
+\end{itemize}
+
+\subsection*{Notebook de Ejercicios (NB2) – Monitoreo de Deriva}
+\begin{itemize}
+    \item \textbf{Datos:} Nuevos textos que simulan un cambio en la distribución (drift).
+    \item \textbf{Actividades:}
+    \begin{enumerate}
+        \item Desplegar la API localmente.
+        \item Enviar lotes de textos y registrar predicciones.
+        \item Usar evidently o alibi-detect para comparar la distribución de las predicciones con las originales.
+        \item Detectar si hay drift y discutir acciones.
+    \end{enumerate}
+\end{itemize}
+
+\end{document}

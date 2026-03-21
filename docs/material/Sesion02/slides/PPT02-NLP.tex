@@ -1,0 +1,453 @@
+% --- CORRECCIÓN IMPORTANTE EN LA PRIMERA LÍNEA ---
+% Agregamos "xcolor=table" para que funcione \rowcolor sin errores
+\documentclass[aspectratio=169, 10pt, xcolor=table]{beamer}
+
+% --- Configuración del Tema (estilo profesional como el ejemplo) ---
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+% --- Paquetes necesarios ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- Ruta de Imágenes (crea la carpeta "imagenes" y coloca ahí tus archivos) ---
+\graphicspath{{./imagenes/}}
+
+% --- Estilo para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Pie de página personalizado ---
+\makeatletter
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}Sesión 2
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}NLP \hfill \insertframenumber/\inserttotalframenumber \hspace*{0.3cm}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\makeatother
+
+% --- Datos de la portada ---
+\title[SESIÓN 2 NLP]{\textbf{Sesión 2}}
+\subtitle{Preprocesamiento de Texto: \\ De texto crudo a datos listos para modelar}
+\author[Prof. C. Sánchez]{Carlos César Sánchez Coronel}
+\institute{\textbf{NLP}}
+\date{}
+
+% Logo opcional (descomentar si tienes la imagen)
+% \titlegraphic{\includegraphics[height=1.5cm]{logo.png}}
+
+% --- Eliminar la barra de navegación (opcional) ---
+\setbeamertemplate{navigation symbols}{}
+
+% --- Índice al inicio de cada sección ---
+\AtBeginSection[]{
+  \begin{frame}
+    \frametitle{Contenido}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ============================================================================
+% INICIO DEL DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% --- Portada ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- Índice general ---
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 1: INTRODUCCIÓN AL PIPELINE DE PREPROCESAMIENTO
+% ============================================================================
+\section{Introducción al Pipeline de Preprocesamiento}
+
+\begin{frame}{¿Por qué preprocesar el texto?}
+    \begin{itemize}
+        \item El texto real es \textbf{ruidoso}: URLs, menciones, emojis, mayúsculas, puntuación, etc.
+        \item El preprocesamiento transforma el texto crudo en una representación estructurada para modelos.
+        \item Un pipeline típico incluye:
+        \begin{enumerate}
+            \item Limpieza inicial
+            \item Tokenización
+            \item Normalización
+            \item Eliminación de stopwords (opcional)
+            \item Reducción morfológica (stemming/lematización)
+        \end{enumerate}
+    \end{itemize}
+    % Basado en introducción del PDF
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 2: TOKENIZACIÓN
+% ============================================================================
+\section{Tokenización}
+
+\begin{frame}{Tokenización por palabras}
+    \begin{block}{Definición}
+        Dividir un texto en unidades mínimas (tokens), normalmente palabras, signos de puntuación, etc.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Desafíos}: contracciones (``don't''), puntuación, idiomas sin espacios.
+        \item \textbf{Herramientas}: NLTK, spaCy, Stanford CoreNLP.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Tokenización por oraciones}
+    \begin{block}{Definición}
+        Dividir un texto en oraciones. La dificultad está en desambiguar el punto.
+    \end{block}
+    \begin{exampleblock}{Ejemplo}
+        ``El Sr. Pérez llegó. ¿Cómo está?'' $\rightarrow$ El punto después de ``Sr.'' no indica fin de oración.
+    \end{exampleblock}
+    \begin{itemize}
+        \item Enfoques: reglas (listas de abreviaturas), modelos ML.
+    \end{itemize}
+    % Basado en PDF y Pregunta 6
+\end{frame}
+
+\begin{frame}{Tokenización por subpalabras}
+    \begin{block}{Motivación}
+        Resolver el problema de palabras fuera de vocabulario (OOV) y manejar lenguas con morfología rica.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{BPE (Byte-Pair Encoding)}: fusiona iterativamente el par más frecuente.
+        \item \textbf{WordPiece}: fusiona el par que maximiza la verosimilitud del lenguaje.
+        \item \textbf{Unigram}: modelo probabilístico de subpalabras.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+\begin{frame}{Algoritmo BPE paso a paso}
+    \begin{enumerate}
+        \item Inicializar vocabulario con caracteres individuales.
+        \item Contar frecuencias de pares de símbolos adyacentes.
+        \item Fusionar el par más frecuente y añadirlo al vocabulario.
+        \item Repetir hasta alcanzar tamaño deseado.
+    \end{enumerate}
+    \begin{exampleblock}{Ejemplo con ``low low lower''}
+        \begin{itemize}
+            \item Inicial: l, o, w, e, r
+            \item Fusión ``lo'' (frecuente), luego ``low'', etc.
+        \end{itemize}
+    \end{exampleblock}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 3: NORMALIZACIÓN
+% ============================================================================
+\section{Normalización}
+
+\begin{frame}{Técnicas de normalización}
+    \begin{itemize}
+        \item \textbf{Minúsculas}: reducir variabilidad (excepto si el caso es informativo).
+        \item \textbf{Eliminación de caracteres especiales}: signos de puntuación, caracteres no imprimibles.
+        \item \textbf{Manejo de URLs, menciones, hashtags}: reemplazar por tokens especiales (\texttt{<URL>}, \texttt{<USER>}).
+        \item \textbf{Manejo de emojis}: eliminar, convertir a texto, o tratar como tokens.
+    \end{itemize}
+    % Basado en PDF y Pregunta 2
+\end{frame}
+
+\begin{frame}[fragile]{Expresiones regulares (regex)}
+    \begin{block}{Fundamento matemático}
+        Las regex describen lenguajes regulares reconocidos por autómatas finitos deterministas (DFA) en tiempo $O(n)$.
+    \end{block}
+    \begin{exampleblock}{Ejemplos en Python}
+        \begin{lstlisting}
+import re
+text = re.sub(r'http\S+', '<URL>', text)   # URLs
+text = re.sub(r'@\S+', '<USER>', text)     # menciones
+text = re.sub(r'#\S+', '<HASHTAG>', text)  # hashtags
+text = re.sub(r'[!?.]+', '', text)         # puntuación
+        \end{lstlisting}
+    \end{exampleblock}
+    % Basado en PDF y Pregunta 5
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 4: ELIMINACIÓN DE STOPWORDS
+% ============================================================================
+\section{Eliminación de Stopwords}
+
+\begin{frame}{Stopwords: ¿eliminar o no?}
+    \begin{itemize}
+        \item Palabras muy frecuentes sin mucho significado (artículos, preposiciones).
+        \item \textbf{En modelos clásicos (BoW)}: eliminar reduce dimensionalidad y ruido.
+        \item \textbf{En modelos contextuales (BERT)}: no es necesario, el modelo aprende a ignorarlas o usarlas para contexto.
+        \item \textbf{Cuidado}: palabras como ``no'' son cruciales para sentimiento.
+    \end{itemize}
+    % Basado en PDF y Pregunta 3
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 5: STEMMING VS LEMMATIZATION
+% ============================================================================
+\section{Stemming vs Lemmatization}
+
+\begin{frame}{Stemming}
+    \begin{block}{Definición}
+        Algoritmo heurístico que elimina sufijos para obtener una raíz (stem). No requiere diccionario.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Ventaja}: rápido, simple.
+        \item \textbf{Desventaja}: produce stems no lingüísticos (``studies'' $\rightarrow$ ``studi'').
+        \item Algoritmos: Porter, Snowball, Lancaster.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Lematización}
+    \begin{block}{Definición}
+        Reduce a la forma canónica (lema) usando diccionario y contexto (POS tagging).
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Ventaja}: produce palabras reales, más precisa.
+        \item \textbf{Desventaja}: más lenta, requiere recursos.
+        \item Ejemplo: ``running'' (verbo) $\rightarrow$ ``run''; ``studies'' (sustantivo) $\rightarrow$ ``study''.
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Comparación formal}
+    \begin{table}
+        \centering
+        \begin{tabular}{l|c|c}
+            \toprule
+            \textbf{Criterio} & \textbf{Stemming} & \textbf{Lematización} \\
+            \midrule
+            Velocidad & Alta & Baja \\
+            Recursos & Ninguno & Diccionario, POS \\
+            Precisión lingüística & Baja & Alta \\
+            Manejo de irregularidades & No & Sí (``mejor'' $\rightarrow$ ``bueno'') \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{¿Cuándo usar cada una?}
+    \begin{itemize}
+        \item \textbf{Stemming}: sistemas de recuperación de información (buscadores) donde la velocidad es crítica.
+        \item \textbf{Lematización}: tareas que requieren comprensión semántica (análisis de sentimiento, NER, traducción).
+    \end{itemize}
+    % Basado en PDF y Pregunta 4
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 6: OUT-OF-VOCABULARY (OOV)
+% ============================================================================
+\section{Out-of-Vocabulary (OOV)}
+
+\begin{frame}{El problema OOV}
+    \begin{itemize}
+        \item Palabras no vistas durante el entrenamiento: neologismos, errores, términos técnicos.
+        \item Soluciones tradicionales: token \texttt{<UNK>}, backing-off.
+        \item \textbf{Solución moderna: tokenización por subpalabras} (BPE, WordPiece) que descomponen palabras desconocidas en fragmentos conocidos.
+    \end{itemize}
+    % Basado en PDF y Pregunta 1
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 7: PIPELINE COMPLETO DE PREPROCESAMIENTO
+% ============================================================================
+\section{Pipeline Completo de Preprocesamiento}
+
+\begin{frame}{Ejemplo concreto}
+    \textbf{Texto original:} ``I LOVE NLP!!! Check out https://example.com for more info @nlp\_expert \#nlp''
+    \begin{enumerate}
+        \item \textbf{Limpieza con regex}: reemplazar URLs, menciones, hashtags; eliminar puntuación.
+        \item \textbf{Minúsculas}.
+        \item \textbf{Tokenización} (BPE simulado).
+        \item \textbf{Eliminación de stopwords} (opcional).
+        \item \textbf{Lematización} (opcional).
+    \end{enumerate}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}[fragile]{Pipeline paso a paso en código}
+    \begin{lstlisting}
+import re
+text = "I LOVE NLP!!! Check out https://example.com for more info @nlp_expert #nlp"
+text = re.sub(r'http\S+', '<URL>', text)
+text = re.sub(r'@\S+', '<USER>', text)
+text = re.sub(r'#\S+', '<HASHTAG>', text)
+text = re.sub(r'[!?.]+', '', text)
+text = text.lower()
+print(text)
+# "i love nlp check out <url> for more info <user> <hashtag>"
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 8: IMPLEMENTACIÓN EN PYTHON CON LIBRERÍAS
+% ============================================================================
+\section{Implementación en Python}
+
+\begin{frame}[fragile]{NLTK}
+    \begin{lstlisting}
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+tokens = word_tokenize("I love NLP. It's fascinating!")
+tokens_lower = [t.lower() for t in tokens]
+stop_words = set(stopwords.words('english'))
+tokens_filtered = [t for t in tokens_lower if t not in stop_words]
+stemmer = PorterStemmer()
+stems = [stemmer.stem(t) for t in tokens_filtered]
+lemmatizer = WordNetLemmatizer()
+lemmas = [lemmatizer.lemmatize(t) for t in tokens_filtered]
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{spaCy}
+    \begin{lstlisting}
+import spacy
+nlp = spacy.load('en_core_web_sm')
+doc = nlp("I love NLP. It's fascinating!")
+tokens = [token.text for token in doc]
+lemmas = [token.lemma_ for token in doc]
+pos_tags = [token.pos_ for token in doc]
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{HuggingFace Tokenizers}
+    \begin{lstlisting}
+from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+tokens = tokenizer.tokenize("I love NLP!")
+input_ids = tokenizer.convert_tokens_to_ids(tokens)
+print(tokens, input_ids)
+    \end{lstlisting}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 9: CASO INTEGRADO - ANÁLISIS DE SENTIMIENTO EN TWITTER
+% ============================================================================
+\section{Caso Integrado: Análisis de Sentimiento en Twitter}
+
+\begin{frame}{Problema}
+    \begin{itemize}
+        \item 100,000 tweets etiquetados (positivo/negativo).
+        \item Contienen URLs, menciones, emojis, repeticiones de letras (``estoy encantadooo'').
+        \item Necesitamos un pipeline de preprocesamiento eficaz.
+    \end{itemize}
+    % Basado en Pregunta 2
+\end{frame}
+
+\begin{frame}{Pasos del pipeline}
+    \begin{enumerate}
+        \item Reemplazar URLs, menciones, hashtags con tokens especiales.
+        \item Normalizar emojis (convertir a texto o token especial).
+        \item Reducir repeticiones de letras (ej. ``encantadooo'' $\rightarrow$ ``encantado'').
+        \item Minúsculas.
+        \item Tokenización por subpalabras (BPE) para manejar jerga.
+        \item No eliminar stopwords (``no'' es crucial).
+    \end{enumerate}
+    % Basado en Pregunta 2
+\end{frame}
+
+\begin{frame}{Evaluación}
+    \begin{itemize}
+        \item Comparar precisión con diferentes pipelines.
+        \item Se observa que eliminar URLs mejora precisión; eliminar ``no'' la empeora.
+        \item BPE maneja bien palabras como ``bestttt'' (tokenizada como ``best'' + ``ttt'').
+    \end{itemize}
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 10: PREPARACIÓN PARA ENTREVISTAS
+% ============================================================================
+\section{Preparación para Entrevistas}
+
+\begin{frame}{Preguntas conceptuales típicas}
+    \begin{itemize}
+        \item ¿Cuándo usar stemming y cuándo lematización?
+        \item ¿Qué es BPE y cómo funciona?
+        \item ¿Cómo manejas palabras fuera de vocabulario (OOV)?
+        \item ¿Siempre eliminas stopwords? ¿Por qué?
+    \end{itemize}
+    % Basado en PDF
+\end{frame}
+
+\begin{frame}{Preguntas prácticas}
+    \begin{itemize}
+        \item Escribe una expresión regular para eliminar URLs.
+        \item ¿Cómo tokenizarías un texto en chino?
+        \item ¿Qué impacto tiene la longitud de la secuencia en un Transformer?
+    \end{itemize}
+    % Basado en Preguntas 1, 5, 12
+\end{frame}
+
+% ============================================================================
+% SECCIÓN 11: RESUMEN
+% ============================================================================
+\section{Resumen}
+
+\begin{frame}{Lo que hemos aprendido}
+    \begin{exampleblock}{Conceptos clave}
+        \begin{itemize}
+            \item Tokenización: palabras, oraciones, subpalabras (BPE, WordPiece).
+            \item Normalización: minúsculas, regex, manejo de URLs/emojis.
+            \item Stopwords: utilidad en modelos clásicos, irrelevante en Transformers.
+            \item Stemming vs Lematización: velocidad vs precisión.
+            \item OOV resuelto con subword tokenization.
+            \item Pipeline completo de preprocesamiento.
+            \item Implementaciones con NLTK, spaCy, HuggingFace.
+            \item Caso práctico: análisis de sentimiento en Twitter.
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% --- Diapositiva final ---
+\begin{frame}
+    \centering
+    \Huge \textbf{¡Gracias!}
+
+\end{frame}
+
+\end{document}

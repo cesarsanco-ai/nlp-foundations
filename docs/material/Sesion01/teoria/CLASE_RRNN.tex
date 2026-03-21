@@ -1,0 +1,689 @@
+\documentclass[12pt,a4paper,openany,oneside]{book}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, shapes}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+
+% --- Colores y estilos para código Python ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+% --- Estilo de cabecera y pie ---
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small Carlos César Sánchez Coronel}
+\fancyhead[R]{\small Sesión 6: Fundamentos de Redes Neuronales}
+\fancyfoot[L]{\small Carlos César Sánchez Coronel}
+\fancyfoot[C]{\thepage}
+
+% --- Portada ---
+\title{
+    \textbf{Sesión 6} \\ 
+    \Huge \textbf{FUNDAMENTOS DE REDES NEURONALES PARA NLP} \\
+    \Large De la neurona biológica a los modelos profundos
+}
+\author{
+    \small Por \\ \vspace{0.2cm}
+    \Large \textsc{Carlos César Sánchez Coronel}
+}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\addcontentsline{toc}{chapter}{Índice general}
+
+% ------------------------------------------------------------------
+% CAPÍTULO 6: SESIÓN 6 - FUNDAMENTOS DE REDES NEURONALES
+% ------------------------------------------------------------------
+\chapter{Fundamentos de Redes Neuronales para NLP}
+
+En la sesión anterior trabajamos con \textit{word embeddings} estáticos (Word2Vec, GloVe) y modelos clásicos de machine learning. Sin embargo, el verdadero potencial del aprendizaje profundo surge cuando integramos estos embeddings en arquitecturas neuronales que pueden \textbf{aprender de forma conjunta} la representación de las palabras y la tarea final. Esta sesión sienta las bases de las redes neuronales artificiales: desde el modelo de una neurona hasta las redes feed-forward, explicando los conceptos matemáticos y mostrando su aplicación en problemas de Procesamiento de Lenguaje Natural (NLP).
+
+\section{Logro de la sesión}
+Comprender los principios fundamentales de las redes neuronales (neurona artificial, funciones de activación, propagación hacia adelante, retropropagación) y ser capaz de construir una red simple para clasificación de texto utilizando PyTorch, asentando así los cimientos para arquitecturas más avanzadas (RNN, LSTM, Transformers).
+
+\section{Introducción: ¿Por qué redes neuronales en NLP?}
+Los modelos clásicos (regresión logística, SVM, etc.) requieren características diseñadas manualmente o representaciones fijas del texto. Las redes neuronales permiten:
+\begin{itemize}
+    \item \textbf{Aprendizaje de representaciones}: la propia red aprende qué características (embeddings) son útiles para la tarea.
+    \item \textbf{No linealidad}: pueden modelar relaciones complejas entre palabras.
+    \item \textbf{Arquitecturas flexibles}: desde simples MLP hasta complejos Transformers.
+\end{itemize}
+En NLP, esto se traduce en mejoras significativas en tareas como análisis de sentimiento, traducción automática, respuesta a preguntas, etc.
+
+\section{La neurona artificial: el bloque fundamental}
+
+\subsection{Analogía biológica}
+Una neurona biológica recibe señales a través de las dendritas, las procesa en el cuerpo celular y, si se supera un umbral, envía una señal a través del axón. La neurona artificial (perceptrón) imita este comportamiento:
+\begin{itemize}
+    \item Entradas \(x_1, x_2, \dots, x_n\) (señales de entrada).
+    \item Pesos sinápticos \(w_1, w_2, \dots, w_n\) (importancia de cada entrada).
+    \item Sesgo \(b\) (umbral).
+    \item Función de activación \(f\) (decisión de disparo).
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    neuron/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+    input/.style={circle, draw, minimum size=0.8cm, inner sep=0pt},
+    arrow/.style={-stealth, thick}
+]
+% Entradas
+\node[input] (x1) at (0,2) {$x_1$};
+\node[input] (x2) at (0,1) {$x_2$};
+\node[input] (x3) at (0,0) {$x_3$};
+\node (dots) at (0,-0.8) {$\vdots$};
+\node[input] (xn) at (0,-1.5) {$x_n$};
+
+% Neurona
+\node[neuron] (neuron) at (3,0.25) {$\Sigma$};
+
+% Salida
+\node[neuron] (output) at (6,0.25) {$f$};
+
+% Conexiones
+\draw[arrow] (x1) -- node[above, pos=0.3] {$w_1$} (neuron);
+\draw[arrow] (x2) -- node[above, pos=0.3] {$w_2$} (neuron);
+\draw[arrow] (x3) -- node[above, pos=0.3] {$w_3$} (neuron);
+\draw[arrow] (xn) -- node[above, pos=0.3] {$w_n$} (neuron);
+\draw[arrow] (neuron) -- node[above] {$z = \sum w_i x_i + b$} (output);
+\draw[arrow] (output) -- (7.5,0.25) node[right] {$y = f(z)$};
+
+% Sesgo
+\node[input] (bias) at (1.5,-1) {$b$};
+\draw[arrow] (bias) -- (neuron);
+\end{tikzpicture}
+\caption{Modelo de una neurona artificial.}
+\label{fig:neurona}
+\end{figure}
+
+\subsection{Modelo matemático}
+La salida de una neurona se calcula en dos pasos:
+\begin{enumerate}
+    \item Combinación lineal de las entradas: 
+    \[
+    z = \sum_{i=1}^{n} w_i x_i + b = \mathbf{w}^T \mathbf{x} + b
+    \]
+    \item Aplicación de una función de activación no lineal:
+    \[
+    y = f(z)
+    \]
+\end{enumerate}
+
+\subsection{Funciones de activación comunes}
+\begin{itemize}
+    \item \textbf{Sigmoide}: \( \sigma(z) = \frac{1}{1 + e^{-z}} \). Útil para probabilidades (salida entre 0 y 1). Sufre de saturación (gradientes pequeños).
+    \item \textbf{Tangente hiperbólica (tanh)}: \( \tanh(z) = \frac{e^{z} - e^{-z}}{e^{z} + e^{-z}} \). Salida entre -1 y 1, centrada en cero.
+    \item \textbf{ReLU (Rectified Linear Unit)}: \( \text{ReLU}(z) = \max(0, z) \). Muy usada en capas ocultas, evita saturación para valores positivos.
+    \item \textbf{Softmax}: generalización de la sigmoide para múltiples clases. Convierte un vector de logits en probabilidades:
+    \[
+    \text{softmax}(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{C} e^{z_j}}
+    \]
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\begin{axis}[
+    title={Funciones de activación},
+    xlabel={$z$},
+    ylabel={$f(z)$},
+    xmin=-5, xmax=5,
+    ymin=-1.5, ymax=1.5,
+    grid=both,
+    legend pos=north west,
+    width=12cm,
+]
+\addplot[blue, thick, domain=-5:5, samples=100] {1/(1+exp(-x))};
+\addlegendentry{Sigmoide}
+\addplot[red, thick, domain=-5:5, samples=100] {tanh(x)};
+\addlegendentry{tanh}
+\addplot[green, thick, domain=-5:5, samples=100] {max(0,x)};
+\addlegendentry{ReLU}
+\end{axis}
+\end{tikzpicture}
+\caption{Comparación de funciones de activación.}
+\label{fig:activaciones}
+\end{figure}
+
+\section{Redes feed-forward (perceptrón multicapa)}
+
+Una red feed-forward está formada por varias capas de neuronas:
+\begin{itemize}
+    \item \textbf{Capa de entrada}: representa los datos (por ejemplo, índices de palabras o embeddings).
+    \item \textbf{Capas ocultas}: transformaciones no lineales.
+    \item \textbf{Capa de salida}: produce la predicción final.
+\end{itemize}
+
+\subsection{Arquitectura general}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    neuron/.style={circle, draw, minimum size=0.7cm, inner sep=0pt},
+    layer/.style={rectangle, draw, minimum width=1.5cm, minimum height=4cm},
+    arrow/.style={-stealth, thick}
+]
+% Capa de entrada
+\node[layer, fill=blue!10] (input) at (0,0) {};
+\node[neuron] (i1) at (0,1.5) {$x_1$};
+\node[neuron] (i2) at (0,0.5) {$x_2$};
+\node[neuron] (i3) at (0,-0.5) {$x_3$};
+\node (dots) at (0,-1.2) {$\vdots$};
+\node[neuron] (in) at (0,-2) {$x_n$};
+
+% Capa oculta 1
+\node[layer, fill=green!10] (h1) at (3,0) {};
+\node[neuron] (h11) at (3,1.2) {$h_{1}^{(1)}$};
+\node[neuron] (h12) at (3,0) {$h_{2}^{(1)}$};
+\node[neuron] (h13) at (3,-1.2) {$h_{3}^{(1)}$};
+\node at (3,-2) {$\vdots$};
+
+% Capa oculta 2
+\node[layer, fill=green!10] (h2) at (6,0) {};
+\node[neuron] (h21) at (6,1.2) {$h_{1}^{(2)}$};
+\node[neuron] (h22) at (6,0) {$h_{2}^{(2)}$};
+\node[neuron] (h23) at (6,-1.2) {$h_{3}^{(2)}$};
+\node at (6,-2) {$\vdots$};
+
+% Capa de salida
+\node[layer, fill=red!10] (output) at (9,0) {};
+\node[neuron] (o1) at (9,0.7) {$y_1$};
+\node[neuron] (o2) at (9,-0.7) {$y_2$};
+
+% Conexiones (solo algunas para no saturar)
+\draw[arrow] (i1) -- (h11);
+\draw[arrow] (i1) -- (h12);
+\draw[arrow] (i2) -- (h12);
+\draw[arrow] (i3) -- (h13);
+\draw[arrow] (h11) -- (h21);
+\draw[arrow] (h12) -- (h22);
+\draw[arrow] (h13) -- (h23);
+\draw[arrow] (h21) -- (o1);
+\draw[arrow] (h22) -- (o2);
+\draw[arrow] (h23) -- (o2);
+\end{tikzpicture}
+\caption{Red feed-forward con dos capas ocultas.}
+\label{fig:mlp}
+\end{figure}
+
+\subsection{Propagación hacia adelante (forward pass)}
+Para una red con \(L\) capas, la salida de la capa \(l\) se calcula como:
+\[
+\mathbf{a}^{(l)} = f^{(l)}\left( \mathbf{W}^{(l)} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)} \right)
+\]
+donde \(\mathbf{a}^{(0)} = \mathbf{x}\) (entrada), \(\mathbf{W}^{(l)}\) y \(\mathbf{b}^{(l)}\) son los pesos y sesgos de la capa \(l\), y \(f^{(l)}\) es la función de activación.
+
+\subsection{Ejemplo: clasificación binaria con una capa oculta}
+Para una red con una capa oculta de tamaño \(H\) y activación ReLU, y capa de salida con sigmoide:
+\begin{align*}
+\mathbf{h} &= \text{ReLU}(\mathbf{W}^{(1)} \mathbf{x} + \mathbf{b}^{(1)}), \quad \mathbf{h} \in \mathbb{R}^H \\
+\hat{y} &= \sigma(\mathbf{w}^{(2)} \cdot \mathbf{h} + b^{(2)}), \quad \hat{y} \in (0,1)
+\end{align*}
+
+\section{Entrenamiento de una red neuronal}
+
+\subsection{Función de pérdida (loss function)}
+Mide el error entre la predicción \(\hat{y}\) y el valor real \(y\). Para clasificación, la más común es la \textbf{entropía cruzada} (cross-entropy). Para un problema con \(C\) clases:
+\[
+\mathcal{L} = -\sum_{c=1}^{C} y_c \log(\hat{y}_c)
+\]
+donde \(y_c\) es 1 si la clase es la correcta, 0 en otro caso (one-hot), y \(\hat{y}_c\) es la probabilidad predicha por softmax.
+
+\subsection{Retropropagación (backpropagation)}
+Es el algoritmo que calcula el gradiente de la pérdida con respecto a todos los parámetros de la red, aplicando la regla de la cadena. Intuitivamente, se propaga el error desde la salida hacia atrás, actualizando los pesos para minimizar la pérdida.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=1.5cm, auto]
+\node (x) {Entrada $\mathbf{x}$};
+\node (w) [right of=x, xshift=1cm] {Pesos $\mathbf{W}$};
+\node (z) [right of=w, xshift=1cm] {$z = \mathbf{W}\mathbf{x} + b$};
+\node (a) [right of=z, xshift=1cm] {$a = f(z)$};
+\node (loss) [right of=a, xshift=1cm] {Pérdida $\mathcal{L}$};
+
+\draw[->] (x) -- (z);
+\draw[->] (w) -- (z);
+\draw[->] (z) -- (a);
+\draw[->] (a) -- (loss);
+
+\draw[->, dashed, red] (loss) -- node[below] {$\frac{\partial \mathcal{L}}{\partial a}$} (a);
+\draw[->, dashed, red] (a) -- node[below] {$\frac{\partial \mathcal{L}}{\partial z}$} (z);
+\draw[->, dashed, red] (z) -- node[below] {$\frac{\partial \mathcal{L}}{\partial \mathbf{W}}$} (w);
+\draw[->, dashed, red] (z) -- node[above] {$\frac{\partial \mathcal{L}}{\partial \mathbf{x}}$} (x);
+\end{tikzpicture}
+\caption{Flujo de la retropropagación. Las flechas sólidas representan el forward pass; las punteadas, el backward pass.}
+\label{fig:backprop}
+\end{figure}
+
+\subsection{Descenso por gradiente (gradient descent)}
+Una vez calculados los gradientes, se actualizan los parámetros en la dirección opuesta al gradiente:
+\[
+\mathbf{W}_{\text{nuevo}} = \mathbf{W}_{\text{anterior}} - \eta \frac{\partial \mathcal{L}}{\partial \mathbf{W}}
+\]
+donde \(\eta\) es la tasa de aprendizaje (learning rate).
+
+\section{Conexión con NLP: de palabras a vectores}
+
+\subsection{Representación de texto para una red neuronal}
+Para que una red neuronal procese texto, debemos convertir las palabras en números. El enfoque moderno es usar \textbf{capas de embedding} (ya vistas en la sesión anterior).
+
+\subsection{Capa de embedding}
+Una capa de embedding es una tabla de búsqueda: asigna a cada palabra (índice) un vector denso entrenable. Si el vocabulario tiene \(V\) palabras y la dimensión del embedding es \(d\), la capa tiene una matriz \(\mathbf{E} \in \mathbb{R}^{V \times d}\). Dada una secuencia de índices \([i_1, i_2, \dots, i_T]\), la capa devuelve los vectores correspondientes:
+\[
+\mathbf{e}_{t} = \mathbf{E}[i_t], \quad \mathbf{e}_t \in \mathbb{R}^d
+\]
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\matrix (E) [matrix of nodes, nodes={draw, minimum width=1.2cm, minimum height=0.6cm}, row sep=0.2cm, column sep=0.2cm] {
+    \(e_{11}\) & \(e_{12}\) & \(\cdots\) & \(e_{1d}\) \\
+    \(e_{21}\) & \(e_{22}\) & \(\cdots\) & \(e_{2d}\) \\
+    \(\vdots\) & \(\vdots\) & \(\ddots\) & \(\vdots\) \\
+    \(e_{V1}\) & \(e_{V2}\) & \(\cdots\) & \(e_{Vd}\) \\
+};
+\node[left=0.5cm of E-1-1] {índice 1};
+\node[left=0.5cm of E-2-1] {índice 2};
+\node[left=0.5cm of E-4-1] {índice V};
+\node[above=0.3cm of E-1-1] {Embedding dim \(d\)};
+\node at (E-4-3) {$\cdots$};
+
+\draw[->, thick] (-2,1) -- (E-1-1.west) node[midway, above] {índice 1};
+\draw[->, thick] (-2,0) -- (E-2-1.west) node[midway, above] {índice 5};
+\draw[->, thick] (-2,-1) -- (E-4-1.west) node[midway, above] {índice V};
+\node at (-2.5,0.5) {Secuencia de índices};
+\end{tikzpicture}
+\caption{Funcionamiento de una capa de embedding.}
+\label{fig:embedding}
+\end{figure}
+
+\subsection{Arquitectura para clasificación de texto con embeddings + MLP}
+La forma más simple de usar embeddings en una red es:
+\begin{enumerate}
+    \item Obtener los embeddings de todas las palabras de la oración.
+    \item Combinarlos en un único vector (por ejemplo, promediándolos).
+    \item Pasar ese vector por un MLP para obtener la clasificación.
+\end{enumerate}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    word/.style={rectangle, draw, minimum width=1cm, minimum height=0.5cm},
+    embed/.style={rectangle, draw, minimum width=0.8cm, minimum height=0.8cm},
+    node distance=1cm
+]
+% Oración
+\node[word] (w1) {``me''};
+\node[word, right=of w1] (w2) {``encanta''};
+\node[word, right=of w2] (w3) {``este''};
+\node[word, right=of w3] (w4) {``curso''};
+
+% Embeddings
+\node[embed, below=of w1] (e1) {$\mathbf{e}_1$};
+\node[embed, below=of w2] (e2) {$\mathbf{e}_2$};
+\node[embed, below=of w3] (e3) {$\mathbf{e}_3$};
+\node[embed, below=of w4] (e4) {$\mathbf{e}_4$};
+
+\draw[->] (w1) -- (e1);
+\draw[->] (w2) -- (e2);
+\draw[->] (w3) -- (e3);
+\draw[->] (w4) -- (e4);
+
+% Average pooling
+\node[draw, ellipse, below=of $(e2.south)!0.5!(e3.south)$, yshift=-1cm] (avg) {Promedio};
+\draw[->] (e1) -- (avg);
+\draw[->] (e2) -- (avg);
+\draw[->] (e3) -- (avg);
+\draw[->] (e4) -- (avg);
+
+% MLP
+\node[draw, rectangle, below=of avg, yshift=-1cm, minimum width=2cm, minimum height=1cm] (mlp) {MLP};
+\draw[->] (avg) -- (mlp);
+
+% Salida
+\node[draw, ellipse, below=of mlp] (out) {Positivo / Negativo};
+\draw[->] (mlp) -- (out);
+\end{tikzpicture}
+\caption{Arquitectura de clasificación de texto con embeddings y MLP.}
+\label{fig:textclf}
+\end{figure}
+
+
+
+
+
+
+\section{Panorama de arquitecturas neuronales en NLP}
+Antes de adentrarnos en las redes recurrentes y los transformadores en sesiones posteriores, es fundamental contar con una visión global de los distintos tipos de redes neuronales utilizadas en Procesamiento de Lenguaje Natural. Cada arquitectura aborda el problema desde una perspectiva diferente: algunas modelan el orden de las palabras, otras capturan patrones locales, y otras procesan la secuencia completa en paralelo. Entender sus fortalezas y debilidades te permitirá elegir la más adecuada según la tarea, los recursos y la naturaleza de los datos.
+
+A continuación, presentamos una clasificación por \textbf{arquitectura}, que es la forma más común de organizar estos modelos. Dentro de cada tipo, se explican sus capacidades, limitaciones y casos de uso típicos.
+
+\subsection{Redes feed-forward (perceptrón multicapa) — \textit{el punto de partida}}
+\begin{itemize}
+\item \textbf{¿Qué hacen?} Procesan entradas de tamaño fijo (por ejemplo, un vector que representa una oración completa mediante el promedio de embeddings) y aplican transformaciones no lineales a través de capas densas (fully connected). No consideran el orden de las palabras.
+\item \textbf{¿Qué NO hacen?} No modelan relaciones secuenciales ni dependencias contextuales. La entrada se trata como un conjunto desordenado (bolsa de palabras).
+\item \textbf{Cuándo se usan en NLP:} Como línea base en clasificación de textos cortos, análisis de sentimiento simple o tareas donde el orden no es crucial (por ejemplo, clasificación de temas). Son rápidas, fáciles de entrenar y requieren pocos datos.
+\item \textbf{Ejemplo típico:} El clasificador desarrollado en esta sesión, que promedia embeddings y los pasa por un MLP.
+\item \textbf{Lugar en la historia:} Fueron las primeras redes aplicadas a NLP (años 90 y 2000), pero hoy se consideran un bloque fundamental, no el estado del arte.
+\end{itemize}
+
+\subsection{Redes convolucionales (CNN) — \textit{detectores de patrones locales}}
+\begin{itemize}
+\item \textbf{Origen:} Las CNN se popularizaron en visión por computadora para procesar imágenes, donde aplican filtros que detectan bordes, texturas, etc. En NLP, se adaptaron para operar sobre secuencias de embeddings de palabras.
+\item \textbf{¿Qué hacen?} Aplican filtros (kernels) que se deslizan sobre la secuencia de vectores (palabras) para detectar patrones locales, como n-gramas relevantes (por ejemplo, "muy buena", "no me gusta"). Luego, combinan la información mediante operaciones de pooling (max-pooling, average-pooling) para obtener una representación fija de la oración.
+\item \textbf{¿Qué NO hacen?} No modelan dependencias de largo alcance de forma explícita; el contexto se limita al tamaño del filtro. Tampoco capturan bien el orden secuencial más allá de la ventana local. Además, al igual que las MLP, la entrada debe tener longitud fija (o se usa padding).
+\item \textbf{Cuándo se usan en NLP:} Clasificación de textos donde ciertas frases clave son determinantes (ej. detección de spam, análisis de sentimiento con expresiones fijas). También en modelos híbridos (CNN + RNN) o para extraer características de nivel de palabra antes de una RNN.
+\item \textbf{Ejemplo típico:} El modelo de Kim (2014) que usa CNN sobre word2vec para clasificación de oraciones.
+\item \textbf{Lugar en la historia:} Populares entre 2014 y 2017, hoy en día han sido superadas por Transformers, pero siguen siendo eficientes en entornos con recursos limitados y en tareas donde los patrones locales son suficientes.
+\end{itemize}
+
+\subsection{Redes recurrentes (RNN) — \textit{modelado de secuencias}}
+Las RNN están diseñadas específicamente para procesar datos secuenciales, como texto, audio o series temporales. Mantienen un estado oculto que se actualiza a medida que recorren la secuencia, lo que les permite capturar dependencias temporales y el orden de las palabras. Dentro de esta familia, encontramos varias variantes que mejoran la capacidad de memoria y estabilidad del entrenamiento.
+
+\subsubsection{RNN simple (Elman RNN)}
+\begin{itemize}
+\item \textbf{¿Qué hace?} Procesa la secuencia paso a paso. En cada instante 
+t
+t, actualiza su estado oculto 
+h
+t
+h 
+t
+​
+  en función de la entrada actual 
+x
+t
+x 
+t
+​
+  y el estado anterior 
+h
+t
+−
+1
+h 
+t−1
+​
+ : 
+h
+t
+=
+tanh
+⁡
+(
+W
+x
+h
+x
+t
++
+W
+h
+h
+h
+t
+−
+1
++
+b
+h
+)
+h 
+t
+​
+ =tanh(W 
+xh
+​
+ x 
+t
+​
+ +W 
+hh
+​
+ h 
+t−1
+​
+ +b 
+h
+​
+ ). Puede usarse para producir una salida en cada paso o una salida global al final.
+\item \textbf{¿Qué NO hace?} Sufre del problema de desvanecimiento (vanishing gradient) y explosión del gradiente, lo que impide aprender dependencias de largo plazo (más allá de 10-15 pasos). Además, su naturaleza secuencial impide la paralelización.
+\item \textbf{Cuándo se usa:} Tareas con dependencias a corto plazo, como etiquetado gramatical (POS tagging) o generación de texto simple, aunque hoy se prefieren variantes más avanzadas.
+\end{itemize}
+
+\subsubsection{LSTM (Long Short-Term Memory)}
+\begin{itemize}
+\item \textbf{¿Qué hace?} Introduce un mecanismo de compuertas (input, forget, output) que controlan el flujo de información, permitiendo mantener o descartar información a lo largo de muchos pasos. Esto resuelve en gran medida el problema del desvanecimiento del gradiente.
+\item \textbf{¿Qué NO hace?} Sigue siendo secuencial (difícil de paralelizar) y tiene más parámetros que una RNN simple, lo que aumenta el costo computacional y el riesgo de sobreajuste si los datos son escasos.
+\item \textbf{Cuándo se usa:} Traducción automática, generación de texto, reconocimiento de voz, y cualquier tarea con dependencias de largo plazo. Hasta 2017, era el estado del arte.
+\item \textbf{Ejemplo típico:} Modelo seq2seq con LSTM para traducción automática (Sutskever et al., 2014).
+\end{itemize}
+
+\subsubsection{GRU (Gated Recurrent Unit)}
+\begin{itemize}
+\item \textbf{¿Qué hace?} Es una variante más simple que LSTM, con solo dos compuertas (reset y update). Tiene menos parámetros y suele ser más rápida de entrenar, con un rendimiento comparable en muchas tareas.
+\item \textbf{¿Qué NO hace?} Al igual que LSTM, mantiene la limitación de procesamiento secuencial y puede no ser tan expresiva como LSTM en ciertos problemas.
+\item \textbf{Cuándo se usa:} Similar a LSTM, pero preferida cuando se busca eficiencia computacional o se tienen menos datos.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+cell/.style={rectangle, draw, minimum width=2cm, minimum height=0.8cm},
+arrow/.style={-stealth, thick}
+]
+\node[cell] (rnn) at (0,0) {RNN simple};
+\node[cell] (lstm) at (3,0) {LSTM};
+\node[cell] (gru) at (6,0) {GRU};
+
+\draw[arrow] (rnn) -- node[above] {+ memoria} (lstm);
+\draw[arrow] (lstm) -- node[above] {simplificación} (gru);
+
+\node[align=center] at (0,-1) {Desvanecimiento\de gradiente};
+\node[align=center] at (3,-1) {Memoria selectiva\Largo plazo};
+\node[align=center] at (6,-1) {Eficiente\Menos parámetros};
+\end{tikzpicture}
+\caption{Evolución de las redes recurrentes: de RNN simple a LSTM y GRU.}
+\end{figure}
+
+\subsection{Transformers — \textit{el paradigma actual}}
+\begin{itemize}
+\item \textbf{¿Qué hacen?} Procesan toda la secuencia en paralelo mediante un mecanismo de \textit{self-attention}. En lugar de recorrer paso a paso, calculan la relevancia de cada palabra respecto a todas las demás, generando representaciones contextuales ricas. Esto permite capturar dependencias globales sin limitaciones de distancia y con alta paralelización.
+\item \textbf{¿Qué NO hacen?} Son computacionalmente costosos (la atención tiene complejidad cuadrática con la longitud de la secuencia) y requieren grandes cantidades de datos para entrenar desde cero. Sin embargo, el \textit{transfer learning} (modelos pre-entrenados como BERT, GPT) ha democratizado su uso.
+\item \textbf{Cuándo se usan:} Prácticamente todas las tareas modernas de NLP: clasificación, generación, preguntas-respuestas, resumen, etc. Si tienes acceso a un modelo pre-entrenado, es la mejor opción.
+\item \textbf{Ejemplo típico:} BERT para clasificación de texto, GPT para generación.
+\item \textbf{Lugar en la historia:} Desde 2017 (Vaswani et al., "Attention is All You Need") son el estado del arte indiscutible.
+\end{itemize}
+
+\subsection{Resumen comparativo}
+La siguiente tabla resume las capacidades clave de cada arquitectura, ayudándote a decidir cuál usar según la tarea:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Arquitectura} & \textbf{Orden} & \textbf{Dependencias largas} & \textbf{Paralelización} & \textbf{Parámetros} & \textbf{Caso de uso típico} \
+\hline
+Feed-forward (MLP) & No & No & Alta & Bajos & Clasificación simple (baseline) \
+CNN & Local & No & Alta & Moderados & Detección de n-gramas clave \
+RNN simple & Sí & No & Baja & Bajos & Etiquetado de secuencias cortas \
+LSTM/GRU & Sí & Sí & Baja & Altos & Traducción, generación \
+Transformers & Sí & Sí & Alta & Muy altos & Estado del arte en casi todo \
+\hline
+\end{tabular}
+\caption{Comparación de arquitecturas neuronales en NLP.}
+\end{table}
+
+\subsection{¿Dónde nos encontramos y hacia dónde vamos?}
+En esta sesión hemos construido una red \textbf{feed-forward con embeddings}. Es el cimiento: hemos aprendido a representar texto como vectores y a pasarlo por capas densas. Este modelo no captura orden ni dependencias, pero nos sirve como punto de partida y como baseline.
+
+En las próximas sesiones:
+\begin{itemize}
+\item \textbf{Sesión 7:} Redes recurrentes (RNN, LSTM, GRU) — modelaremos el orden y las dependencias secuenciales.
+\item \textbf{Sesión 8:} Transformers y atención — el estado del arte, procesamiento paralelo y modelos pre-entrenados (BERT, GPT).
+\end{itemize}
+
+
+
+
+
+\section{Ejemplo completo en PyTorch}
+
+\subsection{Preparación de datos}
+\begin{lstlisting}[language=Python]
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from collections import Counter
+
+# Datos de ejemplo
+texts = [
+    "I loved this movie, it was fantastic",
+    "Terrible film, I hated it",
+    "Amazing acting and great story",
+    "Boring and slow, waste of time"
+]
+labels = [1, 0, 1, 0]  # 1: positivo, 0: negativo
+
+# Construir vocabulario
+def build_vocab(texts, max_size=10000):
+    word_counts = Counter()
+    for text in texts:
+        word_counts.update(text.lower().split())
+    vocab = {word: idx+2 for idx, (word, _) in enumerate(word_counts.most_common(max_size))}
+    vocab['<PAD>'] = 0
+    vocab['<UNK>'] = 1
+    return vocab
+
+vocab = build_vocab(texts)
+vocab_size = len(vocab)
+print("Vocabulario:", vocab)
+
+# Tokenizar y codificar
+def encode(text, vocab, max_len=10):
+    tokens = text.lower().split()
+    indices = [vocab.get(token, vocab['<UNK>']) for token in tokens[:max_len]]
+    indices += [vocab['<PAD>']] * (max_len - len(indices))
+    return indices
+
+X = [encode(text, vocab) for text in texts]
+X = torch.tensor(X)  # (4, 10)
+y = torch.tensor(labels)
+\end{lstlisting}
+
+\subsection{Definición del modelo}
+\begin{lstlisting}[language=Python]
+class TextClassifier(nn.Module):
+    def __init__(self, vocab_size, embed_dim=50, hidden_dim=32, num_classes=2, dropout=0.5):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
+        self.fc1 = nn.Linear(embed_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, num_classes)
+        self.dropout = nn.Dropout(dropout)
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        # x: (batch_size, seq_len)
+        embedded = self.embedding(x)          # (batch, seq_len, embed_dim)
+        pooled = embedded.mean(dim=1)         # (batch, embed_dim)
+        h = self.dropout(self.relu(self.fc1(pooled)))  # (batch, hidden_dim)
+        out = self.fc2(h)                     # (batch, num_classes)
+        return out
+
+model = TextClassifier(vocab_size)
+\end{lstlisting}
+
+\subsection{Entrenamiento}
+\begin{lstlisting}[language=Python]
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-5)
+
+epochs = 100
+for epoch in range(epochs):
+    optimizer.zero_grad()
+    logits = model(X)
+    loss = criterion(logits, y)
+    loss.backward()
+    optimizer.step()
+    
+    if (epoch+1) % 20 == 0:
+        print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+\end{lstlisting}
+
+\subsection{Evaluación}
+\begin{lstlisting}[language=Python]
+with torch.no_grad():
+    logits = model(X)
+    predictions = torch.argmax(logits, dim=1)
+    accuracy = (predictions == y).float().mean()
+    print(f'Accuracy: {accuracy:.2%}')
+\end{lstlisting}
+
+\section{Regularización y buenas prácticas}
+\begin{itemize}
+    \item \textbf{Dropout}: apaga aleatoriamente neuronas durante el entrenamiento para evitar co-adaptación.
+    \item \textbf{Weight decay (L2)}: penaliza pesos grandes.
+    \item \textbf{Early stopping}: detiene el entrenamiento cuando la pérdida en validación deja de mejorar.
+    \item \textbf{Normalización por lotes (BatchNorm)} o \textbf{normalización de capas (LayerNorm)}: estabilizan el entrenamiento.
+    \item \textbf{División de datos}: entrenamiento, validación, prueba.
+\end{itemize}
+
+\section{Casos de uso en la industria}
+\begin{itemize}
+    \item \textbf{Análisis de sentimiento en redes sociales}: clasificar tweets como positivos, negativos o neutros.
+    \item \textbf{Detección de spam}: identificar correos no deseados.
+    \item \textbf{Clasificación de intenciones en chatbots}: saber si el usuario quiere comprar, reclamar o preguntar.
+    \item \textbf{Moderación de contenido}: detectar comentarios tóxicos en foros.
+    \item \textbf{Categorización de tickets de soporte}: asignar automáticamente a los departamentos correspondientes.
+\end{itemize}
+
+\section{Resumen y conexión con el resto del curso}
+\begin{itemize}
+    \item Hemos visto los fundamentos de las redes neuronales: neurona, activaciones, MLP, forward y backward.
+    \item Aplicamos estos conceptos a NLP mediante capas de embedding y una arquitectura simple de clasificación.
+    \item Este conocimiento es la base para entender arquitecturas más avanzadas:
+        \begin{itemize}
+            \item \textbf{RNN/LSTM} (próxima sesión): procesan secuencias respetando el orden.
+            \item \textbf{Transformers}: atención y procesamiento paralelo.
+        \end{itemize}
+    \item Dominar estos conceptos es esencial para trabajar con modelos modernos como BERT, GPT, etc.
+\end{itemize}
+
+\end{document}
