@@ -1,7 +1,6 @@
-[⬅️ Volver al Inicio](https://cesarsanco-ai.github.io/)
-
-
 # Natural Language Processing (NLP)
+
+[⬅️ Volver al Inicio](/)
 
 Bienvenido al material del curso **Natural Language Processing (NLP)**.
 
@@ -25,6 +24,7 @@ Cada sesión incluye material teórico, notebooks de práctica, ejercicios y rec
 | 12 | [RAG y Bases de Datos Vectoriales](sesiones/sesion-12.md) |
 | 13 | [Prompt Engineering y Optimización (LoRA, Cuantización)](sesiones/sesion-13.md) |
 | 14 | [Despliegue de Modelos NLP (MLOps)](sesiones/sesion-14.md) |
+
 > **Nota:** Se recomienda contar con conocimientos previos en Python y fundamentos de Machine Learning para un mejor aprovechamiento de los notebooks.
 
 ## 📂 Recursos generales
@@ -41,13 +41,12 @@ Todo el código fuente, notebooks y materiales adicionales están disponibles en
 
 [https://github.com/cesarsanco-ai/nlp-foundations](https://github.com/cesarsanco-ai/nlp-foundations)
 
-
 ---
 
 ### 👤 Autor
 
-**Carlos César Sánchez Coronel** | *Data Scientist & AI Engineer*
+**Carlos César Sánchez Coronel** | *Data Scientist & AI Engineer*  
 
-*Lima, Perú*
+*Lima, Perú*  
 
 🔗 [LinkedIn](https://www.linkedin.com/in/cesar-sanchez-c/) | 📁 [GitHub](https://github.com/cesarsanco-ai)
