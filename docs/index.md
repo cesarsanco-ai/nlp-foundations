@@ -30,8 +30,11 @@ Cada sesión incluye material teórico, notebooks de práctica, ejercicios y rec
 
 ## 📂 Recursos generales
 
-- **Syllabus de Notebooks**: Guía detallada de las actividades NB1 y NB2 por semana.  
-  [Ver syllabus completo](recursos/NTB0-NLP.pdf)
+- **Cheatsheet**: Resumen de comandos, fórmulas y conceptos clave.  
+  [Descargar cheatsheet](cheatsheet/NLP_Foundations_Cheatsheet.pdf)
+
+- **Proyecto Integrador**: Descripción y guía del proyecto final que integra todos los temas del curso.  
+  [Ver proyecto integrador](proyecto-integrador/README.md)
 
 ## 🔗 Repositorio 
 
