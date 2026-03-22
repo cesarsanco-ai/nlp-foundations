@@ -1,22 +1,27 @@
-# Sesión 10: Semana 10
+---
+layout: default
+---
 
+# Sesion 10: Modelos Pre-entrenados: Fine-tuning de BERT y GPT
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
 Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
 
----
+***
 
 ## 📘 Contenido Teórico
 
-Material de apoyo y referencias de la semana.
+Fundamentos conceptuales y arquitectura de soluciones aplicadas a texto.
 
-* 🖼️ **Slides de Clase:** [Descargar PPT10-NLP.pdf](../material/Sesion10/slides/PPT10-NLP.pdf)
-* 📝 **Quick Reference:** [Carpeta cheatsheet](../material/Sesion10/cheatsheet/)
+* 🖼️ **Slides de Clase (PDF):** [PPT10-NLP.pdf](../material/Sesion10/slides/PPT10-NLP.pdf)
 
-* 📎 **Anexo Técnico:** [Material complementario](../material/Sesion10/anexo/)
----
+* 📝 **Quick Reference:** [CheatSheet](../material/Sesion10/cheatsheet/cheatsheet.md)
+
+* 📎 **Anexo Técnico:** [Material Complementario](../material/Sesion10/anexo/anexo.md)
+
+***
 
 ### 💻 Laboratorio
 
@@ -25,16 +30,8 @@ Material de apoyo y referencias de la semana.
 * 📓 **Notebook Fundamentos:** [Notebook 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion10/practica/SESION10-NTB1-NLP.ipynb)
 * 📓 **Notebook Aplicaciones:** [Notebook 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion10/practica/SESION10-NTB2-NLP.ipynb)
 
----
+***
 
 ## 🔗 Recursos complementarios
 
 * 📁 **[Repositorio del curso](https://github.com/cesarsanco-ai/nlp-foundations)** — Código y materiales en GitHub.
-
----
-
-### 👤 Autor
-
-**Carlos César Sánchez Coronel** | *Data Scientist & AI Engineer*
-
-🔗 [LinkedIn](https://www.linkedin.com/in/cesar-sanchez-c/) | 📁 [GitHub](https://github.com/cesarsanco-ai)

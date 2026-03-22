@@ -1,6 +1,7 @@
-# Natural Language Processing (NLP)
+[⬅️ Volver al Inicio](https://cesarsanco-ai.github.io/)
 
-[⬅️ Volver al Inicio](/)
+
+# Natural Language Processing (NLP)
 
 Bienvenido al material del curso **Natural Language Processing (NLP)**.
 
@@ -41,12 +42,3 @@ Todo el código fuente, notebooks y materiales adicionales están disponibles en
 
 [https://github.com/cesarsanco-ai/nlp-foundations](https://github.com/cesarsanco-ai/nlp-foundations)
 
----
-
-### 👤 Autor
-
-**Carlos César Sánchez Coronel** | *Data Scientist & AI Engineer*  
-
-*Lima, Perú*  
-
-🔗 [LinkedIn](https://www.linkedin.com/in/cesar-sanchez-c/) | 📁 [GitHub](https://github.com/cesarsanco-ai)
