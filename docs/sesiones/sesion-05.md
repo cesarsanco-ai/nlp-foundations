@@ -32,6 +32,12 @@ Fundamentos conceptuales y arquitectura de soluciones aplicadas a texto.
 
 ***
 
-## 🔗 Recursos complementarios
+## 🚀 Proyecto End-to-End
 
-* 📁 **[Repositorio del curso](https://github.com/cesarsanco-ai/nlp-foundations)** — Código y materiales en GitHub.
+Proyectos con arquitectura completa: desde la experimentación hasta el despliegue en producción. ⭐⭐⭐
+
+### 📨 Smart Inbox AI: Clasificador de Intenciones
+Comparativa de modelos de Machine Learning (**Naive Bayes vs SVM**) para la clasificación automática de mensajes en NLP.
+
+* 🌐 **Demo en vivo:** [https://intent-classifier-frontend.onrender.com/](https://intent-classifier-frontend.onrender.com/)
+* 💻 **Código Fuente:** [https://github.com/cesarsanco-ai/intent-classifier-project](https://github.com/cesarsanco-ai/intent-classifier-project)
