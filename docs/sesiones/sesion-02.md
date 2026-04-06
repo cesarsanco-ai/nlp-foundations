@@ -15,11 +15,9 @@ Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y labo
 
 Fundamentos conceptuales y arquitectura de soluciones aplicadas a texto.
 
-* 🖼️ **Slides de Clase (PDF):** [PPT02-NLP.pdf](../material/Sesion02/slides/PPT02-NLP.pdf)
+* 🖼️ **Clase:** [Clase](../material/Sesion02/teoria/S02-NLP.pdf)
 
-* 📝 **Quick Reference:** [CheatSheet](../material/Sesion02/cheatsheet/cheatsheet.md)
 
-* 📎 **Anexo Técnico:** [Material Complementario](../material/Sesion02/anexo/anexo.md)
 
 ***
 
