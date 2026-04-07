@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 14: Despliegue de Modelos NLP (MLOps)
+# Sesion 14: NLP Multilingüe y Post-Transformers
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Frontera tecnologica. Modelos Cross-lingual (mBERT, XLM-R). Introducción a arquitecturas de nueva generación: Flash Attention, MoE (Mixture of Experts) y Mamba (SSM)
 
 ***
 

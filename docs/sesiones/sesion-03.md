@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 3: Representación del Texto: BOW, TF-IDF y N-gramas
+# Sesion 3: Modelos Estadísticos y Probabilísticos
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+La predicción basada en frecuencia. N-gramas, modelos de lenguaje de Markov y suavizado. El concepto de "probabilidad de la siguiente palabra" antes de las redes neuronales.
 
 ***
 

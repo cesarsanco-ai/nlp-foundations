@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 4: Word Embeddings: Word2Vec y GloVe
+# Sesion 4: Word Embeddings Estáticos
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Vectorización del significado. Word2Vec (Skip-gram/CBOW) y GloVe. Cómo representar palabras en un espacio vectorial donde la cercanía matemática implica cercanía semántica.
 
 ***
 

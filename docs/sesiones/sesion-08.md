@@ -2,14 +2,14 @@
 layout: default
 ---
 
-# Sesion 8: Modelos Seq2Seq y Mecanismos de Atención
+# Sesion 8: Arquitectura Transformer
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Analizaremos el fin temporal de la recurrencia. El paper "Attention Is All You Need". Paralelismo masivo, Self-Attention y la estructura de bloques que permite escalar modelos a miles de millones de parámetros.
 
-***
+*** 
 
 ## 📘 Contenido Teórico
 

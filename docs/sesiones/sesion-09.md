@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 9: Transformers: Self-Attention y Positional Encoding
+# Sesion 9: Componentes del Transformer
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Desglose de las matrices $Q, K, V$, Multi-Head Attention, y el Positional Encoding (Sinusoidal vs. RoPE). Capas de normalización y residuos.
 
 ***
 

@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 6: Redes Neuronales y Embeddings Entrenables
+# Sesion 6: Embeddings Contextuales (RNN/LSTM/GRU)
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+El lenguaje como serie temporal. Captura de dependencias secuenciales. Por qué una palabra cambia su significado según lo que tiene a la izquierda. Limitaciones del gradiente (olvido).
 
 ***
 

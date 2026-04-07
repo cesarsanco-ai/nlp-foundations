@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 10: Modelos Pre-entrenados: Fine-tuning de BERT y GPT
+# Sesion 10: Modelos Pre-entrenados (BERT, GPT y T5)
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Pre-entrenamiento con Masked Language Modeling (MLM). Fine-tuning para tareas de extracción: NER, QA y clasificación de alta precisión. Generación vs Traducción. La familia GPT (Causal Language Modeling) y modelos T5/BART. Diferencias estructurales según el objetivo (resumen, diálogo o traducción). 
 
 ***
 

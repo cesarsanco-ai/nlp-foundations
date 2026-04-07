@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 1: Fundamentos Lingüísticos y Primeros Pasos con NLP
+# Sesion 1: Introducción a NLP y Lingüística Computacional
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Niveles del lenguaje (fonología a pragmática), ambigüedad lingüística y la evolución histórica de sistemas basados en reglas hacia modelos probabilísticos.
 
 ***
 

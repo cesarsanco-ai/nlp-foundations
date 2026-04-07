@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 7: Redes Recurrentes (RNN, LSTM, GRU)
+# Sesion 7: Modelo Seq2Seq y Mecanismos de Atención
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+El puente hacia la traducción. Arquitecturas Encoder-Decoder clásicas. El nacimiento de la Atención (Bahdanau/Luong) como solución al cuello de botella del vector de contexto dinámico.
 
 ***
 

@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 12: RAG y Bases de Datos Vectoriales
+# Sesion 12: Transfer Learning y Adaptación
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Comprender que no debemos reentrenar desde cero. Estrategias de adaptación de modelos pre-entrenados. Dominios específicos (Legal, Médico) y evaluación de métricas de calidad de lenguaje.
 
 ***
 

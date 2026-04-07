@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 2: Preprocesamiento: Tokenización, Lematización y Regex
+# Sesion 2: Preprocesamiento del Texto
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Preprocesamiento, limpieza, normalizacion, Regex avanzado, lematización, stemming y Tokenización Moderna (BPE, WordPiece). Cómo transformar texto crudo en unidades que el modelo pueda procesar.
 
 ***
 

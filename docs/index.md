@@ -20,8 +20,8 @@ Cada sesión incluye material teórico, notebooks de práctica, ejercicios y rec
 | 07 | [Modelo Seq2Seq y Mecanismos de Atención](sesiones/sesion-07.md) |
 | 08 | [Arquitectura Transformer](sesiones/sesion-08.md) |
 | 09 | [Componentes del Transformer](sesiones/sesion-09.md) |
-| 10 | [Encoder-only models (BERT)](sesiones/sesion-10.md) |
-| 11 | [Decoder-only & Encoder-Decoder models](sesiones/sesion-11.md) |
+| 10 | [Modelos pre-entrenados (BERT, GPT y T5)](sesiones/sesion-10.md) |
+| 11 | [Razonamiento y capacidades emergentes](sesiones/sesion-11.md) |
 | 12 | [Transfer Learning y Adaptación](sesiones/sesion-12.md) |
 | 13 | [Eficiencia en NLP (PEFT, Quantization)](sesiones/sesion-13.md) |
 | 14 | [NLP Multilingüe y post-Transformers](sesiones/sesion-14.md) |

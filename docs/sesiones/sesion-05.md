@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 5: Modelos Clásicos para NLP: Naive Bayes y SVM
+# Sesion 5: Clasificación de Texto con ML Clásico
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+El Baseline de la industria en NLP. Naive Bayes, SVM y Logistic Regression aplicados a NLP. Uso de TF-IDF vs. Embeddings para tareas de categorización y detección de spam.
 
 ***
 

@@ -2,12 +2,12 @@
 layout: default
 ---
 
-# Sesion 13: Prompt Engineering y Optimización (LoRA, Cuantización)
+# Sesion 13: Eficiencia en NLP (PEFT y Quantization)
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Optimizacion para el mundo real. LoRA, QLoRA y Adapters. Cómo entrenar modelos gigantes en hardware limitado y técnicas de cuantización para reducir el peso del modelo sin perder precisión.
 
 ***
 

@@ -2,12 +2,20 @@
 layout: default
 ---
 
-# Sesion 11: Tareas Avanzadas: NER, QA y Summarization
+# Sesion 11: Razonamiento y capacidades emergentes
 [⬅️ Volver al Índice](../index.md)
 
 ## 🎯 Objetivo de la Sesión
 
-Aplicar técnicas de procesamiento de lenguaje natural con teoría guiada y laboratorios prácticos.
+Habilidades Emergentes: El fenómeno donde el razonamiento surge por las Scaling Laws (Leyes de Escala).
+
+System 2 en LLMs: Diferencia entre la respuesta inmediata (System 1) y el pensamiento deliberado.
+
+STaR (Self-Taught Reasoner) & Quiet-STaR: Cómo los modelos generan "pensamientos internos" antes de responder.
+
+Inference-time Compute: La teoría de que "pensar más tiempo" (generar más tokens de borrador) mejora la lógica.
+
+Datasets de Razonamiento: Cómo el entrenamiento con código (Python) y matemáticas mejora la lógica general del lenguaje.
 
 ***
 
