@@ -1,11 +1,11 @@
 ---
 layout: default
 ---
-# Sesión 2: Preprocesamiento de Texto
+# Sesión 11: Razonamiento y Capacidades Emergentes
 
 ### 1. Logro de la sesión
 
-Diseñar pipelines reproducibles de limpieza, normalización y tokenización para convertir texto crudo en datos útiles para modelado.
+Evaluar técnicas de prompting para razonamiento y diseñar evaluaciones robustas de factualidad y consistencia.
 
 ---
 
@@ -24,72 +24,72 @@ Esta sesión combina teoría, formalización matemática y decisiones de ingenie
 
 ### 3. Fundamentos conceptuales
 
-#### 3.1 Normalización textual
+#### 3.1 Capacidades emergentes
 
-Minúsculas, Unicode, espacios y estandarización de caracteres según la tarea.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.2 Tokenización por reglas
-
-Apropiada en dominios controlados, pero frágil ante ruido de redes sociales.
+Aptitudes que aparecen al escalar datos/modelo.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.3 Tokenización subword
+#### 3.2 Zero-shot/few-shot
 
-BPE, WordPiece y Unigram reducen OOV y estabilizan vocabulario.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.4 Lematización
-
-Mejora generalización en tareas semánticas al reducir variantes flexivas.
+Condicionamiento por instrucciones y ejemplos.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.5 Stemming
+#### 3.3 Chain-of-thought
 
-Reduce costo y dimensionalidad, con riesgo de pérdida semántica.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.6 Stopwords con criterio
-
-No siempre conviene removerlas; en QA o NLI pueden ser informativas.
+Descomposición explícita de pasos intermedios.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.7 Ruido digital
+#### 3.4 Self-consistency
 
-URLs, menciones, emojis y hashtags requieren política explícita de tratamiento.
+Muestrear rutas y agregar respuestas para robustez.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.8 Reproducibilidad
+#### 3.5 Tool use
 
-El preprocesamiento debe versionarse igual que el modelo para evitar skew.
+Combinación de LLM con herramientas verificables.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.6 Alucinación
+
+Respuesta plausible pero no sustentada.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.7 Evaluación factual
+
+Comparación contra fuentes de verdad.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.8 Seguridad de razonamiento
+
+Mitigar prompts adversariales y sobreconfianza.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
@@ -128,10 +128,10 @@ NLP moderno es acumulativo: avances teóricos, de cómputo y de evaluación.
 
 | Investigador/a | Contribución relacionada | Lectura en esta sesión |
 |---|---|---|
-| John Tukey | Principio de explorar datos antes de modelar. | Referente para contextualizar decisiones metodológicas actuales |
-| Christopher Manning | Sistematización de IR y preprocesamiento moderno. | Referente para contextualizar decisiones metodológicas actuales |
-| Rico Sennrich | Popularización de subword BPE en NLP neural. | Referente para contextualizar decisiones metodológicas actuales |
-| Taku Kudo | SentencePiece y tokenización independiente del idioma. | Referente para contextualizar decisiones metodológicas actuales |
+| Jason Wei | Chain-of-thought prompting. | Referente para contextualizar decisiones metodológicas actuales |
+| Xuezhi Wang | Self-consistency para robustez. | Referente para contextualizar decisiones metodológicas actuales |
+| Yao Fu | Estudios de emergencia de capacidades. | Referente para contextualizar decisiones metodológicas actuales |
+| Sebastian Bubeck | Análisis de capacidades avanzadas en práctica. | Referente para contextualizar decisiones metodológicas actuales |
 
 Línea temporal breve:
 - 1950-1980: bases simbólicas y probabilísticas.

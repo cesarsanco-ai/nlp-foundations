@@ -7,35 +7,14 @@ layout: default
 
 ## 🎯 Objetivo de la Sesión
 
-El Baseline de la industria en NLP. Naive Bayes, SVM y Logistic Regression aplicados a NLP. Uso de TF-IDF vs. Embeddings para tareas de categorización y detección de spam.
+Aplicar algoritmos de machine learning clásicos a tareas de NLP como clasificación de texto y comparar su desempeño frente a enfoques más modernos.
 
-***
+## 📘 Teoría
 
-## 📘 Contenido Teórico
+* 🖼️ [Sesión 5](../material/Sesion05/teoria/S05-NLP.md)
 
-Fundamentos conceptuales y arquitectura de soluciones aplicadas a texto.
-
-* 🖼️ **Clase:** [Clase](../material/Sesion05/teoria/S05-NLP.pdf)
+### 💻 Ejercicios
 
 
-
-***
-
-### 💻 Laboratorio
-
-*Nivel: Intermedio* ⭐⭐⭐
-
-* 📓 **Notebook Fundamentos:** [Notebook 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion05/practica/SESION5-NTB1-NLP.ipynb)
-* 📓 **Notebook Aplicaciones:** [Notebook 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion05/practica/SESION5-NTB2-NLP.ipynb)
-
-***
-
-## 🚀 Proyecto End-to-End
-
-Proyectos con arquitectura completa: desde la experimentación hasta el despliegue en producción. ⭐⭐⭐
-
-### 📨 Smart Inbox AI: Clasificador de Intenciones
-Comparativa de modelos de Machine Learning (**Naive Bayes vs SVM**) para la clasificación automática de mensajes en NLP.
-
-* 🌐 **Demo en vivo:** [https://intent-classifier-frontend.onrender.com/](https://intent-classifier-frontend.onrender.com/)
-* 💻 **Código Fuente:** [https://github.com/cesarsanco-ai/intent-classifier-project](https://github.com/cesarsanco-ai/intent-classifier-project)
+* 📓 [Ejercicio 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion05/practica/SESION5-NTB1-NLP.ipynb)
+* 📓 [Ejercicio 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion05/practica/SESION5-NTB2-NLP.ipynb)

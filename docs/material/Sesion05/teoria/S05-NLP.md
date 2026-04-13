@@ -1,11 +1,11 @@
 ---
 layout: default
 ---
-# Sesión 2: Preprocesamiento de Texto
+# Sesión 5: Clasificación de Texto con ML Clásico
 
 ### 1. Logro de la sesión
 
-Diseñar pipelines reproducibles de limpieza, normalización y tokenización para convertir texto crudo en datos útiles para modelado.
+Implementar pipelines de clasificación textual con TF-IDF y modelos lineales robustos de bajo costo.
 
 ---
 
@@ -24,72 +24,72 @@ Esta sesión combina teoría, formalización matemática y decisiones de ingenie
 
 ### 3. Fundamentos conceptuales
 
-#### 3.1 Normalización textual
+#### 3.1 Vectorización BoW/TF-IDF
 
-Minúsculas, Unicode, espacios y estandarización de caracteres según la tarea.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.2 Tokenización por reglas
-
-Apropiada en dominios controlados, pero frágil ante ruido de redes sociales.
+Transforma texto en matriz dispersa para modelos lineales.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.3 Tokenización subword
+#### 3.2 Naive Bayes multinomial
 
-BPE, WordPiece y Unigram reducen OOV y estabilizan vocabulario.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.4 Lematización
-
-Mejora generalización en tareas semánticas al reducir variantes flexivas.
+Baseline simple y competitivo en escenarios de pocos recursos.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.5 Stemming
+#### 3.3 Regresión logística
 
-Reduce costo y dimensionalidad, con riesgo de pérdida semántica.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.6 Stopwords con criterio
-
-No siempre conviene removerlas; en QA o NLI pueden ser informativas.
+Modelo discriminativo probabilístico interpretable.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.7 Ruido digital
+#### 3.4 SVM lineal
 
-URLs, menciones, emojis y hashtags requieren política explícita de tratamiento.
+Maximiza margen y suele rendir muy bien en texto sparse.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.8 Reproducibilidad
+#### 3.5 Regularización L1/L2
 
-El preprocesamiento debe versionarse igual que el modelo para evitar skew.
+Controla sobreajuste y ayuda selección de features.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.6 Desbalance de clases
+
+Requiere métricas y pesos de clase adecuados.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.7 Interpretabilidad
+
+Coeficientes y términos influyentes por clase.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.8 Despliegue productivo
+
+Modelos lineales son livianos y fáciles de mantener.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
@@ -128,10 +128,10 @@ NLP moderno es acumulativo: avances teóricos, de cómputo y de evaluación.
 
 | Investigador/a | Contribución relacionada | Lectura en esta sesión |
 |---|---|---|
-| John Tukey | Principio de explorar datos antes de modelar. | Referente para contextualizar decisiones metodológicas actuales |
-| Christopher Manning | Sistematización de IR y preprocesamiento moderno. | Referente para contextualizar decisiones metodológicas actuales |
-| Rico Sennrich | Popularización de subword BPE en NLP neural. | Referente para contextualizar decisiones metodológicas actuales |
-| Taku Kudo | SentencePiece y tokenización independiente del idioma. | Referente para contextualizar decisiones metodológicas actuales |
+| Joachims | Uso temprano de SVM en categorización textual. | Referente para contextualizar decisiones metodológicas actuales |
+| Cortes y Vapnik | Fundamentos del margen máximo. | Referente para contextualizar decisiones metodológicas actuales |
+| Trevor Hastie | Marco estadístico de modelos lineales. | Referente para contextualizar decisiones metodológicas actuales |
+| Christopher Manning | Práctica de IR y clasificación textual. | Referente para contextualizar decisiones metodológicas actuales |
 
 Línea temporal breve:
 - 1950-1980: bases simbólicas y probabilísticas.

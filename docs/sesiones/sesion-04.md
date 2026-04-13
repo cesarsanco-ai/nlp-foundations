@@ -7,29 +7,14 @@ layout: default
 
 ## 🎯 Objetivo de la Sesión
 
-Vectorización del significado. Word2Vec (Skip-gram/CBOW) y GloVe. Cómo representar palabras en un espacio vectorial donde la cercanía matemática implica cercanía semántica.
+Comprender el concepto de embeddings densos y entrenar o visualizar representaciones semánticas con Word2Vec y GloVe para capturar relaciones entre palabras.
 
-***
+## 📘 Teoría
 
-## 📘 Contenido Teórico
+* 🖼️ [Sesión 4](../material/Sesion04/teoria/S04-NLP.md)
 
-Fundamentos conceptuales y arquitectura de soluciones aplicadas a texto.
-
-* 🖼️ **Clase:** [Clase](../material/Sesion04/teoria/S04-NLP.pdf)
+### 💻 Ejercicios
 
 
-
-***
-
-### 💻 Laboratorio
-
-*Nivel: Intermedio* ⭐⭐⭐
-
-* 📓 **Notebook Fundamentos:** [Notebook 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion04/practica/SESION4_NTB1_NLP.ipynb)
-* 📓 **Notebook Aplicaciones:** [Notebook 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion04/practica/SESION4_NTB2_NLP.ipynb)
-
-***
-
-## 🔗 Recursos complementarios
-
-* 📁 **[Repositorio del curso](https://github.com/cesarsanco-ai/nlp-foundations)** — Código y materiales en GitHub.
+* 📓 [Ejercicio 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion04/practica/SESION4_NTB1_NLP.ipynb)
+* 📓 [Ejercicio 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion04/practica/SESION4_NTB2_NLP.ipynb)

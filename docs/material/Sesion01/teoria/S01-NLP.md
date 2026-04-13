@@ -1,82 +1,336 @@
-
+---
+layout: default
+---
 # Sesión 1: Introducción a NLP y Fundamentos Lingüísticos
 
-## 1. Introducción y Logro de la Sesión
-El objetivo es comprender el alcance del **Procesamiento del Lenguaje Natural (NLP)**, sus aplicaciones en la industria y los conceptos lingüísticos básicos que permiten el tratamiento automático del lenguaje humano.
+### 1. Logro de la sesión
 
-### 1.1. Definición y Desafíos
-El NLP es una subdisciplina de la **Inteligencia Artificial** que busca dotar a las computadoras de la capacidad de entender, interpretar y generar lenguaje humano de manera útil. A diferencia de los datos estructurados, el lenguaje presenta desafíos únicos:
-* **Ambigüedad**: Una misma palabra tiene múltiples significados según el contexto.
-* **Creatividad**: El lenguaje evoluciona; surgen nuevas palabras y expresiones constantemente.
-* **Dependencia del contexto**: El significado de una oración puede depender de lo dicho anteriormente.
-* **Conocimiento de mundo**: Muchas expresiones requieren información extralingüística para ser comprendidas.
-
-### 1.2. Breve Historia del NLP
-| Época | Hitos y Enfoques |
-| :--- | :--- |
-| **1950s - 1960s** | Enfoques basados en reglas y sistemas expertos. Destaca el experimento de Georgetown (1954) y **ELIZA** (1966), el primer chatbot que simulaba un terapeuta. |
-| **1970s** | **SHRDLU**: Sistema que comprendía lenguaje en un mundo de bloques, demostrando la necesidad de entender el entorno. |
-| **1980s - 1990s** | Auge de los métodos estadísticos y el uso de corpus anotados para modelos probabilísticos. |
-| **2000s** | Machine Learning clásico aplicado a texto, como Naive Bayes y SVM. Uso de recursos como WordNet. |
-| **2010s** | Introducción de **Word Embeddings** (Word2Vec, GloVe) y representaciones densas mediante redes neuronales. |
-| **2017 - Presente** | Revolución de los **Transformers** (BERT, GPT) y el surgimiento de los modelos fundacionales. |
+Comprender el alcance del NLP, sus niveles lingüísticos y su evolución, para diseñar soluciones con criterio técnico desde el primer laboratorio.
 
 ---
 
-## 2. Niveles del Lenguaje
-Para procesar el lenguaje, la lingüística computacional lo divide en niveles de complejidad:
+### 2. Marco y alcance
 
-1.  **Morfología**: Estudia la estructura interna de las palabras y sus **morfemas** (unidades mínimas con significado).
-    * *Tareas*: Segmentación, Lematización (forma canónica) y Stemming (raíz aproximada).
-2.  **Sintaxis**: Estudia cómo se combinan las palabras para formar oraciones gramaticales mediante reglas de orden y concordancia.
-3.  **Semántica**: Se ocupa del significado.
-    * *Semántica Léxica*: Significado de palabras individuales (sinónimos, antónimos).
-    * *Semántica Composicional*: Cómo se forma el significado de la oración al combinar palabras.
-4.  **Pragmática**: Estudia el uso del lenguaje en contexto, incluyendo la ironía, el sarcasmo y las intenciones del hablante.
+Esta sesión combina teoría, formalización matemática y decisiones de ingeniería para construir soluciones NLP robustas y reproducibles.
 
----
-
-## 3. Tareas Fundamentales y Formalización
-
-### 3.1. Part-of-Speech (POS) Tagging
-Consiste en asignar a cada palabra su categoría gramatical (sustantivo, verbo, adjetivo).
-* **Formalización Matemática**: Se busca la secuencia de etiquetas $t$ más probable para una secuencia de palabras $w$ mediante el teorema de Bayes:
-    $$\hat{t}_1^n = \arg\max_{t_1^n} \frac{P(w_1^n | t_1^n) P(t_1^n)}{P(w_1^n)}$$
-* **Modelos**: Modelos de Markov Ocultos (**HMM**), que estiman probabilidades de transición y emisión, y modelos de aprendizaje profundo (BiLSTM, Transformers).
-
-### 3.2. Parsing (Análisis Sintáctico)
-Proceso de determinar la estructura sintáctica de una oración según una gramática formal.
-* **Parsing de Constituyentes**: Construye árboles jerárquicos basados en grupos de frases (Sintagma Nominal, Verbal).
-* **Parsing de Dependencias**: Crea un grafo de relaciones binarias entre palabras. Es ideal para lenguas con orden libre y está más ligado a la semántica.
-    
+| Dimensión | Pregunta guía | Entregable esperado |
+|---|---|---|
+| Lingüística | ¿Qué fenómeno modelamos? | Definición operativa del problema |
+| Estadística | ¿Qué objetivo y supuestos usamos? | Modelo con límites explícitos |
+| Ingeniería | ¿Cómo aseguramos reproducibilidad? | Pipeline versionado y trazable |
+| Producto | ¿Qué error es tolerable? | Métricas y SLA alineados |
 
 ---
 
-## 4. Corpus y Datasets Anotados
-Un **corpus** es una colección estructurada de textos utilizada para investigación y entrenamiento de modelos. Los modernos deben seguir los **principios FAIR**: *Findable* (Localizable), *Accessible* (Accesible), *Interoperable* (Interoperable) y *Reusable* (Reutilizable).
+### 3. Fundamentos conceptuales
 
-### Ejemplos de la investigación actual:
-* **RareDis**: Corpus para identificar enfermedades raras y manifestaciones clínicas en textos médicos (1,041 textos de Orphanet).
-* **SAMSum**: Más de 16,000 diálogos de chat con resúmenes escritos por humanos para entrenamiento de resumen abstractivo.
-* **Petro NLP**: Recursos para la industria del petróleo (en portugués), incluyendo el treebank **PetroGold** y el corpus de entidades **PetroNER**.
-* **ELEXIS**: Corpus semántico de 2 millones de palabras para los idiomas oficiales de la Unión Europea.
-* **NLUCat**: 12,000 instrucciones en catalán para asistentes virtuales, enfocado en necesidades de personas vulnerables.
+#### 3.1 NLP como disciplina híbrida
+
+Integra lingüística, estadística e ingeniería de software. El punto clave es traducir fenómenos del lenguaje a variables observables.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.2 Morfología y léxico
+
+La morfología explica cómo se forman palabras y por qué la normalización afecta el significado.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.3 Sintaxis
+
+La estructura gramatical condiciona tareas como parsing, NER y extracción de relaciones.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.4 Semántica
+
+Se trabaja con significado literal y composicional, base de embeddings y modelos contextuales.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.5 Pragmática
+
+Incorpora intención, contexto social y conocimiento compartido; fundamental en asistentes conversacionales.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.6 Ambigüedad lingüística
+
+El lenguaje tiene polisemia, elipsis e ironía; por ello la evaluación debe ser contextual.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.7 Ciclo de vida NLP
+
+Problema, datos, modelado, evaluación y despliegue con monitoreo continuo.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.8 Ética y sesgo
+
+Toda decisión de corpus y anotación puede amplificar sesgos culturales o de representación.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
 
 ---
 
-## 5. Aplicaciones en la Industria
-* **Asistentes Virtuales**: Clasificación de intenciones y extracción de entidades.
-* **Análisis de Sentimiento**: Clasificación de polaridad y detección de emociones en redes sociales.
-* **Extracción de Información**: Conversión de datos no estructurados (PDF, documentos legales) en información procesable. En industrias como la del petróleo, el 80% de los datos nuevos son no estructurados.
-* **Resumen Automático**: Puede ser extractivo (selecciona frases) o abstractivo (genera texto nuevo).
+### 4. Fundamentos matemáticos
+
+Probabilidad de secuencia:
+
+$$P(w_{1:n}) = \prod_{t=1}^{n} P(w_t \mid w_{1:t-1})$$
+
+Objetivo de entrenamiento regularizado:
+
+$$\min_{\theta} \frac{1}{N}\sum_{i=1}^{N}\mathcal{L}(f_\theta(x_i), y_i) + \lambda\,\Omega(\theta)$$
+
+Entropía cruzada multiclase:
+
+$$\mathcal{L}_{CE} = -\sum_{c=1}^{C} y_c\log(\hat{y}_c)$$
+
+Perplejidad:
+
+$$PP = \exp\left(-\frac{1}{N}\sum_{t=1}^{N}\log P(w_t\mid w_{<t})\right)$$
+
+Relación sesgo-varianza (forma conceptual):
+
+$$Error_{gen} = Error_{train} + Error_{complejidad}$$
 
 ---
 
-## 6. Desafíos y Preparación para Entrevistas
-| Desafío | Descripción |
-| :--- | :--- |
-| **Polisemia** | Una palabra con muchos significados; se resuelve con modelos contextuales como BERT. |
-| **Conocimiento de Mundo** | Entender entidades y sus relaciones (ej. "El Papa visitó Barcelona"); se aborda con **Grafos de Conocimiento**. |
-| **Escasez de Recursos** | Falta de datos para lenguas minoritarias; se soluciona con *Transfer Learning*. |
-| **Sesgos** | Los modelos aprenden prejuicios de los datos; requiere un curado cuidadoso y métricas de equidad. |
+### 5. Historia y protagonistas
 
+NLP moderno es acumulativo: avances teóricos, de cómputo y de evaluación.
+
+| Investigador/a | Contribución relacionada | Lectura en esta sesión |
+|---|---|---|
+| Alan Turing | Pregunta fundacional sobre inteligencia computacional. | Referente para contextualizar decisiones metodológicas actuales |
+| Claude Shannon | Formalización probabilística de información y secuencias. | Referente para contextualizar decisiones metodológicas actuales |
+| Noam Chomsky | Jerarquía gramatical y estructura sintáctica. | Referente para contextualizar decisiones metodológicas actuales |
+| Dan Jurafsky | Síntesis moderna de NLP en enfoque aplicado. | Referente para contextualizar decisiones metodológicas actuales |
+
+Línea temporal breve:
+- 1950-1980: bases simbólicas y probabilísticas.
+- 1980-2010: consolidación estadística y modelos clásicos.
+- 2010-2017: embeddings distribuidos y deep learning.
+- 2017-actualidad: transformers, eficiencia y gobernanza.
+
+---
+
+### 6. Metodología y pipeline
+
+#### 6.1 Definir caso de uso y variable objetivo.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.2 Establecer corpus y criterios de calidad.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.3 Diseñar preprocesamiento reproducible.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.4 Construir baseline interpretable.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.5 Entrenar modelo principal de sesión.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.6 Validar con métricas técnicas y de negocio.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.7 Analizar errores críticos.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+#### 6.8 Planificar despliegue y monitoreo.
+
+Control mínimo de calidad:
+- Registrar versión de datos y configuración.
+- Separar estrictamente train/valid/test.
+- Medir una métrica de proceso y una de resultado.
+- Documentar decisiones para mantenimiento futuro.
+
+---
+
+### 7. Evaluación y validación
+
+| Escenario | Métricas sugeridas | Criterio de interpretación |
+|---|---|---|
+| Clasificación | F1 macro, precisión, recall | Evitar depender solo de accuracy |
+| Etiquetado secuencial | F1 por clase/entidad | Reportar clases raras por separado |
+| Generación | BLEU/ROUGE + evaluación humana | Fluidez no garantiza fidelidad factual |
+| Operación | Latencia p95, throughput, costo | Score alto sin SLA no es suficiente |
+
+Principios de evaluación:
+- Desagregar métricas por segmento crítico.
+- Comparar solo con protocolos equivalentes.
+- Combinar evidencia cuantitativa y cualitativa.
+- Conectar métricas con decisiones de despliegue.
+
+---
+
+### 8. Casos aplicados y decisiones de producto
+
+#### 8.1 Atención al cliente e intención
+
+Checklist de despliegue:
+- Definir umbral para automatizar vs escalar a humano.
+- Instrumentar observabilidad técnica y de negocio.
+- Diseñar estrategia de rollback.
+- Revisar cumplimiento legal y privacidad.
+
+#### 8.2 Extracción de entidades en documentos
+
+Checklist de despliegue:
+- Definir umbral para automatizar vs escalar a humano.
+- Instrumentar observabilidad técnica y de negocio.
+- Diseñar estrategia de rollback.
+- Revisar cumplimiento legal y privacidad.
+
+#### 8.3 Resumen y control de factualidad
+
+Checklist de despliegue:
+- Definir umbral para automatizar vs escalar a humano.
+- Instrumentar observabilidad técnica y de negocio.
+- Diseñar estrategia de rollback.
+- Revisar cumplimiento legal y privacidad.
+
+#### 8.4 Búsqueda semántica y recuperación
+
+Checklist de despliegue:
+- Definir umbral para automatizar vs escalar a humano.
+- Instrumentar observabilidad técnica y de negocio.
+- Diseñar estrategia de rollback.
+- Revisar cumplimiento legal y privacidad.
+
+#### 8.5 Moderación de contenido
+
+Checklist de despliegue:
+- Definir umbral para automatizar vs escalar a humano.
+- Instrumentar observabilidad técnica y de negocio.
+- Diseñar estrategia de rollback.
+- Revisar cumplimiento legal y privacidad.
+
+#### 8.6 Asistentes internos con trazabilidad
+
+Checklist de despliegue:
+- Definir umbral para automatizar vs escalar a humano.
+- Instrumentar observabilidad técnica y de negocio.
+- Diseñar estrategia de rollback.
+- Revisar cumplimiento legal y privacidad.
+
+---
+
+### 9. Implementación orientativa en Python
+
+```python
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import f1_score
+
+df = pd.DataFrame({
+    "texto": ["consulta urgente", "mensaje informativo", "reclamo de servicio", "agradecimiento"],
+    "label": [1, 0, 1, 0],
+})
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df["texto"], df["label"], test_size=0.5, random_state=42, stratify=df["label"]
+)
+
+pipe = Pipeline([
+    ("tfidf", TfidfVectorizer(ngram_range=(1, 2))),
+    ("clf", LogisticRegression(max_iter=1000)),
+])
+
+pipe.fit(X_train, y_train)
+pred = pipe.predict(X_test)
+print("F1:", f1_score(y_test, pred, zero_division=0))
+```
+
+---
+
+### 10. Glosario técnico mínimo
+
+- **Corpus:** Colección de textos usada para análisis y entrenamiento.
+- **Token:** Unidad elemental que consume el modelo.
+- **Vocabulario:** Conjunto de tokens válidos según tokenizador.
+- **OOV:** Términos fuera de vocabulario observado.
+- **Data leakage:** Fuga de información entre etapas de evaluación.
+- **Drift:** Cambio de distribución en datos o etiquetas.
+- **Latencia p95:** Percentil operativo de tiempo de respuesta.
+- **Guardrail:** Regla de seguridad en entrada/salida del sistema.
+
+---
+
+## Referencias bibliográficas principales
+
+1. Jurafsky, D., & Martin, J. H. *Speech and Language Processing*.
+2. Manning, C., Raghavan, P., & Schutze, H. *Introduction to Information Retrieval*.
+3. Eisenstein, J. *Introduction to Natural Language Processing*.
+4. Goldberg, Y. *Neural Network Methods for NLP*.
+5. Goodfellow, I., Bengio, Y., & Courville, A. *Deep Learning*.
+6. Vaswani, A., et al. (2017). Attention Is All You Need.
+7. Devlin, J., et al. (2019). BERT: Pre-training of Deep Bidirectional Transformers.
+8. Raffel, C., et al. (2020). Exploring the Limits of Transfer Learning with T5.
+9. Hu, E., et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models.
+10. Conneau, A., et al. (2020). Cross-lingual Representation Learning at Scale.

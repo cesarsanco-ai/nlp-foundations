@@ -1,11 +1,11 @@
 ---
 layout: default
 ---
-# Sesión 2: Preprocesamiento de Texto
+# Sesión 10: Modelos Pre-entrenados (BERT, GPT y T5)
 
 ### 1. Logro de la sesión
 
-Diseñar pipelines reproducibles de limpieza, normalización y tokenización para convertir texto crudo en datos útiles para modelado.
+Comparar familias de modelos preentrenados y decidir estrategia de adaptación según tarea y restricciones.
 
 ---
 
@@ -24,72 +24,72 @@ Esta sesión combina teoría, formalización matemática y decisiones de ingenie
 
 ### 3. Fundamentos conceptuales
 
-#### 3.1 Normalización textual
+#### 3.1 Autosupervisión
 
-Minúsculas, Unicode, espacios y estandarización de caracteres según la tarea.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.2 Tokenización por reglas
-
-Apropiada en dominios controlados, pero frágil ante ruido de redes sociales.
+Aprendizaje en gran corpus sin etiquetas manuales.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.3 Tokenización subword
+#### 3.2 BERT
 
-BPE, WordPiece y Unigram reducen OOV y estabilizan vocabulario.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.4 Lematización
-
-Mejora generalización en tareas semánticas al reducir variantes flexivas.
+Encoder-only fuerte en comprensión y clasificación.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.5 Stemming
+#### 3.3 GPT
 
-Reduce costo y dimensionalidad, con riesgo de pérdida semántica.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.6 Stopwords con criterio
-
-No siempre conviene removerlas; en QA o NLI pueden ser informativas.
+Decoder-only dominante en generación autoregresiva.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.7 Ruido digital
+#### 3.4 T5
 
-URLs, menciones, emojis y hashtags requieren política explícita de tratamiento.
+Unifica tareas bajo formato text-to-text.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.8 Reproducibilidad
+#### 3.5 Prompting
 
-El preprocesamiento debe versionarse igual que el modelo para evitar skew.
+Ajuste sin actualizar pesos mediante instrucciones.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.6 Fine-tuning
+
+Actualiza parámetros para dominio específico.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.7 Alineamiento
+
+Mejora utilidad y seguridad en interacción humana.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.8 Trade-off costo-calidad
+
+Modelo mayor no siempre es mejor decisión de producto.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
@@ -128,10 +128,10 @@ NLP moderno es acumulativo: avances teóricos, de cómputo y de evaluación.
 
 | Investigador/a | Contribución relacionada | Lectura en esta sesión |
 |---|---|---|
-| John Tukey | Principio de explorar datos antes de modelar. | Referente para contextualizar decisiones metodológicas actuales |
-| Christopher Manning | Sistematización de IR y preprocesamiento moderno. | Referente para contextualizar decisiones metodológicas actuales |
-| Rico Sennrich | Popularización de subword BPE en NLP neural. | Referente para contextualizar decisiones metodológicas actuales |
-| Taku Kudo | SentencePiece y tokenización independiente del idioma. | Referente para contextualizar decisiones metodológicas actuales |
+| Jacob Devlin | BERT y MLM bidireccional. | Referente para contextualizar decisiones metodológicas actuales |
+| Alec Radford | Escalamiento GPT autoregresivo. | Referente para contextualizar decisiones metodológicas actuales |
+| Tom Brown | Capacidades emergentes por escala. | Referente para contextualizar decisiones metodológicas actuales |
+| Colin Raffel | Marco unificado T5. | Referente para contextualizar decisiones metodológicas actuales |
 
 Línea temporal breve:
 - 1950-1980: bases simbólicas y probabilísticas.

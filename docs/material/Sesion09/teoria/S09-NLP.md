@@ -1,11 +1,11 @@
 ---
 layout: default
 ---
-# Sesión 2: Preprocesamiento de Texto
+# Sesión 9: Componentes del Transformer
 
 ### 1. Logro de la sesión
 
-Diseñar pipelines reproducibles de limpieza, normalización y tokenización para convertir texto crudo en datos útiles para modelado.
+Profundizar en los componentes internos del transformer para diagnosticar y optimizar modelos.
 
 ---
 
@@ -24,72 +24,72 @@ Esta sesión combina teoría, formalización matemática y decisiones de ingenie
 
 ### 3. Fundamentos conceptuales
 
-#### 3.1 Normalización textual
+#### 3.1 Proyecciones Q,K,V
 
-Minúsculas, Unicode, espacios y estandarización de caracteres según la tarea.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.2 Tokenización por reglas
-
-Apropiada en dominios controlados, pero frágil ante ruido de redes sociales.
+Transformaciones lineales que definen consulta, clave y valor.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.3 Tokenización subword
+#### 3.2 Máscara causal
 
-BPE, WordPiece y Unigram reducen OOV y estabilizan vocabulario.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.4 Lematización
-
-Mejora generalización en tareas semánticas al reducir variantes flexivas.
+Evita fuga de información futura en decodificación.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.5 Stemming
+#### 3.3 Padding mask
 
-Reduce costo y dimensionalidad, con riesgo de pérdida semántica.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.6 Stopwords con criterio
-
-No siempre conviene removerlas; en QA o NLI pueden ser informativas.
+Ignora tokens de relleno para atención válida.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.7 Ruido digital
+#### 3.4 FFN posicional
 
-URLs, menciones, emojis y hashtags requieren política explícita de tratamiento.
+No linealidad token a token tras atención.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.8 Reproducibilidad
+#### 3.5 Pre-norm vs post-norm
 
-El preprocesamiento debe versionarse igual que el modelo para evitar skew.
+Afecta estabilidad en entrenamiento profundo.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.6 Dropout en atención
+
+Regularización para evitar sobreajuste.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.7 Inicialización y escala
+
+Impactan convergencia y saturación.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.8 Depuración por activaciones
+
+Inspección de atención y normas para detectar fallos.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
@@ -128,10 +128,10 @@ NLP moderno es acumulativo: avances teóricos, de cómputo y de evaluación.
 
 | Investigador/a | Contribución relacionada | Lectura en esta sesión |
 |---|---|---|
-| John Tukey | Principio de explorar datos antes de modelar. | Referente para contextualizar decisiones metodológicas actuales |
-| Christopher Manning | Sistematización de IR y preprocesamiento moderno. | Referente para contextualizar decisiones metodológicas actuales |
-| Rico Sennrich | Popularización de subword BPE en NLP neural. | Referente para contextualizar decisiones metodológicas actuales |
-| Taku Kudo | SentencePiece y tokenización independiente del idioma. | Referente para contextualizar decisiones metodológicas actuales |
+| Jimmy Lei Ba | Layer normalization. | Referente para contextualizar decisiones metodológicas actuales |
+| Geoffrey Hinton | Base de regularización y aprendizaje profundo. | Referente para contextualizar decisiones metodológicas actuales |
+| Llion Jones | Contribuciones al paper transformer. | Referente para contextualizar decisiones metodológicas actuales |
+| Aidan Gomez | Variantes y prácticas de entrenamiento. | Referente para contextualizar decisiones metodológicas actuales |
 
 Línea temporal breve:
 - 1950-1980: bases simbólicas y probabilísticas.

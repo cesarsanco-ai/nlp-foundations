@@ -1,33 +1,4 @@
-# Sílabo del Curso
-
-# **PROCESAMIENTO DE LENGUAJE NATURAL (NLP)**
-## *para Inteligencia Artificial*
-
-**De los fundamentos lingüísticos a los modelos generativos**
-
-*Por*
-
-**Carlos César Sánchez Coronel**
-
-2026
-
-
----
-
-## Presentación del Curso
-
-Este curso ha sido diseñado para futuros ingenieros en inteligencia artificial que deseen dominar el Procesamiento de Lenguaje Natural (NLP) desde una perspectiva práctica y orientada a la industria. A lo largo de 14 semanas, exploraremos desde las técnicas clásicas de preprocesamiento hasta la arquitectura de transformers y los modelos generativos, con un enfoque en las preguntas y habilidades que se esperan en entrevistas técnicas.
-
-Cada tema será abordado con teoría sólida, implementaciones en Python usando librerías estándar (NLTK, spaCy, Hugging Face, PyTorch) y ejemplos de casos reales como chatbots, análisis de sentimiento, sistemas de búsqueda semántica y asistentes virtuales. Al finalizar, el estudiante estará preparado para enfrentar desafíos de modelado de lenguaje y comprender el ciclo completo de un proyecto de NLP, desde la recolección de datos hasta el despliegue en producción.
-
-**Estructura del curso (14 semanas):**
-- ☐ Semanas 1-3: Fundamentos y preprocesamiento
-- ☐ Semanas 4-6: Representación del lenguaje y modelos clásicos
-- ☐ Semanas 7-9: Modelos de deep learning para secuencias
-- ☐ Semanas 10-12: Transformers y modelos pre-entrenados
-- ☐ Semanas 13-14: Aplicaciones avanzadas y despliegue
-
----
+# Sílabo del Curso **PROCESAMIENTO DE LENGUAJE NATURAL (NLP)**
 
 ## Semana 1: Introducción a NLP y Fundamentos Lingüísticos
 
@@ -75,28 +46,30 @@ Aplicar técnicas de limpieza y normalización de texto para preparar datos para
 
 ---
 
-## Semana 3: Representación del Texto: BOW, TF-IDF y N-gramas
+## Semana 3: Modelos Estadísticos y Probabilísticos
 
 ### Logro de la sesión
-Transformar texto en vectores numéricos utilizando técnicas clásicas de representación.
+Comprender y aplicar modelos probabilísticos para modelar lenguaje y resolver tareas de NLP clásico.
 
 #### Conceptos
-- Bag of Words (BOW): frecuencia de términos, limitaciones (pérdida de orden y semántica).
-- N-gramas: capturar contexto local.
-- TF-IDF (Term Frequency-Inverse Document Frequency): ponderación de términos según su importancia.
-- Limitaciones de las representaciones dispersas (sparse representations).
+- Fundamentos de probabilidad en NLP: variables aleatorias, distribuciones y estimación.
+- Modelos de lenguaje con n-gramas y suavizado (Laplace, Good-Turing).
+- Teorema de Bayes aplicado a clasificación de texto.
+- Modelos generativos vs. discriminativos en NLP.
+- Evaluación básica de modelos probabilísticos (perplejidad, log-likelihood).
 
 #### Aplicaciones y entrevistas
-- Pregunta frecuente: "Compara Bag of Words, TF-IDF y embeddings. ¿Cuándo usarías cada uno?"
-- Saber que TF-IDF penaliza palabras muy comunes (como artículos) y resalta términos distintivos.
+- Pregunta frecuente: "Explica cómo funciona Naive Bayes para clasificación de textos".
+- Diferenciar el uso de modelos n-grama frente a modelos neuronales modernos.
 
 #### Python
-- Implementación con `sklearn.feature_extraction.text.CountVectorizer` y `TfidfVectorizer`.
-- Análisis de documentos con estas representaciones.
+- Implementación de un clasificador Naive Bayes en `scikit-learn`.
+- Construcción de un modelo n-grama simple y cálculo de probabilidades de secuencia.
+- Comparación entre enfoques probabilísticos y representaciones básicas.
 
 ---
 
-## Semana 4: Word Embeddings: Word2Vec y GloVe
+## Semana 4: Word Embeddings estáticos
 
 ### Logro de la sesión
 Comprender el concepto de embeddings densos y entrenar/visualizar word embeddings.
@@ -119,7 +92,7 @@ Comprender el concepto de embeddings densos y entrenar/visualizar word embedding
 
 ---
 
-## Semana 5: Modelos Clásicos para NLP (Naive Bayes, SVM)
+## Semana 5: Clasificación de texto con ML clásico
 
 ### Logro de la sesión
 Aplicar algoritmos de machine learning clásicos a tareas de NLP como clasificación de texto.
@@ -140,168 +113,171 @@ Aplicar algoritmos de machine learning clásicos a tareas de NLP como clasificac
 
 ---
 
-## Semana 6: Redes Neuronales para NLP y Embeddings Entrenables
+## Semana 6: Embeddings contextuales (RNN/LSTM/GRU en NLP)
 
 ### Logro de la sesión
-Construir redes neuronales simples para tareas de NLP usando PyTorch.
+Modelar contexto en secuencias de texto mediante arquitecturas recurrentes y comparar su capacidad representacional.
 
 #### Conceptos
-- De los embeddings estáticos a los embeddings entrenables.
-- Capa de embedding en PyTorch.
-- Redes feed-forward para clasificación de texto (promedio de embeddings + MLP).
-- Función de pérdida: Cross-Entropy.
-- Regularización en NLP: dropout, weight decay.
+- Limitaciones de embeddings estáticos ante polisemia y contexto.
+- Redes recurrentes (RNN) y problema del gradiente desvaneciente.
+- LSTM y GRU para modelar dependencias largas.
+- Embeddings contextuales generados por el estado de la secuencia.
+- Comparación conceptual con embeddings estáticos.
 
 #### Aplicaciones y entrevistas
-- Pregunta: "¿Cómo representarías una oración para ingresarla a una red neuronal?" (respuesta: promedio de embeddings o concatenación).
-- Saber que los embeddings entrenables se ajustan a la tarea específica.
+- Pregunta típica: "¿Por qué LSTM/GRU mejoran a una RNN vanilla en texto?"
+- Identificar escenarios donde el contexto cambia el significado de una palabra.
 
 #### Python
-- Implementación de un clasificador simple con embeddings entrenables en PyTorch.
-- Entrenamiento sobre dataset de IMDb para análisis de sentimiento.
-- Comparación con embeddings pre-entrenados estáticos.
+- Implementación de un clasificador secuencial con RNN/LSTM en PyTorch.
+- Comparación rápida de resultados entre RNN, LSTM y GRU.
+- Visualización del impacto del contexto en la representación de palabras.
 
 ---
 
-## Semana 7: Redes Recurrentes (RNN, LSTM, GRU) para NLP
+## Semana 7: Modelo Seq2Seq y Mecanismos de Atención
 
 ### Logro de la sesión
-Modelar secuencias de texto utilizando redes recurrentes y entender sus limitaciones.
+Construir modelos encoder-decoder para tareas de transformación de secuencias e incorporar atención.
 
 #### Conceptos
-- RNN (Recurrent Neural Networks): cómo procesan secuencias, estado oculto.
-- Problema del gradiente desvaneciente (vanishing gradient).
-- LSTM (Long Short-Term Memory): celdas de memoria, puertas (input, forget, output).
-- GRU (Gated Recurrent Unit): versión simplificada de LSTM.
+- Arquitectura encoder-decoder para secuencias.
+- Limitación del vector de contexto fijo.
+- Mecanismo de atención y alineamiento entrada-salida.
+- Aplicaciones: traducción automática y resumen.
+- Métricas de evaluación en generación secuencial (BLEU).
 
 #### Aplicaciones y entrevistas
-- Pregunta avanzada: "Explica por qué LSTM funciona mejor que RNN vanilla para secuencias largas".
-- Saber que LSTM fue el estado del arte antes de los transformers.
+- Pregunta clave: "¿Qué problema resuelve la atención en Seq2Seq?"
+- Entender por qué la atención habilita secuencias más largas y precisas.
 
 #### Python
-- Implementación de LSTM para clasificación de sentimiento con PyTorch.
-- Comparación de rendimiento entre RNN simple y LSTM.
-- Uso de embeddings pre-entrenados con LSTM.
+- Implementación de un modelo Seq2Seq con atención en PyTorch.
+- Práctica de traducción simple con dataset reducido.
+- Evaluación básica de calidad con BLEU.
 
 ---
 
-## Semana 8: Modelos Seq2Seq y Atención
+## Semana 8: Arquitectura Transformer
 
 ### Logro de la sesión
-Construir modelos de secuencia a secuencia (Seq2Seq) para tareas como traducción automática y summarization.
+Comprender la arquitectura transformer como base de los modelos modernos de NLP.
 
 #### Conceptos
-- Arquitectura Encoder-Decoder.
-- Context vector fijo y su limitación.
-- Mecanismo de atención: alineación entre palabras de entrada y salida.
-- Tipos de atención: global vs. local.
-- Métricas para traducción: BLEU (Bilingual Evaluation Understudy).
+- Motivación histórica: de RNN/Seq2Seq a transformers.
+- Visión general del encoder-decoder transformer.
+- Self-attention como mecanismo central.
+- Positional encoding y paralelización.
+- Ventajas frente a arquitecturas recurrentes.
 
 #### Aplicaciones y entrevistas
-- Pregunta fundamental: "¿Cómo funciona el mecanismo de atención?"
-- La atención es la base de los transformers; entenderla es clave.
-- Saber que BLEU mide la similitud entre traducción automática y referencia.
+- Pregunta frecuente: "¿Por qué transformer reemplazó a RNN en muchas tareas?"
+- Explicar el rol de positional encodings cuando no hay recurrencia.
 
 #### Python
-- Implementación de un modelo Seq2Seq con atención usando PyTorch.
-- Entrenamiento para tarea de traducción simple (ej. inglés-español con dataset pequeño).
-- Evaluación con BLEU usando `sacrebleu`.
+- Exploración guiada de bloques transformer con `transformers` y `torch`.
+- Inspección de pesos de atención en ejemplos reales.
+- Mini experimento comparativo en tiempo de entrenamiento/inferencia.
 
 ---
 
-## Semana 9: Transformers - Arquitectura y Atención Multi-Head
+## Semana 9: Componentes del Transformer
 
 ### Logro de la sesión
-Comprender la arquitectura del transformer y su revolución en NLP.
+Desglosar en detalle los componentes internos del transformer y su función matemática.
 
 #### Conceptos
-- El paper "Attention is All You Need".
-- Arquitectura del transformer: encoder, decoder, multi-head attention, positional encoding, feed-forward layers.
-- Self-attention y atención cruzada (cross-attention).
-- Ventajas sobre RNN: paralelización, captura de dependencias largas.
+- Multi-head self-attention y scaled dot-product attention.
+- Feed-forward networks por posición.
+- Residual connections y layer normalization.
+- Máscaras de atención (padding mask y causal mask).
+- Diferencias entre encoder-only, decoder-only y encoder-decoder.
 
 #### Aplicaciones y entrevistas
-- Pregunta estrella: "Explica cómo funciona el transformer y qué problema resuelve".
-- Saber qué es positional encoding y por qué es necesario.
+- Pregunta técnica: "¿Qué aporta el mecanismo multi-head frente a una sola cabeza?"
+- Relacionar arquitectura con familias de modelos como BERT y GPT.
 
 #### Python
-- Implementación de una capa de self-attention desde cero con PyTorch.
-- Exploración de la librería Hugging Face Transformers.
-- Uso de modelos pre-entrenados para inferencia.
+- Implementación desde cero de self-attention y masking en PyTorch.
+- Visualización de formas tensores en cada bloque.
+- Ejercicios de interpretación de salidas intermedias.
 
 ---
 
-## Semana 10: Modelos Pre-entrenados (BERT, GPT) y Fine-tuning
+## Semana 10: Modelos pre-entrenados (BERT, GPT y T5)
 
 ### Logro de la sesión
-Utilizar y fine-tunar modelos pre-entrenados como BERT y GPT para tareas específicas.
+Comprender paradigmas de preentrenamiento y aplicar modelos fundacionales a distintas tareas de NLP.
 
 #### Conceptos
-- BERT (Bidirectional Encoder Representations from Transformers): entrenamiento con MLM (Masked Language Model) y NSP (Next Sentence Prediction).
-- GPT (Generative Pre-trained Transformer): entrenamiento autorregresivo.
-- Fine-tuning vs. feature-based approaches.
-- Tokenizadores de subpalabras (WordPiece, BPE).
-- Métricas para clasificación: accuracy, F1, AUC.
+- BERT: enfoque encoder-only y objetivos MLM/NSP.
+- GPT: enfoque decoder-only y generación autorregresiva.
+- T5: enfoque text-to-text para tareas unificadas.
+- Prompting vs. fine-tuning clásico.
+- Comparación de trade-offs según tarea, costo y latencia.
 
 #### Aplicaciones y entrevistas
-- Pregunta común: "¿Cuál es la diferencia entre BERT y GPT?"
-- Saber cuándo usar fine-tuning completo y cuándo usar adaptadores (LoRA).
+- Pregunta clave: "¿En qué casos conviene BERT, GPT o T5?"
+- Argumentar elección de modelo según tipo de problema (clasificación, generación, traducción).
 
 #### Python
-- Fine-tuning de BERT para clasificación de textos usando Hugging Face.
-- Uso de GPT para generación de texto.
-- Implementación de early stopping y guardado de checkpoints.
+- Uso de `pipeline` y `Trainer` de Hugging Face con modelos BERT/GPT/T5.
+- Experimentos comparativos en una tarea de clasificación y otra generativa.
+- Reporte simple de métricas y análisis de errores.
 
 ---
 
-## Semana 11: Tareas Avanzadas: NER, Question Answering, Summarization
+## Semana 11: Razonamiento y capacidades emergentes
 
 ### Logro de la sesión
-Aplicar modelos pre-entrenados a tareas específicas de NLP como Named Entity Recognition (NER) y extracción de respuestas.
+Analizar capacidades emergentes de los LLMs y técnicas de razonamiento asistido por prompting.
 
 #### Conceptos
-- Named Entity Recognition (NER): etiquetado de entidades (personas, organizaciones, lugares).
-- Question Answering (QA): modelos extractivos (SQuAD) y generativos.
-- Summarization: extractivo vs. abstractivo.
-- Métricas de evaluación: F1 para NER, exact match para QA, ROUGE para summarization.
+- Capacidades emergentes en modelos de gran escala.
+- Razonamiento paso a paso (chain-of-thought) y variantes.
+- In-context learning y sensibilidad al prompt.
+- Alucinaciones, factualidad y límites de razonamiento.
+- Criterios de evaluación cualitativa y cuantitativa.
 
 #### Aplicaciones y entrevistas
-- Pregunta: "¿Qué métrica usarías para evaluar un sistema de NER?" (F1-score por entidad).
-- Saber que ROUGE mide solapamiento de n-gramas entre resumen generado y referencia.
+- Pregunta habitual: "¿Qué significa que una capacidad sea emergente en LLMs?"
+- Distinguir razonamiento real de patrones espurios en respuestas.
 
 #### Python
-- Fine-tuning de BERT para NER con Hugging Face.
-- Uso de pipelines de Hugging Face para QA y summarization.
-- Evaluación con métricas específicas.
+- Diseño de prompts para tareas de razonamiento lógico y multietapa.
+- Evaluación de consistencia entre distintas estrategias de prompting.
+- Análisis guiado de fallos y alucinaciones.
 
 ---
 
-## Semana 12: RAG (Retrieval-Augmented Generation) y Bases de Datos Vectoriales
+## Semana 12: Transfer Learning y adaptación
 
 ### Logro de la sesión
-Diseñar sistemas que combinan recuperación de información con generación de lenguaje (RAG).
+Aplicar estrategias de adaptación de modelos pre-entrenados a dominios y tareas específicas.
 
 #### Conceptos
-- Limitaciones de los LLMs: conocimiento desactualizado, alucinaciones.
-- RAG (Retrieval-Augmented Generation): recuperar información relevante de una base de conocimiento y pasarla al LLM como contexto.
-- Embeddings para búsqueda semántica.
-- Bases de datos vectoriales: FAISS, Pinecone, Weaviate.
-- Evaluación de sistemas RAG: faithfulness, relevance.
+- Principios de transfer learning en NLP.
+- Fine-tuning completo vs. fine-tuning parcial.
+- Domain adaptation y task adaptation.
+- Data-centric adaptation: selección, limpieza y balance de datos.
+- Evaluación comparativa antes/después de adaptación.
 
 #### Aplicaciones y entrevistas
-- Pregunta clave: "¿Qué es RAG y cuándo lo usarías?"
-- Saber que RAG reduce alucinaciones y permite usar conocimiento actualizado sin reentrenar.
+- Pregunta frecuente: "¿Cómo adaptarías un modelo generalista a un dominio legal o médico?"
+- Justificar estrategia de adaptación según presupuesto y datos disponibles.
 
 #### Python
-- Construcción de un pipeline RAG: cargar documentos, crear embeddings con Sentence Transformers, almacenar en FAISS, recuperar y generar con GPT.
-- Implementación de un chatbot que responda sobre documentos propios.
+- Fine-tuning supervisado de un modelo pre-entrenado en un dataset de dominio.
+- Comparación entre baseline sin adaptar y modelo adaptado.
+- Documentación de decisiones de adaptación y resultados.
 
 ---
 
-## Semana 13: Prompt Engineering y Optimización de Modelos
+## Semana 13: Eficiencia en NLP (PEFT, Quantization)
 
 ### Logro de la sesión
-Dominar técnicas de prompt engineering y métodos de optimización como LoRA y cuantización.
+Dominar técnicas de eficiencia para adaptar y desplegar modelos NLP con menor costo computacional.
 
 #### Conceptos
 - Prompt engineering: zero-shot, few-shot, chain-of-thought.
@@ -321,57 +297,23 @@ Dominar técnicas de prompt engineering y métodos de optimización como LoRA y 
 
 ---
 
-## Semana 14: Despliegue de Modelos NLP (MLOps)
+## Semana 14: NLP Multilingüe y post-Transformers
 
 ### Logro de la sesión
-Llevar un modelo NLP a producción, crear APIs y monitorear su rendimiento.
+Explorar NLP multilingüe y tendencias de arquitectura posteriores a transformer.
 
 #### Conceptos
-- Separación entre entrenamiento e inferencia.
-- Serialización de modelos: pickle, joblib, ONNX, TorchScript.
-- Creación de APIs REST con Flask o FastAPI.
-- Contenerización con Docker.
-- Monitoreo de modelos en producción: data drift, concept drift, latencia, throughput.
-- Versionamiento de modelos con DVC o Hugging Face Hub.
+- Desafíos del NLP multilingüe: transferencia cruzada y recursos desbalanceados.
+- Modelos multilingües (mBERT, XLM-R) y evaluación cross-lingual.
+- Eficiencia y escalabilidad en escenarios globales.
+- Panorama post-transformers: State Space Models, Mixture-of-Experts y arquitecturas híbridas.
+- Tendencias de investigación y aplicaciones futuras.
 
 #### Aplicaciones y entrevistas
-- Pregunta clave: "¿Cómo desplegarías un modelo NLP en producción?"
-- Saber que se debe monitorear la deriva de datos y la latencia.
+- Pregunta clave: "¿Cómo abordarías una solución NLP para varios idiomas con pocos datos?"
+- Identificar límites y oportunidades de las arquitecturas post-transformer.
 
 #### Python
-- Creación de una API con FastAPI que carga un modelo fine-tuneado y recibe textos para clasificar.
-- Dockerización de la aplicación.
-- Pruebas de carga y monitoreo básico.
-
----
-
-## Metodología y Evaluación
-
-### Estrategias metodológicas
-- **Clases síncronas:** Exposición conceptual con diapositivas, programación en vivo con Python utilizando cuadernos de Jupyter y Hugging Face.
-- **Trabajo asíncrono:** Lectura de papers seminales ("Attention is All You Need"), ejercicios prácticos y proyectos semanales.
-- **Aprendizaje activo:** Simulacros de entrevistas técnicas, discusión de casos reales, retos de código.
-- **Recursos:** Plataforma virtual, Zoom, grabaciones, foros y repositorio GitHub.
-
-### Materiales educativos
-- Cuadernos de Jupyter con ejemplos y ejercicios.
-- Acceso a modelos en Hugging Face y datasets.
-- Bibliografía: Jurafsky & Martin (Speech and Language Processing), papers originales.
-- Google Colab Pro para GPU.
-
-### Evaluación
-
-| **Ítem** | **Ponderación** |
-|----------|-----------------|
-| Evaluaciones continuas (EC) | 40% |
-| Examen parcial (EP) - Semana 7 | 30% |
-| Examen final (EF) - Semana 14 | 30% |
-| **Promedio final (PF)** | PF = 0.4 × EC + 0.3 × EP + 0.3 × EF |
-
-- **Evaluaciones continuas:** Controles de lectura, entrega de ejercicios de programación, participación en foros y quiz semanales.
-- **Examen parcial:** Cubre semanas 1-7 (fundamentos, word embeddings, RNN, atención).
-- **Examen final:** Proyecto integrador (ej. construir un chatbot con RAG y desplegarlo como API).
-- **Examen sustitutorio:** Semana 15, reemplaza la nota más baja entre parcial y final.
-
----
-
+- Experimentos con inferencia multilingüe y análisis de sesgo por idioma.
+- Uso de modelos multilingües de Hugging Face en tareas de clasificación/QA.
+- Discusión técnica guiada sobre papers recientes post-transformers.

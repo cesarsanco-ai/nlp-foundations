@@ -1,11 +1,11 @@
 ---
 layout: default
 ---
-# Sesión 2: Preprocesamiento de Texto
+# Sesión 7: Seq2Seq y Mecanismos de Atención
 
 ### 1. Logro de la sesión
 
-Diseñar pipelines reproducibles de limpieza, normalización y tokenización para convertir texto crudo en datos útiles para modelado.
+Comprender encoder-decoder y atención para tareas de traducción, resumen y transformación secuencial.
 
 ---
 
@@ -24,72 +24,72 @@ Esta sesión combina teoría, formalización matemática y decisiones de ingenie
 
 ### 3. Fundamentos conceptuales
 
-#### 3.1 Normalización textual
+#### 3.1 Encoder-decoder
 
-Minúsculas, Unicode, espacios y estandarización de caracteres según la tarea.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.2 Tokenización por reglas
-
-Apropiada en dominios controlados, pero frágil ante ruido de redes sociales.
+Mapea secuencia origen a secuencia destino.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.3 Tokenización subword
+#### 3.2 Contexto fijo
 
-BPE, WordPiece y Unigram reducen OOV y estabilizan vocabulario.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.4 Lematización
-
-Mejora generalización en tareas semánticas al reducir variantes flexivas.
+Un único vector no escala en secuencias largas.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.5 Stemming
+#### 3.3 Atención aditiva
 
-Reduce costo y dimensionalidad, con riesgo de pérdida semántica.
-
-Implicaciones prácticas:
-- Decisión de diseño que habilita este concepto.
-- Riesgo si el supuesto central no se cumple.
-- Señal observable para validar funcionamiento en datos reales.
-
-#### 3.6 Stopwords con criterio
-
-No siempre conviene removerlas; en QA o NLI pueden ser informativas.
+Alinea tokens origen-destino con pesos dinámicos.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.7 Ruido digital
+#### 3.4 Atención multiplicativa
 
-URLs, menciones, emojis y hashtags requieren política explícita de tratamiento.
+Variante eficiente computacionalmente.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
 - Riesgo si el supuesto central no se cumple.
 - Señal observable para validar funcionamiento en datos reales.
 
-#### 3.8 Reproducibilidad
+#### 3.5 Alineamiento
 
-El preprocesamiento debe versionarse igual que el modelo para evitar skew.
+Interpretabilidad parcial entre secuencias.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.6 Beam search
+
+Equilibra calidad y costo en decodificación.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.7 Exposure bias
+
+Teacher forcing puede fallar en inferencia autoregresiva.
+
+Implicaciones prácticas:
+- Decisión de diseño que habilita este concepto.
+- Riesgo si el supuesto central no se cumple.
+- Señal observable para validar funcionamiento en datos reales.
+
+#### 3.8 Métricas de generación
+
+BLEU/ROUGE deben complementarse con evaluación humana.
 
 Implicaciones prácticas:
 - Decisión de diseño que habilita este concepto.
@@ -128,10 +128,10 @@ NLP moderno es acumulativo: avances teóricos, de cómputo y de evaluación.
 
 | Investigador/a | Contribución relacionada | Lectura en esta sesión |
 |---|---|---|
-| John Tukey | Principio de explorar datos antes de modelar. | Referente para contextualizar decisiones metodológicas actuales |
-| Christopher Manning | Sistematización de IR y preprocesamiento moderno. | Referente para contextualizar decisiones metodológicas actuales |
-| Rico Sennrich | Popularización de subword BPE en NLP neural. | Referente para contextualizar decisiones metodológicas actuales |
-| Taku Kudo | SentencePiece y tokenización independiente del idioma. | Referente para contextualizar decisiones metodológicas actuales |
+| Sutskever | Popularización de seq2seq neural. | Referente para contextualizar decisiones metodológicas actuales |
+| Bahdanau | Atención que mejora traducción larga. | Referente para contextualizar decisiones metodológicas actuales |
+| Luong | Variantes de atención eficientes. | Referente para contextualizar decisiones metodológicas actuales |
+| Koehn | Evaluación y práctica en traducción automática. | Referente para contextualizar decisiones metodológicas actuales |
 
 Línea temporal breve:
 - 1950-1980: bases simbólicas y probabilísticas.

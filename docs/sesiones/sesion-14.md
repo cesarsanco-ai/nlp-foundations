@@ -7,28 +7,14 @@ layout: default
 
 ## 🎯 Objetivo de la Sesión
 
-Frontera tecnologica. Modelos Cross-lingual (mBERT, XLM-R). Introducción a arquitecturas de nueva generación: Flash Attention, MoE (Mixture of Experts) y Mamba (SSM)
+Explorar NLP multilingüe y tendencias de arquitectura posteriores a transformer, evaluando retos de transferencia cruzada y eficiencia global.
 
-***
+## 📘 Teoría
 
-## 📘 Contenido Teórico
+* 🖼️ [Sesión 14](../material/Sesion14/teoria/S14-NLP.md)
 
-Fundamentos conceptuales y arquitectura de soluciones aplicadas a texto.
-
-* 🖼️ **Clase:** [Clase](../material/Sesion14/teoria/S14-NLP.pdf)
+### 💻 Ejercicios
 
 
-***
-
-### 💻 Laboratorio
-
-*Nivel: Intermedio* ⭐⭐⭐
-
-* 📓 **Notebook Fundamentos:** [Notebook 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion14/practica/SESION14-NTB1-NLP.ipynb)
-* 📓 **Notebook Aplicaciones:** [Notebook 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion14/practica/SESION14-NTB2-NLP.ipynb)
-
-***
-
-## 🔗 Recursos complementarios
-
-* 📁 **[Repositorio del curso](https://github.com/cesarsanco-ai/nlp-foundations)** — Código y materiales en GitHub.
+* 📓 [Ejercicio 1](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion14/practica/SESION14-NTB1-NLP.ipynb)
+* 📓 [Ejercicio 2](https://github.com/cesarsanco-ai/nlp-foundations/blob/main/docs/material/Sesion14/practica/SESION14-NTB2-NLP.ipynb)
