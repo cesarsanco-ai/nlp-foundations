@@ -11,7 +11,7 @@ Cada sesión incluye material teórico, ejercicios, recursos complementarios y n
 
 | Semana | Tema |
 |--------|--------|
-| 01 | [Introducción a NLP y Lingüística computacional](sesiones/sesion-01.md) |
+| 01 | [Introducción a NLP](sesiones/sesion-01.md) |
 | 02 | [Preprocesamiento del texto](sesiones/sesion-02.md) |
 | 03 | [Modelos Estadísticos y Probabilísticos](sesiones/sesion-03.md) |
 | 04 | [Word Embeddings estáticos](sesiones/sesion-04.md) |

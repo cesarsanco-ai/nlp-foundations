@@ -2,7 +2,7 @@
 layout: default
 ---
 
-# Fundamento: prompt engineering, LoRA y cuantización
+# Fundamento: prompt engineering, LoRA , cuantización y memoria
 #### Autor: Carlos César Sánchez Coronel
 
 [⬅️ Volver a la Sesión-13](../../../sesiones/sesion-13.md)
